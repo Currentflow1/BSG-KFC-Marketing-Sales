@@ -9,7 +9,6 @@ def product_list(request):
     'products': products
   })
 
-
 def product_new(request):
   if request.method == 'POST':
     form = ProductForm(request.POST)

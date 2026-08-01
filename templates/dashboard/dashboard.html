@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-center">
+<div class="max-w-7xl mx-auto p-8 space-y-8">
+  {% for section in sections %}
+  <section>
+
+    <h2 class="mb-5 text-2xl font-bold">
+      {{ section.title }}
+    </h2>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+      {% for card in section.cards %}
+      {% include "dashboard/components/card.html" with title=card.title description=card.description href=card.href emoji=card.emoji %}
+      {% endfor %}
+
+    </div>
+
+  </section>
+  {% endfor %}
+</div>
+</div>
+{% endblock %}
