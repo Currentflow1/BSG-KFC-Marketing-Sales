@@ -4,7 +4,7 @@ from .forms import CustomerForm
 
 def customer_list(request):
   customers = Customer.objects.all()
-  return render(request, 'customer/home.html', {
+  return render(request, 'customers/home.html', {
     'customers': customers
   })
 
@@ -16,7 +16,7 @@ def customer_new(request):
     form.save()
     return render(request, 'customer_list')
 
-  return render (request, 'customer/new.html', {
+  return render (request, 'customers/new.html', {
     'form': form
   })
 
@@ -33,7 +33,7 @@ def customer_edit(request, id):
     form.save()
     return render(request, 'customer_list')
 
-  return render(request, 'customer/edit.html', {
+  return render(request, 'customers/edit.html', {
     'form': form
   })
 
@@ -45,6 +45,6 @@ def customer_delete(request, id):
     customer.delete()
     return render(request, 'customer_list')
 
-  return render(request, 'customer/delete.html', {
+  return render(request, 'customers/delete.html', {
     'customer': customer
   })

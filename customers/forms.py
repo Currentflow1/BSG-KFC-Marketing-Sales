@@ -4,13 +4,13 @@ from .models import Customer
 class CustomerForm(forms.ModelForm):
   class Meta:
     model = Customer
-    field = [
+    fields = [
       'customer_area',
       'customer_business_name',
       'customer_contact_person',
-      'customer_mobile_no'
-      'customer_business_address'
-      'customer_active'
+      'customer_mobile_no',
+      'customer_business_address',
+      'customer_active',
     ]
 
     widget = {
