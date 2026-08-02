@@ -10,35 +10,31 @@ def product_list(request):
   })
 
 def product_new(request):
-  if request.method == 'POST':
-    form = ProductForm(request.POST)
+  form = ProductForm(request.POST or None)
 
-    if form.is_valid():
-      form.save()
-      return redirect('product_list')
-
-  else:
-    form = ProductForm()
+  if request.method == 'POST' and form.is_valid():
+    form.save()
+    return redirect('product_list')
 
   return render(request, 'products/new.html', {
-    'form': form
+    'form': form 
   })
 
 def product_edit(request, id):
-    product = get_object_or_404(Product, product_id=id)
+  product = get_object_or_404(Product, product_id=id)
 
-    if request.method == "POST":
-        form = ProductForm(request.POST, instance=product)
+  form = ProductForm(
+    request.POST or None, 
+    instance=product
+  )
 
-        if form.is_valid():
-            form.save()
-            return redirect("product_list")
-    else:
-        form = ProductForm(instance=product)
+  if request.method == 'POST' and form.is_valid():
+    form.save()
+    return redirect('product_list')
 
-    return render(request, "products/edit.html", {
-        "form": form
-    })
+  return render(request, 'products/edit.html', {
+    'form': form
+  })
 
 def product_delete(request, id):
     product = get_object_or_404(Product, product_id=id)

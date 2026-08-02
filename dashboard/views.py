@@ -14,7 +14,7 @@ def dashboard(request):
                 {
                     "title": "Transaction Logs",
                     "description": "View all user activities and audit history.",
-                    "href": "/transaction-logs/",
+                    "href": "/transaction_logs/",
                     "emoji": "📜",
                 },
                 {
@@ -24,9 +24,9 @@ def dashboard(request):
                     "emoji": "📋",
                 },
                 {
-                    "title": "Summary",
-                    "description": "View Stock Summary",
-                    "href": "/summary/",
+                    "title": "Forecasting",
+                    "description": "View Stock Data.",
+                    "href": "/forecasting/",
                     "emoji": "📊",
                 },
             ],
@@ -57,6 +57,12 @@ def dashboard(request):
                     "description": "Manage employee records.",
                     "href": "/employees/",
                     "emoji": "👤",
+                },
+                                {
+                    "title": "Accounts",
+                    "description": "Manage account records.",
+                    "href": "/accounts/",
+                    "emoji": "🔐",
                 },
             ],
         },

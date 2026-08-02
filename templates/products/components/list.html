@@ -7,6 +7,7 @@
         <th class="px-4 py-2 text-left">Factory Price</th>
         <th class="px-4 py-2 text-left">Shelf Life</th>
         <th class="px-4 py-2 text-left">Product Packaging</th>
+        <th class="px-4 py-2 text-center">Status</th>
         <th class="px-4 py-2 text-center">Actions</th>
       </tr>
     </thead>
@@ -14,32 +15,61 @@
     <tbody>
       {% for product in products %}
       <tr class="border-t hover:bg-gray-50">
-        <td class="px-4 py-2">{{ product.product_code }}</td>
-        <td class="px-4 py-2">{{ product.product_name }}</td>
-        <td class="px-4 py-2">{{ product.factory_price }}</td>
-        <td class="px-4 py-2">{{ product.shelf_life }}</td>
-        <td class="px-4 py-2">{{ product.product_packaging }}</td>
+
+        <td class="px-4 py-2">
+          {{ product.product_code }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ product.product_name }}
+        </td>
+
+        <td class="px-4 py-2">
+          ₱{{ product.factory_price }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ product.shelf_life }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ product.product_packaging }}
+        </td>
+
+        <td class="px-4 py-2 text-center">
+          {% if product.discontinued %}
+            <span class="rounded bg-red-100 px-2 py-1 text-sm font-medium text-red-700">
+              Discontinued
+            </span>
+          {% else %}
+            <span class="rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-700">
+              Active
+            </span>
+          {% endif %}
+        </td>
 
         <td class="px-4 py-2">
           <div class="flex justify-center gap-2">
 
-            <a href="{% url 'product_edit' product.product_id %}"
-              class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600">
+            <a
+              href="{% url 'product_edit' product.product_id %}"
+              class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
+            >
               Edit
             </a>
 
-            <a href="{% url 'product_delete' product.product_id %}"
-              class="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600">
+            <a
+              href="{% url 'product_delete' product.product_id %}"
+              class="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+            >
               Delete
             </a>
-
           </div>
         </td>
       </tr>
-
       {% empty %}
       <tr>
-        <td colspan="6" class="px-4 py-6 text-center text-gray-500">
+        <td colspan="7" class="px-4 py-6 text-center text-gray-500">
           No products found.
         </td>
       </tr>

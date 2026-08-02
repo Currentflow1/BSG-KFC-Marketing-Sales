@@ -43,7 +43,15 @@ INSTALLED_APPS = [
 
     'dashboard',
     'products',
+    'employees',
+    'area_prices',
+    'customers',
+    'orders',
+    'transactional_logs',
+    'records',
+    'forecasting',
 ]
+
 TAILWIND_APP_NAME = 'theme'
 
 MIDDLEWARE = [

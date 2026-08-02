@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+    New Employee
+</h1>
+
+<form method="POST" class="space-y-6">
+
+    {% include "employees/components/form.html" %}
+
+    <button
+        class="rounded-lg bg-blue-600 px-4 py-2 text-white"
+    >
+        Create Employee
+    </button>
+
+</form>
+
+{% endblock %}

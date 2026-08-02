@@ -1,0 +1,88 @@
+{% csrf_token %}
+
+<div class="space-y-4">
+
+    <div>
+        <label for="{{ form.employee_name.id_for_label }}" class="block text-sm font-medium">
+            Employee Name
+        </label>
+        {{ form.employee_name }}
+        {{ form.employee_name.errors }}
+    </div>
+
+    <div>
+        <label for="{{ form.employee_nickname.id_for_label }}" class="block text-sm font-medium">
+            Nickname
+        </label>
+        {{ form.employee_nickname }}
+        {{ form.employee_nickname.errors }}
+    </div>
+
+    <div>
+        <label for="{{ form.employee_group.id_for_label }}" class="block text-sm font-medium">
+            Group
+        </label>
+        {{ form.employee_group }}
+        {{ form.employee_group.errors }}
+    </div>
+
+    <div>
+        <label for="{{ form.employee_position.id_for_label }}" class="block text-sm font-medium">
+            Position
+        </label>
+        {{ form.employee_position }}
+        {{ form.employee_position.errors }}
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+
+        <div>
+            <label for="{{ form.employee_birthdate.id_for_label }}" class="block text-sm font-medium">
+                Birthdate
+            </label>
+            {{ form.employee_birthdate }}
+            {{ form.employee_birthdate.errors }}
+        </div>
+
+        <div>
+            <label for="{{ form.employee_hiredate.id_for_label }}" class="block text-sm font-medium">
+                Hire Date
+            </label>
+            {{ form.employee_hiredate }}
+            {{ form.employee_hiredate.errors }}
+        </div>
+
+    </div>
+
+    <div>
+        <label for="{{ form.employee_sex.id_for_label }}" class="block text-sm font-medium">
+            Sex
+        </label>
+        {{ form.employee_sex }}
+        {{ form.employee_sex.errors }}
+    </div>
+
+    <div>
+        <label for="{{ form.employee_sss.id_for_label }}" class="block text-sm font-medium">
+            SSS
+        </label>
+        {{ form.employee_sss }}
+        {{ form.employee_sss.errors }}
+    </div>
+
+    <div>
+        <label for="{{ form.employee_gsis.id_for_label }}" class="block text-sm font-medium">
+            GSIS
+        </label>
+        {{ form.employee_gsis }}
+        {{ form.employee_gsis.errors }}
+    </div>
+
+    <div class="flex items-center gap-2">
+        {{ form.employeeActive }}
+        <label for="{{ form.employeeActive.id_for_label }}">
+            Active
+        </label>
+    </div>
+
+</div>

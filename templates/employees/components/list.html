@@ -1,0 +1,92 @@
+<div class="overflow-x-auto">
+  <table class="min-w-full border border-gray-200 rounded-lg">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left">Name</th>
+        <th class="px-4 py-2 text-left">Nickname</th>
+        <th class="px-4 py-2 text-left">Group</th>
+        <th class="px-4 py-2 text-left">Position</th>
+        <th class="px-4 py-2 text-left">Birthdate</th>
+        <th class="px-4 py-2 text-left">Hire Date</th>
+        <th class="px-4 py-2 text-left">Sex</th>
+        <th class="px-4 py-2 text-left">Status</th>
+        <th class="px-4 py-2 text-center">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for employee in employees %}
+      <tr class="border-t hover:bg-gray-50">
+
+        <td class="px-4 py-2">
+          {{ employee.employee_name }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ employee.employee_nickname }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ employee.employee_group }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ employee.employee_position }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ employee.employee_birthdate }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ employee.employee_hiredate }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ employee.get_employee_sex_display }}
+        </td>
+
+        <td class="px-4 py-2">
+          {% if employee.employeeActive %}
+            <span class="rounded bg-green-100 px-2 py-1 text-sm text-green-700">
+              Active
+            </span>
+          {% else %}
+            <span class="rounded bg-red-100 px-2 py-1 text-sm text-red-700">
+              Inactive
+            </span>
+          {% endif %}
+        </td>
+
+        <td class="px-4 py-2">
+          <div class="flex justify-center gap-2">
+
+            <a
+              href="{% url 'employee_edit' employee.employee_id %}"
+              class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
+            >
+              Edit
+            </a>
+
+            <a
+              href="{% url 'employee_delete' employee.employee_id %}"
+              class="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+            >
+              Delete
+            </a>
+
+          </div>
+        </td>
+
+      </tr>
+
+      {% empty %}
+      <tr>
+        <td colspan="9" class="px-4 py-6 text-center text-gray-500">
+          No employees found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
