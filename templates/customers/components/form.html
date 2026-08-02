@@ -1,0 +1,51 @@
+<div class="space-y-4">
+
+  <div>
+    <label class="block mb-2 font-medium">
+      Area
+    </label>
+    {{ form.customer_area }}
+    {{ form.customer_area.errors }}
+  </div>
+
+  <div>
+    <label class="block mb-2 font-medium">
+      Business Name
+    </label>
+    {{ form.customer_business_name }}
+    {{ form.customer_business_name.errors }}
+  </div>
+
+  <div>
+    <label class="block mb-2 font-medium">
+      Contact Person
+    </label>
+    {{ form.customer_contact_person }}
+    {{ form.customer_contact_person.errors }}
+  </div>
+
+  <div>
+    <label class="block mb-2 font-medium">
+      Mobile Number
+    </label>
+    {{ form.customer_mobile_no }}
+    {{ form.customer_mobile_no.errors }}
+  </div>
+
+  <div>
+    <label class="block mb-2 font-medium">
+      Business Address
+    </label>
+    {{ form.customer_business_address }}
+    {{ form.customer_business_address.errors }}
+  </div>
+
+  <div class="flex items-center gap-2">
+    {{ form.customer_active }}
+    <label class="font-medium">
+      Active
+    </label>
+    {{ form.customer_active.errors }}
+  </div>
+
+</div>

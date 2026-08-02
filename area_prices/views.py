@@ -14,7 +14,6 @@ def area_price_list(request):
     })
 
 
-
 def area_new(request):
   form = AreaForm(request.POST or None)
 
@@ -22,7 +21,7 @@ def area_new(request):
     form.save()
     return redirect('area_price_list')
 
-  return render(request, 'area_prices/new_area.html', {
+  return render(request, 'area_prices/components/area/new_area.html', {
     'form': form
   })
 
@@ -52,7 +51,7 @@ def area_edit(request, id):
     form.save()
     return redirect('area_price_list')
 
-  return render(request, 'area_prices/edit_area.html', {
+  return render(request, 'area_prices/components/area/edit_area.html', {
     'form': form
   })
 
@@ -82,7 +81,7 @@ def area_delete(request, id):
     area.delete()
     return redirect('area_price_list')
 
-  return render(request, 'area_prices/delete_area.html', {
+  return render(request, 'area_prices/components/area/delete_area.html', {
     'area': area
   })
 
