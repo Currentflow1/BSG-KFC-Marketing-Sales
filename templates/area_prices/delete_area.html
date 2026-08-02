@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="text-xl font-bold mb-4">
+  Delete Area 
+</h2>
+
+<p>
+  Are you sure you want to delete
+  <strong>{{ area.area_name }}</strong>?
+</p>
+
+<form method="post">
+  {% csrf_token %}
+
+  <button type="submit" class="rounded bg-red-600 px-4 py-2 text-white">
+    Yes, Delete
+  </button>
+
+  <a href="{% url 'area_price_list' %}" class="rounded border px-4 py-2">
+    Cancel
+  </a>
+</form>
+
+{% endblock %}

@@ -17,7 +17,7 @@ class AreaForm(forms.ModelForm):
 
 class AreaPriceForm(forms.ModelForm):
   class Meta:
-    model: Area_price
+    model = Area_price
     fields = [
       'area_name',
       'product_name',

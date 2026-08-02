@@ -4,39 +4,35 @@ from .models import Area_price
 from .forms import AreaForm
 from .forms import AreaPriceForm
 
-"""def area_list(request):
-  areas = Area.objects.all()
-  return render(request, 'area_price/home.html', {
-    'areas': areas,
-    })
-"""
-
 
 def area_price_list(request):
   area_prices = Area_price.objects.all()
-  return render(request, 'area_price/home.html', {
+  areas = Area.objects.all()
+  return render(request, 'area_prices/home.html', {
     'area_prices': area_prices,
+    'areas': areas,
     })
 
 
-"""def area_new(request):
+
+def area_new(request):
   form = AreaForm(request.POST or None)
 
   if request.method == 'POST' and form.is_valid():
-    form.save
-    return redirect('area_list')
+    form.save()
+    return redirect('area_price_list')
 
   return render(request, 'area_prices/new_area.html', {
     'form': form
   })
-"""
+
 
   
 def area_price_new(request):
   form = AreaPriceForm(request.POST or None)
 
   if request.method == 'POST' and form.is_valid():
-    form.save
+    form.save()
     return redirect('area_price_list')
 
   return render(request, 'area_prices/new.html', {
@@ -44,8 +40,7 @@ def area_price_new(request):
   })
 
 
-"""
-def area_edit(request):
+def area_edit(request, id):
   area = get_object_or_404(Area, area_id=id)
 
   form = AreaForm(
@@ -54,13 +49,12 @@ def area_edit(request):
     )
   
   if request.method == 'POST' and form.is_valid():
-    form.save
-    return redirect('area_list')
+    form.save()
+    return redirect('area_price_list')
 
-  return render(request, 'area_prices/new.html', {
+  return render(request, 'area_prices/edit_area.html', {
     'form': form
   })
-"""
 
 
 def area_price_edit(request, id):
@@ -72,32 +66,33 @@ def area_price_edit(request, id):
     )
   
   if request.method == 'POST' and form.is_valid():
-    form.save
+    form.save()
     return redirect('area_price_list')
 
-  return render(request, 'area_prices/new.html', {
+  return render(request, 'area_prices/edit.html', {
     'form': form
   })
+  
 
 
 def area_delete(request, id):
   area = get_object_or_404(Area, area_id=id)
 
   if request.method == 'POST':
-    area.delete
-    return redirect('area_list')
+    area.delete()
+    return redirect('area_price_list')
 
-  return render(request, 'area_prices/delete.html', {
+  return render(request, 'area_prices/delete_area.html', {
     'area': area
   })
 
 
 def area_prices_delete(request, id):
-  area_prices = get_object_or_404(Area_price, area_prices_id=id)
+  area_prices = get_object_or_404(Area_price, area_price_id=id)
 
   if request.method == 'POST':
-    area_prices.delete
-    return redirect('area_prices_list')
+    area_prices.delete()
+    return redirect('area_price_list')
 
   return render(request, 'area_prices/delete.html', {
     'area_prices': area_prices
