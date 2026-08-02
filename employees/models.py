@@ -11,7 +11,7 @@ class Employee(models.Model):
   employee_group = models.CharField(max_length=255, null=True, default='')
   employee_position = models.CharField(max_length=255, null=True, default='')
   employee_birthdate = models.DateField(default='')
-  employee_hiredate = models.DateField(default='')  # renamed from employeeDate for clarity
+  employee_hiredate = models.DateField(default='')  
   employee_sex = models.CharField(max_length=1, choices=SEX_CHOICES, default='')
   employee_sss = models.CharField(max_length=20, null=True, default='')
   employee_gsis = models.CharField(max_length=20, null=True, default='')
