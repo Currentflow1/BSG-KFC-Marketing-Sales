@@ -224,6 +224,9 @@
   .top-0 {
     top: calc(var(--spacing) * 0);
   }
+  .z-50 {
+    z-index: 50;
+  }
   .container {
     width: 100%;
     @media (width >= 40rem) {
