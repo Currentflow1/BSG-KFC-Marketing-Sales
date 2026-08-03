@@ -1,0 +1,62 @@
+<div class="overflow-x-auto">
+  <table class="min-w-full border border-gray-200 rounded-lg">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left">Area Name</th>
+        <th class="px-4 py-2 text-left">Product Code</th>
+        <th class="px-4 py-2 text-left">Product Name</th>
+        <th class="px-4 py-2 text-left">Area Price</th>
+        <th class="px-4 py-2 text-center">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for area_price in area_prices %}
+      <tr class="border-t hover:bg-gray-50">
+
+        <td class="px-4 py-2">
+          {{ area_price.area_name.area_name }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ area_price.product_name.product_code }}
+        </td>
+
+        <td class="px-4 py-2">
+          {{ area_price.product_name.product_name }}
+        </td>
+
+        <td class="px-4 py-2">
+          ₱{{ area_price.area_price }}
+        </td>
+
+
+        <td class="px-4 py-2">
+          <div class="flex justify-center gap-2">
+
+            <a
+              href="{% url 'area_price_edit' area_price.area_price_id %}"
+              class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
+            >
+              Edit
+            </a>
+
+            <a
+              href="{% url 'area_price_delete' area_price.area_price_id %}"
+              class="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+            >
+              Delete
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="px-4 py-6 text-center text-gray-500">
+          No area prices found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

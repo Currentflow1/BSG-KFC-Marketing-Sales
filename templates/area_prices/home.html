@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="p-6 space-y-6">
+  {% include 'area_prices/components/header.html' %}
+  {% include 'area_prices/components/list.html' %}
+</div>
+
+<div class="p-6 space-y-6">
+  {% include 'area_prices/components/area/components/header.html' %}
+  {% include 'area_prices/components/area/components/list.html' %}
+</div>
+{% endblock content %}

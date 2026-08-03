@@ -1,0 +1,47 @@
+<div class="overflow-x-auto">
+  <table class="min-w-full border border-gray-200 rounded-lg">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left">Area Name</th>
+        <th class="px-4 py-2 text-center">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for area in areas %}
+      <tr class="border-t hover:bg-gray-50">
+
+        <td class="px-4 py-2">
+          {{ area.area_name }}
+        </td>
+
+
+        <td class="px-4 py-2">
+          <div class="flex justify-center gap-2">
+
+            <a
+              href="{% url 'area_edit' area.area_id %}"
+              class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
+            >
+              Edit
+            </a>
+
+            <a
+              href="{% url 'area_delete' area.area_id %}"
+              class="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+            >
+              Delete
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="px-4 py-6 text-center text-gray-500">
+          No areas found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
