@@ -1,5 +1,5 @@
 from django import forms
-from .models import Area, Area_price
+from .models import Area, AreaPrice
 
 class AreaForm(forms.ModelForm):
   class Meta: 
@@ -17,7 +17,7 @@ class AreaForm(forms.ModelForm):
 
 class AreaPriceForm(forms.ModelForm):
   class Meta:
-    model = Area_price
+    model = AreaPrice
     fields = [
       'area_name',
       'product_name',
