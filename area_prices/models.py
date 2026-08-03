@@ -13,7 +13,7 @@ class Area(models.Model):
     return self.area_name
 
 
-class Area_price(models.Model):
+class AreaPrice(models.Model):
   area_price_id = models.BigAutoField(primary_key=True)
   area_name = models.ForeignKey(Area, on_delete=models.CASCADE)
   product_name = models.ForeignKey(Product, on_delete=models.CASCADE)
