@@ -16,20 +16,20 @@ class ProductForm(forms.ModelForm):
 
         widgets = {
             "product_code": forms.TextInput(attrs={
-                "class": "w-full rounded-lg border border-gray-300 px-3 py-2",
+                "class": "w-full rounded-lg border border-gray-300 px-4 py-2",
             }),
             "product_name": forms.TextInput(attrs={
-                "class": "w-full rounded-lg border border-gray-300 px-3 py-2",
+                "class": "w-full rounded-lg border border-gray-300 px-4 py-2",
             }),
             "factory_price": forms.NumberInput(attrs={
-                "class": "w-full rounded-lg border border-gray-300 px-3 py-2",
+                "class": "w-full rounded-lg border border-gray-300 px-4 py-2",
                 "step": "0.01",
             }),
             "shelf_life": forms.TextInput(attrs={
-                "class": "w-full rounded-lg border border-gray-300 px-3 py-2",
+                "class": "w-full rounded-lg border border-gray-300 px-4 py-2",
             }),
             "product_packaging": forms.TextInput(attrs={
-                "class": "w-full rounded-lg border border-gray-300 px-3 py-2",
+                "class": "w-full rounded-lg border border-gray-300 px-4 py-2",
             }),
             "discontinued": forms.CheckboxInput(attrs={
                 "class": "h-4 w-4 rounded border-gray-300",
