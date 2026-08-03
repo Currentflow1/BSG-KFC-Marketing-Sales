@@ -1,0 +1,73 @@
+[1mdiff --git a/orders/models.py b/orders/models.py[m
+[1mindex 48d255d..7ade6f3 100644[m
+[1m--- a/orders/models.py[m
+[1m+++ b/orders/models.py[m
+[36m@@ -6,7 +6,7 @@[m [mfrom products.models import Product[m
+ [m
+ [m
+ # OrderDetails Table[m
+[31m-class Order_details(models.Model):[m
+[32m+[m[32mclass OrderDetails(models.Model):[m
+   od_id = models.BigAutoField(primary_key=True)[m
+   od_control_no = models.CharField(max_length=15)[m
+   od_area = models.ForeignKey(Area, on_delete=models.CASCADE)[m
+[36m@@ -20,9 +20,9 @@[m [mclass Order_details(models.Model):[m
+     return str(self.od_control_no)[m
+ [m
+ # CustomerDetails Table[m
+[31m-class Customer_details(models.Model):[m
+[32m+[m[32mclass CustomerDetails(models.Model):[m
+   cd_id = models.BigAutoField(primary_key=True)[m
+[31m-  cd_control_no = models.ForeignKey(Order_details, on_delete=models.CASCADE)[m
+[32m+[m[32m  cd_control_no = models.ForeignKey(OrderDetails, on_delete=models.CASCADE)[m
+   cd_invoice_no = models.IntegerField()[m
+   cd_customer = models.ForeignKey(Customer, on_delete=models.CASCADE)[m
+ [m
+[36m@@ -31,7 +31,7 @@[m [mclass Customer_details(models.Model):[m
+ [m
+ [m
+ # DeliveryDetails Table[m
+[31m-class Delivery_details(models.Model):[m
+[32m+[m[32mclass DeliveryDetails(models.Model):[m
+   order_type_choices = [[m
+       ('MLOAD', 'MLOAD'),[m
+       ('MRET', 'MRET'),[m
+[36m@@ -39,7 +39,7 @@[m [mclass Delivery_details(models.Model):[m
+   ][m
+ [m
+   dd_id = models.BigAutoField(primary_key=True)[m
+[31m-  dd_control_no = models.ForeignKey(Order_details, on_delete=models.CASCADE)[m
+[32m+[m[32m  dd_control_no = models.ForeignKey(OrderDetails, on_delete=models.CASCADE)[m
+   dd_order_type = models.CharField(max_length=10, choices=order_type_choices)[m
+   dd_product_code = models.ForeignKey(Product, on_delete=models.CASCADE)[m
+   dd_quantity = models.IntegerField()[m
+[36m@@ -51,7 +51,7 @@[m [mclass Delivery_details(models.Model):[m
+ [m
+ [m
+ # TransactionDetails Table[m
+[31m-class Transaction_details(models.Model):[m
+[32m+[m[32mclass TransactionDetails(models.Model):[m
+   order_type_choices = [[m
+     ('SO', 'SO'),[m
+     ('SAM', 'SAM'),[m
+[36m@@ -60,7 +60,7 @@[m [mclass Transaction_details(models.Model):[m
+   ][m
+ [m
+   td_id = models.BigAutoField(primary_key=True)[m
+[31m-  td_invoice_no = models.ForeignKey(Customer_details, on_delete=models.CASCADE)[m
+[32m+[m[32m  td_invoice_no = models.ForeignKey(CustomerDetails, on_delete=models.CASCADE)[m
+   td_order_type = models.CharField(max_length=10, choices=order_type_choices)[m
+   td_product_code = models.ForeignKey(Product, on_delete=models.CASCADE)[m
+   td_quantity = models.IntegerField()[m
+[36m@@ -71,9 +71,9 @@[m [mclass Transaction_details(models.Model):[m
+     return f"{self.td_invoice_no} - {self.td_product_code} ({self.td_order_type})"[m
+ [m
+ # MarketingDetails Table[m
+[31m-class Marketing_details(models.Model):[m
+[32m+[m[32mclass MarketingDetails(models.Model):[m
+   md_id = models.BigAutoField(primary_key=True)[m
+[31m-  md_control_no = models.ForeignKey(Order_details, on_delete=models.CASCADE)[m
+[32m+[m[32m  md_control_no = models.ForeignKey(OrderDetails, on_delete=models.CASCADE)[m
+   md_total_SO = models.IntegerField()[m
+   md_total_SAM = models.IntegerField()[m
+   md_total_CRET = models.IntegerField()[m

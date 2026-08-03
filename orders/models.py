@@ -6,7 +6,7 @@ from products.models import Product
 
 
 # OrderDetails Table
-class Order_details(models.Model):
+class OrderDetails(models.Model):
   od_id = models.BigAutoField(primary_key=True)
   od_control_no = models.CharField(max_length=15)
   od_area = models.ForeignKey(Area, on_delete=models.CASCADE)
@@ -20,9 +20,9 @@ class Order_details(models.Model):
     return str(self.od_control_no)
 
 # CustomerDetails Table
-class Customer_details(models.Model):
+class CustomerDetails(models.Model):
   cd_id = models.BigAutoField(primary_key=True)
-  cd_control_no = models.ForeignKey(Order_details, on_delete=models.CASCADE)
+  cd_control_no = models.ForeignKey(OrderDetails, on_delete=models.CASCADE)
   cd_invoice_no = models.IntegerField()
   cd_customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
 
@@ -31,7 +31,7 @@ class Customer_details(models.Model):
 
 
 # DeliveryDetails Table
-class Delivery_details(models.Model):
+class DeliveryDetails(models.Model):
   order_type_choices = [
       ('MLOAD', 'MLOAD'),
       ('MRET', 'MRET'),
@@ -39,7 +39,7 @@ class Delivery_details(models.Model):
   ]
 
   dd_id = models.BigAutoField(primary_key=True)
-  dd_control_no = models.ForeignKey(Order_details, on_delete=models.CASCADE)
+  dd_control_no = models.ForeignKey(OrderDetails, on_delete=models.CASCADE)
   dd_order_type = models.CharField(max_length=10, choices=order_type_choices)
   dd_product_code = models.ForeignKey(Product, on_delete=models.CASCADE)
   dd_quantity = models.IntegerField()
@@ -51,7 +51,7 @@ class Delivery_details(models.Model):
 
 
 # TransactionDetails Table
-class Transaction_details(models.Model):
+class TransactionDetails(models.Model):
   order_type_choices = [
     ('SO', 'SO'),
     ('SAM', 'SAM'),
@@ -60,7 +60,7 @@ class Transaction_details(models.Model):
   ]
 
   td_id = models.BigAutoField(primary_key=True)
-  td_invoice_no = models.ForeignKey(Customer_details, on_delete=models.CASCADE)
+  td_invoice_no = models.ForeignKey(CustomerDetails, on_delete=models.CASCADE)
   td_order_type = models.CharField(max_length=10, choices=order_type_choices)
   td_product_code = models.ForeignKey(Product, on_delete=models.CASCADE)
   td_quantity = models.IntegerField()
@@ -71,9 +71,9 @@ class Transaction_details(models.Model):
     return f"{self.td_invoice_no} - {self.td_product_code} ({self.td_order_type})"
 
 # MarketingDetails Table
-class Marketing_details(models.Model):
+class MarketingDetails(models.Model):
   md_id = models.BigAutoField(primary_key=True)
-  md_control_no = models.ForeignKey(Order_details, on_delete=models.CASCADE)
+  md_control_no = models.ForeignKey(OrderDetails, on_delete=models.CASCADE)
   md_total_SO = models.IntegerField()
   md_total_SAM = models.IntegerField()
   md_total_CRET = models.IntegerField()

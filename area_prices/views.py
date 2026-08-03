@@ -25,7 +25,6 @@ def area_new(request):
   })
 
 
-  
 def area_price_new(request):
   form = AreaPriceForm(request.POST or None)
 
