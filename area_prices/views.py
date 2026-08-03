@@ -1,12 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Area
-from .models import Area_price
+from .models import AreaPrice
 from .forms import AreaForm
 from .forms import AreaPriceForm
 
-
 def area_price_list(request):
-  area_prices = Area_price.objects.all()
+  area_prices = AreaPrice.objects.all()
   areas = Area.objects.all()
   return render(request, 'area_prices/home.html', {
     'area_prices': area_prices,
@@ -57,7 +56,7 @@ def area_edit(request, id):
 
 
 def area_price_edit(request, id):
-  area_price = get_object_or_404(Area_price, area_price_id=id)
+  area_price = get_object_or_404(AreaPrice, area_price_id=id)
 
   form = AreaPriceForm(
     request.POST or None,
@@ -87,7 +86,7 @@ def area_delete(request, id):
 
 
 def area_prices_delete(request, id):
-  area_prices = get_object_or_404(Area_price, area_price_id=id)
+  area_prices = get_object_or_404(AreaPrice, area_price_id=id)
 
   if request.method == 'POST':
     area_prices.delete()
