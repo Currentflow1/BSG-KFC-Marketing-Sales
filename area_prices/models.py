@@ -4,7 +4,7 @@ from decimal import Decimal
 
 class Area(models.Model):
   area_id = models.BigAutoField(primary_key=True)
-  area_name = models.CharField(max_length=255, default='')
+  area_name = models.CharField(max_length=255)
 
   class Meta:
     ordering = ['area_name']
