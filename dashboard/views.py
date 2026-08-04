@@ -58,10 +58,10 @@ def dashboard(request):
                     "href": "/employees/",
                     "emoji": "👤",
                 },
-                                {
-                    "title": "Accounts",
-                    "description": "Manage account records.",
-                    "href": "/accounts/",
+                {
+                    "title": "Admin",
+                    "description": "Manage app data in the admin panel.",
+                    "href": "/admin/",
                     "emoji": "🔐",
                 },
             ],
