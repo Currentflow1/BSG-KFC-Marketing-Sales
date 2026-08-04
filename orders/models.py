@@ -5,82 +5,90 @@ from employees.models import Employee
 from products.models import Product
 
 
-# OrderDetails Table
+class OrderQuerySet(models.QuerySet):
+    def incomplete(self):
+        return self.filter(end_date__isnull=True)
+
+    def completed(self):
+        return self.filter(end_date__isnull=False)
+
+
 class OrderDetails(models.Model):
-  od_id = models.BigAutoField(primary_key=True)
-  od_control_no = models.CharField(max_length=15)
-  od_area = models.ForeignKey(Area, on_delete=models.CASCADE)
-  od_agent = models.ForeignKey(Employee, on_delete=models.CASCADE)
-  od_van_number = models.IntegerField(null=True)
-  od_beg_date = models.DateTimeField(auto_now_add=True)
-  od_end_date = models.DateTimeField(null=True)
+    id = models.BigAutoField(primary_key=True)
+    control_no = models.CharField(max_length=15, unique=True)
+    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="orders")
+    agent = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="orders")
+    van_number = models.IntegerField(null=True, blank=True)
+    beg_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+
+    objects = OrderQuerySet.as_manager()
+
+    class Meta:
+        ordering = ["-beg_date"]
+
+    def __str__(self):
+        return self.control_no
+
+    @property
+    def is_complete(self):
+        return self.end_date is not None
 
 
-  def __str__(self):
-    return str(self.od_control_no)
-
-# CustomerDetails Table
 class CustomerDetails(models.Model):
-  cd_id = models.BigAutoField(primary_key=True)
-  cd_control_no = models.ForeignKey(OrderDetails, on_delete=models.CASCADE)
-  cd_invoice_no = models.IntegerField()
-  cd_customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    id = models.BigAutoField(primary_key=True)
+    order = models.ForeignKey(OrderDetails, on_delete=models.CASCADE, related_name="customers")
+    invoice_no = models.IntegerField(unique=True)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="customer_details")
 
-  def __str__(self):
-    return str(self.cd_invoice_no)
-
-
-# DeliveryDetails Table
-class DeliveryDetails(models.Model):
-  order_type_choices = [
-      ('MLOAD', 'MLOAD'),
-      ('MRET', 'MRET'),
-      ('VBO', 'VBO'),
-  ]
-
-  dd_id = models.BigAutoField(primary_key=True)
-  dd_control_no = models.ForeignKey(OrderDetails, on_delete=models.CASCADE)
-  dd_order_type = models.CharField(max_length=10, choices=order_type_choices)
-  dd_product_code = models.ForeignKey(Product, on_delete=models.CASCADE)
-  dd_quantity = models.IntegerField()
-  dd_line_price = models.DecimalField(max_digits=20, decimal_places=2)
+    def __str__(self):
+        return str(self.invoice_no)
 
 
-  def __str__(self):
-    return f"{self.dd_control_no} - {self.dd_product_code} ({self.dd_order_type})"
+class DeliveryDetail(models.Model):
+    ORDER_TYPE_CHOICES = [
+        ("MLOAD", "MLOAD"),
+        ("MRET", "MRET"),
+        ("VBO", "VBO"),
+    ]
+
+    id = models.BigAutoField(primary_key=True)
+    order = models.ForeignKey(OrderDetails, on_delete=models.CASCADE, related_name="deliveries")
+    order_type = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="delivery_lines")
+    quantity = models.IntegerField()
+    line_price = models.DecimalField(max_digits=20, decimal_places=2)
+    remarks = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.order} - {self.product} ({self.order_type})"
 
 
-# TransactionDetails Table
-class TransactionDetails(models.Model):
-  order_type_choices = [
-    ('SO', 'SO'),
-    ('SAM', 'SAM'),
-    ('CRET', 'CRET'),
-    ('CBO', 'CBO'),
-  ]
+class TransactionDetail(models.Model):
+    ORDER_TYPE_CHOICES = [
+        ("SO", "SO"),
+        ("SAM", "SAM"),
+        ("CRET", "CRET"),
+        ("CBO", "CBO"),
+    ]
+    INVOICE_TYPE_CHOICES = [
+        ("CASH", "Cash"),
+        ("CHARGE", "Charge"),
+        ("CHEQUE", "Cheque"),
+    ]
 
-  td_id = models.BigAutoField(primary_key=True)
-  td_invoice_no = models.ForeignKey(CustomerDetails, on_delete=models.CASCADE)
-  td_order_type = models.CharField(max_length=10, choices=order_type_choices)
-  td_product_code = models.ForeignKey(Product, on_delete=models.CASCADE)
-  td_quantity = models.IntegerField()
-  td_line_price = models.DecimalField(max_digits=20, decimal_places=2)
+    id = models.BigAutoField(primary_key=True)
+    customer_detail = models.ForeignKey(
+        CustomerDetails, on_delete=models.CASCADE, related_name="transactions"
+    )
+    order_type = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES)
+    invoice_type = models.CharField(max_length=10, choices=INVOICE_TYPE_CHOICES, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="transaction_lines")
+    quantity = models.IntegerField()
+    line_price = models.DecimalField(max_digits=20, decimal_places=2)
+    remarks = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-
-  def __str__(self):
-    return f"{self.td_invoice_no} - {self.td_product_code} ({self.td_order_type})"
-
-# MarketingDetails Table
-class MarketingDetails(models.Model):
-  md_id = models.BigAutoField(primary_key=True)
-  md_control_no = models.ForeignKey(OrderDetails, on_delete=models.CASCADE)
-  md_total_SO = models.IntegerField()
-  md_total_SAM = models.IntegerField()
-  md_total_CRET = models.IntegerField()
-  md_total_CBO = models.IntegerField()
-  md_total_MLOAD = models.IntegerField()
-  md_total_MRET = models.IntegerField()
-  md_total_VBO = models.IntegerField()
-  
-  def __str__(self):
-    return str(self.md_control_no)
+    def __str__(self):
+        return f"{self.customer_detail} - {self.product} ({self.order_type})"

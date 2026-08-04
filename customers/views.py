@@ -14,7 +14,7 @@ def customer_new(request):
 
   if request.method == 'POST' and form.is_valid():
     form.save()
-    return render(request, 'customer_list')
+    return redirect('customer_list')
 
   return render (request, 'customers/new.html', {
     'form': form
@@ -31,7 +31,7 @@ def customer_edit(request, id):
 
   if request.method == 'POST' and form.is_valid():
     form.save()
-    return render(request, 'customer_list')
+    return redirect('customer_list')
 
   return render(request, 'customers/edit.html', {
     'form': form
@@ -43,7 +43,7 @@ def customer_delete(request, id):
 
   if request.method == 'POST':
     customer.delete()
-    return render(request, 'customer_list')
+    return redirect('customer_list')
 
   return render(request, 'customers/delete.html', {
     'customer': customer
