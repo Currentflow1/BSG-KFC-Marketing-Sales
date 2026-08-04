@@ -1,53 +1,86 @@
-<div class="space-y-3">
-  {% for order in orders %}
-  <div class="rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50">
-    <div class="flex items-center justify-between">
+<div class="overflow-x-auto">
+  <table class="min-w-full border border-gray-200 rounded-lg">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left">Control No.</th>
+        <th class="px-4 py-2 text-left">Agent</th>
+        <th class="px-4 py-2 text-left">Area</th>
+        <th class="px-4 py-2 text-left">Van No.</th>
+        <th class="px-4 py-2 text-left">Begin Date</th>
+        <th class="px-4 py-2 text-center">Status</th>
+        <th class="px-4 py-2 text-center">Actions</th>
+      </tr>
+    </thead>
 
-      <div>
-        <p class="font-semibold">
+    <tbody>
+      {% for order in orders %}
+      <tr class="border-t hover:bg-gray-50">
+
+        <td class="px-4 py-2">
           {{ order.control_no }}
-        </p>
+        </td>
 
-        <p class="text-sm text-gray-500">
-          Agent: {{ order.agent }} &middot; Area: {{ order.area }}
-          {% if order.van_number %} &middot; Van {{ order.van_number }}{% endif %}
-        </p>
+        <td class="px-4 py-2">
+          {{ order.agent }}
+        </td>
 
-        <p class="text-sm text-gray-400 mt-1">
-          Begin {{ order.beg_date|date:"M j, Y" }}
-          {% if order.end_date %} &middot; Ended {{ order.end_date|date:"M j, Y" }}{% endif %}
-        </p>
-      </div>
+        <td class="px-4 py-2">
+          {{ order.area }}
+        </td>
 
-      <div class="flex items-center gap-2">
-        {% if order.is_complete %}
-          <span class="rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-700">
-            Completed
-          </span>
-        {% else %}
-          <span class="rounded bg-yellow-100 px-2 py-1 text-sm font-medium text-yellow-700">
-            In Progress
-          </span>
-        {% endif %}
+        <td class="px-4 py-2">
+          {{ order.van_number|default:"—" }}
+        </td>
 
-        <a href="{% url 'order_detail' order.id %}" class="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
-          View
-        </a>
+        <td class="px-4 py-2">
+          {{ order.beg_date|date:"M j, Y" }}
+        </td>
 
-        <a href="{% url 'order_edit' order.id %}" class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600">
-          Edit
-        </a>
+        <td class="px-4 py-2 text-center">
+          {% if order.is_complete %}
+            <span class="rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-700">
+              Completed
+            </span>
+          {% else %}
+            <span class="rounded bg-yellow-100 px-2 py-1 text-sm font-medium text-yellow-700">
+              In Progress
+            </span>
+          {% endif %}
+        </td>
 
-        <a href="{% url 'order_delete' order.id %}" class="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600">
-          Delete
-        </a>
-      </div>
+        <td class="px-4 py-2">
+          <div class="flex justify-center gap-2">
 
-    </div>
-  </div>
-  {% empty %}
-  <div class="rounded-lg border border-gray-200 bg-white p-6 text-center text-gray-500">
-    No orders found.
-  </div>
-  {% endfor %}
+            <a
+              href="{% url 'order_detail' order.id %}"
+              class="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
+            >
+              View
+            </a>
+
+            <a
+              href="{% url 'order_edit' order.id %}"
+              class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
+            >
+              Edit
+            </a>
+
+            <a
+              href="{% url 'order_delete' order.id %}"
+              class="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+            >
+              Delete
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="px-4 py-6 text-center text-gray-500">
+          No orders found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>

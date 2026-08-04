@@ -1,0 +1,44 @@
+<div class="rounded-lg border border-gray-200 bg-white p-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-sm text-black">
+        Agent: {{ order.agent }} &middot; Area: {{ order.area }}
+        {% if order.van_number %} &middot; Van {{ order.van_number }}{% endif %}
+      </p>
+      <p class="text-sm text-black mt-1">
+        Begin {{ order.beg_date|date:"M j, Y" }}
+        {% if order.end_date %} &middot; Ended {{ order.end_date|date:"M j, Y" }}{% endif %}
+      </p>
+    </div>
+
+    {% if order.is_complete %}
+      <span class="rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-700">Completed</span>
+    {% else %}
+      <span class="rounded bg-yellow-100 px-2 py-1 text-sm font-medium text-yellow-700">In Progress</span>
+    {% endif %}
+  </div>
+
+  <div class="mt-4 flex gap-2">
+    <a href="{% url 'order_edit' order.id %}" class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600">
+      Edit Order
+    </a>
+
+    {% if not order.is_complete %}
+      <form method="post" action="{% url 'order_complete' order.id %}">
+        {% csrf_token %}
+        <button type="submit" onclick="return confirm('Mark this order as complete?')"
+                class="rounded cursor-pointer bg-green-600 px-3 py-1 text-white hover:bg-green-700">
+          Mark Complete
+        </button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'order_uncomplete' order.id %}">
+        {% csrf_token %}
+        <button type="submit" onclick="return confirm('Reopen this order?')"
+                class="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600">
+          Reopen Order
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
