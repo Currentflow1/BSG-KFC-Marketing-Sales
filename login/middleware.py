@@ -1,3 +1,4 @@
+'''
 # login/middleware.py
 from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
@@ -25,3 +26,4 @@ class LoginRequiredMiddleware:
                 return redirect_to_login(request.get_full_path())
 
         return self.get_response(request)
+'''

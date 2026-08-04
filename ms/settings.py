@@ -41,8 +41,6 @@ INSTALLED_APPS = [
 
     'tailwind',
     'theme',
-
-    'login',
     
     'dashboard',
     'products',
@@ -55,11 +53,6 @@ INSTALLED_APPS = [
     'forecasting',
 ]
 
-AUTH_USER_MODEL = 'login.User'
-
-LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = 'login'  
-LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 TAILWIND_APP_NAME = 'theme'
 
@@ -90,7 +83,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'login.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'ms.urls'
