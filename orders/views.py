@@ -63,14 +63,12 @@ def order_delete(request, order_id):
         return redirect("order_list")
     return render(request, "orders/delete.html", {"order": order})
 
-
 def order_complete(request, order_id):
     order = get_object_or_404(OrderDetails, id=order_id)
     if request.method == "POST":
         services.complete_order(order)
         messages.success(request, f"Order {order.control_no} marked complete.")
     return redirect("order_detail", order_id=order.id)
-
 
 def add_customer(request, order_id):
     order = get_object_or_404(OrderDetails, id=order_id)

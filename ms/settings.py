@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,7 +55,32 @@ INSTALLED_APPS = [
     'forecasting',
 ]
 
+AUTH_USER_MODEL = 'login.User'
+
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = 'login'  
+LOGOUT_REDIRECT_URL = '/accounts/login/'
+
 TAILWIND_APP_NAME = 'theme'
+
+JAZZMIN_SETTINGS = {
+    "site_title": "KFC's Marketing and Sales Admin",
+    "site_header": "Marketing and Sales",
+    "site_brand": "Marketing and Sales",
+    "welcome_sign": "Welcome to the admin",
+    "copyright": "BSG Sytems",
+    "search_model": ["auth.User"],
+    "show_sidebar": True,
+    "show_ui_builder": True,
+    "navigation_expanded": True,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -64,6 +90,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'login.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'ms.urls'

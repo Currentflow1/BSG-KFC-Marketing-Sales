@@ -330,9 +330,6 @@
   .min-w-full {
     min-width: 100%;
   }
-  .flex-1 {
-    flex: 1;
-  }
   .-translate-x-full {
     --tw-translate-x: -100%;
     translate: var(--tw-translate-x) var(--tw-translate-y);
@@ -600,9 +597,6 @@
   }
   .text-white {
     color: var(--color-white);
-  }
-  .text-yellow-700 {
-    color: var(--color-yellow-700);
   }
   .shadow-sm {
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));

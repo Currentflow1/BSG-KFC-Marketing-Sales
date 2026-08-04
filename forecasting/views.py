@@ -1,3 +1,4 @@
 from django.shortcuts import render
 
-# Create your views here.
+def forecast_view(request):
+  return render(request, 'forecasting/home.html')
