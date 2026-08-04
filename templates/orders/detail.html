@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">
+  {{ order.control_no }}
+</h1>
+
+<div class="rounded-lg border border-gray-200 bg-white p-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-sm text-gray-500">
+        Agent: {{ order.agent }} &middot; Area: {{ order.area }}
+        {% if order.van_number %} &middot; Van {{ order.van_number }}{% endif %}
+      </p>
+      <p class="text-sm text-gray-400 mt-1">
+        Begin {{ order.beg_date|date:"M j, Y" }}
+        {% if order.end_date %} &middot; Ended {{ order.end_date|date:"M j, Y" }}{% endif %}
+      </p>
+    </div>
+
+    {% if order.is_complete %}
+      <span class="rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-700">Completed</span>
+    {% else %}
+      <span class="rounded bg-yellow-100 px-2 py-1 text-sm font-medium text-yellow-700">In Progress</span>
+    {% endif %}
+  </div>
+
+  <div class="mt-4 flex gap-2">
+    <a href="{% url 'order_edit' order.id %}" class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600">
+      Edit order
+    </a>
+    {% if not order.is_complete %}
+      <form method="post" action="{% url 'order_complete' order.id %}">
+        {% csrf_token %}
+        <button type="submit" class="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600">
+          Mark complete
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mt-4 grid grid-cols-2 gap-4">
+
+  <div class="rounded-lg border border-gray-200 bg-white p-6">
+    <h2 class="mb-3 font-medium">Customers &amp; invoices</h2>
+
+    <div class="mb-4 space-y-2">
+      {% for cd in order.customers.all %}
+        <div class="flex justify-between border-b pb-2 text-sm">
+          <span>{{ cd.customer }}</span>
+          <span class="text-gray-500">INV {{ cd.invoice_no }}</span>
+        </div>
+      {% empty %}
+        <p class="text-sm text-gray-400">No customers added yet.</p>
+      {% endfor %}
+    </div>
+
+    <form method="post" action="{% url 'add_customer' order.id %}" class="space-y-2">
+      {% csrf_token %}
+      {{ customer_form.customer }}
+      {{ customer_form.invoice_no }}
+      <button type="submit" class="w-full rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
+        + Add customer
+      </button>
+    </form>
+  </div>
+
+  <div class="rounded-lg border border-gray-200 bg-white p-6">
+    <h2 class="mb-3 font-medium">Marketing summary</h2>
+
+    <table class="w-full text-sm">
+      <tbody>
+        <tr class="border-b"><td class="py-1 text-gray-500">MLOAD</td><td class="py-1 text-right">{{ marketing_summary.total_MLOAD }}</td></tr>
+        <tr class="border-b"><td class="py-1 text-gray-500">MRET</td><td class="py-1 text-right">{{ marketing_summary.total_MRET }}</td></tr>
+        <tr class="border-b"><td class="py-1 text-gray-500">VBO</td><td class="py-1 text-right">{{ marketing_summary.total_VBO }}</td></tr>
+        <tr class="border-b"><td class="py-1 text-gray-500">SO</td><td class="py-1 text-right">{{ marketing_summary.total_SO }}</td></tr>
+        <tr class="border-b"><td class="py-1 text-gray-500">SAM</td><td class="py-1 text-right">{{ marketing_summary.total_SAM }}</td></tr>
+        <tr class="border-b"><td class="py-1 text-gray-500">CRET</td><td class="py-1 text-right">{{ marketing_summary.total_CRET }}</td></tr>
+        <tr><td class="py-1 text-gray-500">CBO</td><td class="py-1 text-right">{{ marketing_summary.total_CBO }}</td></tr>
+      </tbody>
+    </table>
+
+    <div class="mt-4 flex gap-2">
+      <a href="#" class="flex-1 rounded border border-gray-300 px-4 py-2 text-center text-sm hover:bg-gray-50">Manage delivery</a>
+      <a href="#" class="flex-1 rounded border border-gray-300 px-4 py-2 text-center text-sm hover:bg-gray-50">Manage orders</a>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

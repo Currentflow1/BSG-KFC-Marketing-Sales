@@ -26,6 +26,11 @@ urlpatterns = [
     path('employees/', include('employees.urls')),
     path('area_prices/', include('area_prices.urls')),
     path('customers/', include('customers.urls')),
+<<<<<<< HEAD
+
+    path('orders/', include('orders.urls')),
+=======
     path('forecasting/', include('forecasting.urls')),
     path('records/', include('records.urls'))
+>>>>>>> origin/main
 ]
