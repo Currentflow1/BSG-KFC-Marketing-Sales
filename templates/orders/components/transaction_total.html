@@ -1,0 +1,46 @@
+<div class="mt-4 rounded-lg border border-gray-200 bg-white p-6">
+  <div class="mb-4 flex items-center justify-between">
+    <h2 class="text-xl font-semibold">
+      Totals
+    </h2>
+    <div class="rounded bg-blue-100 px-4 py-2 text-xl font-bold text-blue-700">
+      Amount Due: ₱{{ totals.amount_due }}
+    </div>
+  </div>
+  <table class="w-full">
+    <tbody>
+      <tr class="border-b">
+        <td class="py-3 text-lg font-medium">SO</td>
+        <td class="py-3 text-right text-lg">
+          {{ totals.by_type.SO.qty }} &middot; ₱{{ totals.by_type.SO.price }}
+        </td>
+      </tr>
+      <tr class="border-b">
+        <td class="py-3 text-lg font-medium">SAM</td>
+        <td class="py-3 text-right text-lg">
+          {{ totals.by_type.SAM.qty }} &middot; ₱{{ totals.by_type.SAM.price }}
+        </td>
+      </tr>
+      <tr class="border-b text-red-600">
+        <td class="py-3 text-lg font-medium">CRET</td>
+        <td class="py-3 text-right text-lg">
+          {{ totals.by_type.CRET.qty }} &middot; ₱{{ totals.by_type.CRET.price }}
+        </td>
+      </tr>
+      <tr class="border-b text-red-600">
+        <td class="py-3 text-lg font-medium">CBO</td>
+        <td class="py-3 text-right text-lg">
+          {{ totals.by_type.CBO.qty }} &middot; ₱{{ totals.by_type.CBO.price }}
+        </td>
+      </tr>
+      <tr class="bg-gray-50">
+        <td class="py-4 text-xl font-semibold">
+          Overall
+        </td>
+        <td class="py-4 text-right text-xl font-semibold">
+          {{ totals.qty }} &middot; ₱{{ totals.price }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

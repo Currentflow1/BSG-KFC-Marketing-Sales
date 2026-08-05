@@ -1,23 +1,67 @@
-<div class="rounded-lg border border-gray-200 bg-white p-6">
-  <h2 class="mb-3 font-medium">Customers &amp; Invoices</h2>
+<div class="rounded-lg border border-gray-200 bg-white p-5">
 
-  <div class="mb-4 space-y-2">
-    {% for cd in order.customers.all %}
-      <div class="flex justify-between border-b pb-2 text-sm">
-        <span>{{ cd.customer }}</span>
-        <span class="text-gray-500">INV {{ cd.invoice_no }}</span>
-      </div>
-    {% empty %}
-      <p class="text-sm text-gray-400">No customers added yet.</p>
-    {% endfor %}
+  <h2 class="mb-4 text-lg font-semibold">
+    Customers &amp; Invoices
+  </h2>
+
+  <div class="mb-4 h-56 overflow-y-auto rounded-lg border border-gray-200">
+
+    <table class="w-full">
+      <tbody>
+
+        {% for cd in order.customers.all %}
+        <tr class="border-b last:border-b-0">
+          <td class="px-4 py-3 font-medium">
+            {{ cd.customer }}
+          </td>
+
+          <td class="px-4 py-3 text-right">
+            <span class="rounded bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+              INV {{ cd.invoice_no }}
+            </span>
+          </td>
+
+          <td class="px-4 py-3 text-right">
+            <form method="post" action="{% url 'customer_delete' order.id cd.id %}">
+              {% csrf_token %}
+              <button type="submit" onclick="return confirm('Delete this invoice?')"
+                class="rounded cursor-pointer bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600">
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+
+        {% empty %}
+        <tr>
+          <td colspan="2" class="px-4 py-6 text-center text-sm text-gray-500">
+            No customers added yet.
+          </td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+
   </div>
 
-  <form method="post" action="{% url 'add_customer' order.id %}" class="space-y-2">
+  <form method="post" action="{% url 'add_customer' order.id %}" class="space-y-3">
     {% csrf_token %}
-    {{ customer_form.customer }}
-    {{ customer_form.invoice_no }}
-    <button type="submit" class="w-full cursor-pointer rounded-lg bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white">
+
+    <div>
+      {{ customer_form.customer }}
+      {{ customer_form.customer.errors }}
+    </div>
+
+    <div>
+      {{ customer_form.invoice_no }}
+      {{ customer_form.invoice_no.errors }}
+    </div>
+
+    <button type="submit"
+      class="w-full cursor-pointer rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">
       + Add Customer
     </button>
   </form>
+
 </div>

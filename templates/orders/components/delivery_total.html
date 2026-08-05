@@ -1,0 +1,54 @@
+<div class="mt-4 rounded-lg border border-gray-200 bg-white p-6">
+  <div class="mb-4 flex items-center justify-between">
+    <h2 class="text-xl font-semibold">
+      Totals
+    </h2>
+    <div class="rounded bg-blue-100 px-4 py-2 text-xl font-bold text-blue-700">
+      Overall: {{ totals.qty }} &middot; ₱{{ totals.price }}
+    </div>
+  </div>
+  <table class="w-full">
+    <tbody>
+      <tr class="border-b">
+        <td class="py-3 text-lg font-medium">
+          MLOAD
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ totals.by_type.MLOAD.qty }}
+          &middot;
+          ₱{{ totals.by_type.MLOAD.price }}
+        </td>
+      </tr>
+      <tr class="border-b text-red-600">
+        <td class="py-3 text-lg font-medium">
+          MRET
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ totals.by_type.MRET.qty }}
+          &middot;
+          ₱{{ totals.by_type.MRET.price }}
+        </td>
+      </tr>
+      <tr class="border-b text-red-600">
+        <td class="py-3 text-lg font-medium">
+          VBO
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ totals.by_type.VBO.qty }}
+          &middot;
+          ₱{{ totals.by_type.VBO.price }}
+        </td>
+      </tr>
+      <tr class="bg-gray-50">
+        <td class="py-4 text-xl font-semibold">
+          Net Total
+        </td>
+        <td class="py-4 text-right text-xl font-semibold">
+          {{ totals.qty }}
+          &middot;
+          ₱{{ totals.price }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

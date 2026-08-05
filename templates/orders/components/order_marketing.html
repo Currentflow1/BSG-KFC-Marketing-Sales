@@ -1,24 +1,94 @@
-<div class="rounded-lg border border-gray-200 bg-white p-6">
-  <h2 class="mb-3 font-medium">Marketing Summary</h2>
+<div class="rounded-lg border border-gray-200 bg-white p-5">
+
+  <div class="mb-4 flex items-center justify-between">
+    <h2 class="text-lg font-semibold">
+      Marketing Summary
+    </h2>
+
+    <div class="rounded bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
+      Order Summary
+    </div>
+  </div>
 
   <table class="w-full text-sm">
     <tbody>
-      <tr class="border-b"><td class="py-1 text-gray-500">MLOAD</td><td class="py-1 text-right">{{ marketing_summary.total_MLOAD }}</td></tr>
-      <tr class="border-b"><td class="py-1 text-gray-500">MRET</td><td class="py-1 text-right">{{ marketing_summary.total_MRET }}</td></tr>
-      <tr class="border-b"><td class="py-1 text-gray-500">VBO</td><td class="py-1 text-right">{{ marketing_summary.total_VBO }}</td></tr>
-      <tr class="border-b"><td class="py-1 text-gray-500">SO</td><td class="py-1 text-right">{{ marketing_summary.total_SO }}</td></tr>
-      <tr class="border-b"><td class="py-1 text-gray-500">SAM</td><td class="py-1 text-right">{{ marketing_summary.total_SAM }}</td></tr>
-      <tr class="border-b"><td class="py-1 text-gray-500">CRET</td><td class="py-1 text-right">{{ marketing_summary.total_CRET }}</td></tr>
-      <tr><td class="py-1 text-gray-500">CBO</td><td class="py-1 text-right">{{ marketing_summary.total_CBO }}</td></tr>
+
+      <tr class="border-b">
+        <td class="py-2 font-medium">
+          MLOAD
+        </td>
+        <td class="py-2 text-right">
+          {{ marketing_summary.total_MLOAD }}
+        </td>
+      </tr>
+
+      <tr class="border-b text-red-600">
+        <td class="py-2 font-medium">
+          MRET
+        </td>
+        <td class="py-2 text-right font-semibold">
+          {{ marketing_summary.total_MRET }}
+        </td>
+      </tr>
+
+      <tr class="border-b text-red-600">
+        <td class="py-2 font-medium">
+          VBO
+        </td>
+        <td class="py-2 text-right font-semibold">
+          {{ marketing_summary.total_VBO }}
+        </td>
+      </tr>
+
+      <tr class="border-b">
+        <td class="py-2 font-medium">
+          SO
+        </td>
+        <td class="py-2 text-right">
+          {{ marketing_summary.total_SO }}
+        </td>
+      </tr>
+
+      <tr class="border-b">
+        <td class="py-2 font-medium">
+          SAM
+        </td>
+        <td class="py-2 text-right">
+          {{ marketing_summary.total_SAM }}
+        </td>
+      </tr>
+
+      <tr class="border-b text-red-600">
+        <td class="py-2 font-medium">
+          CRET
+        </td>
+        <td class="py-2 text-right font-semibold">
+          {{ marketing_summary.total_CRET }}
+        </td>
+      </tr>
+
+      <tr class="bg-gray-50 text-red-600">
+        <td class="py-2 font-medium">
+          CBO
+        </td>
+        <td class="py-2 text-right font-semibold">
+          {{ marketing_summary.total_CBO }}
+        </td>
+      </tr>
+
     </tbody>
   </table>
 
-  <div class="mt-4 flex gap-2">
-    <a href="{% url 'manage_delivery' order.id %}" class="flex-1 rounded-lg border px-4 py-2 text-center cursor-pointer hover:bg-gray-100">
+  <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <a href="{% url 'manage_delivery' order.id %}"
+      class="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium hover:bg-gray-100">
       Manage Delivery
     </a>
-    <a href="{% url 'manage_transactions' order.id %}" class="flex-1 rounded-lg border px-4 py-2 text-center cursor-pointer hover:bg-gray-100">
-      Manage Orders
+
+    <a href="{% url 'manage_transactions' order.id %}"
+      class="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium hover:bg-gray-100">
+      Manage Transactions
     </a>
   </div>
+
 </div>
