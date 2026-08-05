@@ -17,16 +17,30 @@ def order_list(request):
     )
     return render(request, "orders/home.html", {"orders": orders})
 
-
 def order_detail(request, order_id):
-    order = get_object_or_404(OrderDetails, pk=order_id)
-    customer_form = CustomerDetailForm(area=order.area)
-    return render(request, "orders/detail.html", {
-        "order": order,
-        "customer_form": customer_form,
-        "marketing_summary": services.get_marketing_summary(order),
-    })
+    order = get_object_or_404(
+        OrderDetails.objects.select_related(
+            "area",
+            "agent",
+        ).prefetch_related(
+            "customers__customer",
+            "customers__transactions",
+            "deliveries__product",
+        ),
+        pk=order_id,
+    )
 
+    customer_form = CustomerDetailForm(area=order.area)
+
+    return render(
+        request,
+        "orders/detail.html",
+        {
+            "order": order,
+            "customer_form": customer_form,
+            "marketing_summary": services.get_marketing_summary(order),
+        },
+    )
 
 def order_new(request):
     if request.method == "POST":
@@ -104,15 +118,16 @@ def manage_delivery(request, order_id):
         "totals": services.get_delivery_totals(order),
     })
 
-
 def delivery_delete(request, order_id, line_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     line = get_object_or_404(DeliveryDetail, pk=line_id, order=order)
+
     if request.method == "POST":
         line.delete()
+        services.sync_marketing_details(order)
         messages.success(request, "Delivery line removed.")
-    return redirect("manage_delivery", order_id=order.id)
 
+    return redirect("manage_delivery", order_id=order.id)
 
 def manage_transactions(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
@@ -141,15 +156,20 @@ def manage_transactions(request, order_id):
         "totals": services.get_transaction_totals(order),
     })
 
-
 def transaction_delete(request, order_id, line_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
-    line = get_object_or_404(TransactionDetail, pk=line_id, customer_detail__order=order)
+    line = get_object_or_404(
+        TransactionDetail,
+        pk=line_id,
+        customer_detail__order=order,
+    )
+
     if request.method == "POST":
         line.delete()
+        services.sync_marketing_details(order)
         messages.success(request, "Transaction line removed.")
-    return redirect("manage_transactions", order_id=order.id)
 
+    return redirect("manage_transactions", order_id=order.id)
 
 def add_customer(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
@@ -161,7 +181,7 @@ def add_customer(request, order_id):
             cd.save()
             messages.success(request, "Customer added to order.")
         else:
-            messages.error(request, "Could not new customer — check the form.")
+            messages.error(request, "Could not add customer — check the form.")
     return redirect("order_detail", order_id=order.id)
 
 def customer_delete(request, order_id, customer_detail_id):
@@ -174,6 +194,7 @@ def customer_delete(request, order_id, customer_detail_id):
 
     if request.method == "POST":
         customer_detail.delete()
+        services.sync_marketing_details(order)
         messages.success(request, "Invoice removed.")
 
     return redirect("order_detail", order_id=order.id)
