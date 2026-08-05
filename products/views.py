@@ -1,12 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from . import services
 from .models import Product
 from .forms import ProductForm
 
 def product_list(request):
-  products = Product.objects.all()
-  return render(request, 'products/home.html', {
-    'products': products
-  })
+    products = services.search_products(
+        request.GET.get("search")
+    )
+
+    return render(request, "products/home.html", {
+        "products": products,
+    })
 
 def product_new(request):
   form = ProductForm(request.POST or None)

@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 from area_prices.models import Area
 from customers.models import Customer
 from employees.models import Employee
@@ -11,7 +13,7 @@ class OrderQuerySet(models.QuerySet):
 
     def completed(self):
         return self.filter(end_date__isnull=False)
-
+    
 class OrderDetails(models.Model):
     id = models.BigAutoField(primary_key=True)
 
@@ -31,7 +33,7 @@ class OrderDetails(models.Model):
 
     van_number = models.IntegerField(null=True, blank=True)
 
-    beg_date = models.DateField()
+    beg_date = models.DateField(default=timezone.localdate)
     mload_date = models.DateField(null=True, blank=True)
     mret_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
@@ -45,6 +47,16 @@ class OrderDetails(models.Model):
     def is_complete(self):
         return self.end_date is not None
 
+    def clean(self):
+        if self.end_date and self.end_date < self.beg_date:
+            raise ValidationError(
+                "End date cannot be earlier than begin date."
+            )
+
+    def __str__(self):
+        return self.control_no
+
+    
 class CustomerDetails(models.Model):
     id = models.BigAutoField(primary_key=True)
     order = models.ForeignKey(OrderDetails, on_delete=models.CASCADE, related_name="customers")
@@ -102,10 +114,12 @@ class TransactionDetail(models.Model):
 
     def __str__(self):
         return f"{self.customer_detail} - {self.product} ({self.order_type})"
+
+    
 class MarketingDetails(models.Model):
     id = models.BigAutoField(primary_key=True)
 
-    order = models.OneToOneField(
+    order = models.ForeignKey(
         OrderDetails,
         on_delete=models.CASCADE,
         related_name="marketing"
@@ -125,4 +139,4 @@ class MarketingDetails(models.Model):
     total_VBO = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.order.control_no
+        return f"{self.order.control_no} - {self.product.product_name}"
