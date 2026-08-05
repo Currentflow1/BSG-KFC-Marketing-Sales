@@ -1,9 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 
-from area_prices.models import Area
-from employees.models import Employee
-from customers.models import Customer
 from .models import OrderDetails, CustomerDetails, DeliveryDetail, TransactionDetail
 from .forms import OrderForm, CustomerDetailForm, DeliveryLineForm, TransactionLineForm
 from . import services
@@ -62,7 +59,7 @@ def order_delete(request, order_id):
         order.delete()
         messages.success(request, "Order deleted.")
         return redirect("order_list")
-    return render(request, "orders/confirm_delete.html", {"order": order})
+    return render(request, "orders/delete.html", {"order": order})
 
 
 def order_complete(request, order_id):
@@ -165,4 +162,18 @@ def add_customer(request, order_id):
             messages.success(request, "Customer added to order.")
         else:
             messages.error(request, "Could not new customer — check the form.")
+    return redirect("order_detail", order_id=order.id)
+
+def customer_delete(request, order_id, customer_detail_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+    customer_detail = get_object_or_404(
+        CustomerDetails,
+        pk=customer_detail_id,
+        order=order,
+    )
+
+    if request.method == "POST":
+        customer_detail.delete()
+        messages.success(request, "Invoice removed.")
+
     return redirect("order_detail", order_id=order.id)

@@ -48,8 +48,8 @@ class CustomerDetails(models.Model):
 class DeliveryDetail(models.Model):
     ORDER_TYPE_CHOICES = [
         ("MLOAD", "MLOAD"),
-        ("MRET", "MRET"),
-        ("VBO", "VBO"),
+        ("MRET", "MRET (-)"),
+        ("VBO", "VBO (-)"),
     ]
 
     id = models.BigAutoField(primary_key=True)
@@ -69,8 +69,8 @@ class TransactionDetail(models.Model):
     ORDER_TYPE_CHOICES = [
         ("SO", "SO"),
         ("SAM", "SAM"),
-        ("CRET", "CRET"),
-        ("CBO", "CBO"),
+        ("CRET", "CRET (-)"),
+        ("CBO", "CBO (-)"),
     ]
     INVOICE_TYPE_CHOICES = [
         ("CASH", "Cash"),

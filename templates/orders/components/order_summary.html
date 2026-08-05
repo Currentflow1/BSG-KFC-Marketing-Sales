@@ -1,44 +1,101 @@
 <div class="rounded-lg border border-gray-200 bg-white p-6">
-  <div class="flex items-center justify-between">
-    <div>
-      <p class="text-sm text-black">
-        Agent: {{ order.agent }} &middot; Area: {{ order.area }}
-        {% if order.van_number %} &middot; Van {{ order.van_number }}{% endif %}
-      </p>
-      <p class="text-sm text-black mt-1">
-        Begin {{ order.beg_date|date:"M j, Y" }}
-        {% if order.end_date %} &middot; Ended {{ order.end_date|date:"M j, Y" }}{% endif %}
-      </p>
-    </div>
+
+  <div class="mb-5 flex items-center justify-between">
+    <h2 class="text-xl font-semibold">
+      Order Information
+    </h2>
 
     {% if order.is_complete %}
-      <span class="rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-700">Completed</span>
+    <span class="rounded-lg bg-green-100 px-4 py-2 text-base font-semibold text-green-700">
+      Completed
+    </span>
     {% else %}
-      <span class="rounded bg-yellow-100 px-2 py-1 text-sm font-medium text-yellow-700">In Progress</span>
+    <span class="rounded-lg bg-yellow-100 px-4 py-2 text-base font-semibold text-yellow-700">
+      In Progress
+    </span>
     {% endif %}
   </div>
 
-  <div class="mt-4 flex gap-2">
-    <a href="{% url 'order_edit' order.id %}" class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600">
+  <table class="w-full">
+    <tbody>
+
+      <tr class="border-b">
+        <td class="py-3 text-lg font-medium">
+          Agent
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ order.agent }}
+        </td>
+      </tr>
+
+      <tr class="border-b">
+        <td class="py-3 text-lg font-medium">
+          Area
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ order.area }}
+        </td>
+      </tr>
+
+      {% if order.van_number %}
+      <tr class="border-b">
+        <td class="py-3 text-lg font-medium">
+          Van
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ order.van_number }}
+        </td>
+      </tr>
+      {% endif %}
+
+      <tr class="border-b">
+        <td class="py-3 text-lg font-medium">
+          Begin
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ order.beg_date|date:"M j, Y" }}
+        </td>
+      </tr>
+
+      {% if order.end_date %}
+      <tr>
+        <td class="py-3 text-lg font-medium">
+          Ended
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ order.end_date|date:"M j, Y" }}
+        </td>
+      </tr>
+      {% endif %}
+
+    </tbody>
+  </table>
+
+  <div class="mt-6 flex flex-wrap gap-3">
+
+    <a href="{% url 'order_edit' order.id %}"
+      class="rounded-lg bg-yellow-500 px-5 py-3 text-base font-medium text-white hover:bg-yellow-600">
       Edit Order
     </a>
 
     {% if not order.is_complete %}
-      <form method="post" action="{% url 'order_complete' order.id %}">
-        {% csrf_token %}
-        <button type="submit" onclick="return confirm('Mark this order as complete?')"
-                class="rounded cursor-pointer bg-green-600 px-3 py-1 text-white hover:bg-green-700">
-          Mark Complete
-        </button>
-      </form>
+    <form method="post" action="{% url 'order_complete' order.id %}">
+      {% csrf_token %}
+      <button type="submit" onclick="return confirm('Mark this order as complete?')"
+        class="cursor-pointer rounded-lg bg-green-600 px-5 py-3 text-base font-medium text-white hover:bg-green-700">
+        Mark Complete
+      </button>
+    </form>
     {% else %}
-      <form method="post" action="{% url 'order_uncomplete' order.id %}">
-        {% csrf_token %}
-        <button type="submit" onclick="return confirm('Reopen this order?')"
-                class="rounded bg-gray-500 px-3 py-1 text-white hover:bg-gray-600">
-          Reopen Order
-        </button>
-      </form>
+    <form method="post" action="{% url 'order_uncomplete' order.id %}">
+      {% csrf_token %}
+      <button type="submit" onclick="return confirm('Reopen this order?')"
+        class="cursor-pointer rounded-lg bg-gray-600 px-5 py-3 text-base font-medium text-white hover:bg-gray-700">
+        Reopen Order
+      </button>
+    </form>
     {% endif %}
+
   </div>
+
 </div>

@@ -3,7 +3,7 @@ from django.db.models import Sum, Q
 from django.utils import timezone
 
 from area_prices.models import AreaPrice
-from .models import OrderDetails, DeliveryDetail, TransactionDetail, CustomerDetails
+from .models import OrderDetails, DeliveryDetail, TransactionDetail
 
 
 def get_area_price(area, product):
@@ -41,48 +41,79 @@ def add_transaction_line(customer_detail, product, order_type, quantity, invoice
         remarks=remarks,
     )
 
-
 def get_delivery_totals(order):
-    """Total qty/price for an order's delivery lines, overall and per order_type."""
     lines = DeliveryDetail.objects.filter(order=order)
-    overall = lines.aggregate(qty=Sum("quantity"), price=Sum("line_price"))
+
     by_type = {}
+
     for code, _ in DeliveryDetail.ORDER_TYPE_CHOICES:
-        agg = lines.filter(order_type=code).aggregate(qty=Sum("quantity"), price=Sum("line_price"))
-        by_type[code] = {"qty": agg["qty"] or 0, "price": agg["price"] or Decimal("0")}
+        agg = lines.filter(order_type=code).aggregate(
+            qty=Sum("quantity"),
+            price=Sum("line_price"),
+        )
+
+        qty = agg["qty"] or 0
+        price = agg["price"] or Decimal("0")
+
+        if code in ["MRET", "VBO"]:
+            qty *= -1
+            price *= Decimal("-1")
+
+        by_type[code] = {
+            "qty": qty,
+            "price": price,
+        }
+
+    total_qty = sum(item["qty"] for item in by_type.values())
+    total_price = sum(item["price"] for item in by_type.values())
+
     return {
-        "qty": overall["qty"] or 0,
-        "price": overall["price"] or Decimal("0"),
+        "qty": total_qty,
+        "price": total_price,
         "by_type": by_type,
     }
-
-
 def get_transaction_totals(order):
-    """Total qty/price for all transaction lines under an order (across all its
-    customers/invoices), overall and per order_type. Also computes amount due
-    the way an SO/CBO ledger typically wants it: SO+SAM as charges, CRET+CBO as credits."""
     lines = TransactionDetail.objects.filter(customer_detail__order=order)
-    overall = lines.aggregate(qty=Sum("quantity"), price=Sum("line_price"))
-    by_type = {}
-    for code, _ in TransactionDetail.ORDER_TYPE_CHOICES:
-        agg = lines.filter(order_type=code).aggregate(qty=Sum("quantity"), price=Sum("line_price"))
-        by_type[code] = {"qty": agg["qty"] or 0, "price": agg["price"] or Decimal("0")}
 
-    total_so = by_type["SO"]["price"]
-    total_sam = by_type["SAM"]["price"]
-    total_cret = by_type["CRET"]["price"]
-    total_cbo = by_type["CBO"]["price"]
-    bo_amount = total_cbo
-    amount_due = (total_so + total_sam) - (total_cret + total_cbo)
+    by_type = {}
+
+    for code, _ in TransactionDetail.ORDER_TYPE_CHOICES:
+        agg = lines.filter(order_type=code).aggregate(
+            qty=Sum("quantity"),
+            price=Sum("line_price"),
+        )
+
+        qty = agg["qty"] or 0
+        price = agg["price"] or Decimal("0")
+        
+        if code in ["CRET", "CBO"]:
+            qty *= -1
+            price *= Decimal("-1")
+
+        by_type[code] = {
+            "qty": qty,
+            "price": price,
+        }
+
+    total_qty = (
+        by_type["SO"]["qty"] +
+        by_type["SAM"]["qty"]
+    )
+
+    total_price = (
+        by_type["SO"]["price"] +
+        by_type["SAM"]["price"]
+    )
+
+    amount_due = total_price
 
     return {
-        "qty": overall["qty"] or 0,
-        "price": overall["price"] or Decimal("0"),
+        "qty": total_qty,
+        "price": total_price,
         "by_type": by_type,
-        "bo_amount": bo_amount,
+        "bo_amount": abs(by_type["CBO"]["price"]),
         "amount_due": amount_due,
     }
-
 
 def get_marketing_summary(order):
     """Fully derived MarketingDetails-equivalent. No stored/cached fields —
