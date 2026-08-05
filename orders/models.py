@@ -12,28 +12,38 @@ class OrderQuerySet(models.QuerySet):
     def completed(self):
         return self.filter(end_date__isnull=False)
 
-
 class OrderDetails(models.Model):
     id = models.BigAutoField(primary_key=True)
+
     control_no = models.CharField(max_length=15, unique=True)
-    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="orders")
-    agent = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="orders")
+
+    area = models.ForeignKey(
+        Area,
+        on_delete=models.CASCADE,
+        related_name="orders"
+    )
+
+    agent = models.ForeignKey(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name="orders"
+    )
+
     van_number = models.IntegerField(null=True, blank=True)
-    beg_date = models.DateTimeField(auto_now_add=True)
-    end_date = models.DateTimeField(null=True, blank=True)
+
+    beg_date = models.DateField()
+    mload_date = models.DateField(null=True, blank=True)
+    mret_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
 
     objects = OrderQuerySet.as_manager()
 
     class Meta:
         ordering = ["-beg_date"]
 
-    def __str__(self):
-        return self.control_no
-
     @property
     def is_complete(self):
         return self.end_date is not None
-
 
 class CustomerDetails(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -92,3 +102,27 @@ class TransactionDetail(models.Model):
 
     def __str__(self):
         return f"{self.customer_detail} - {self.product} ({self.order_type})"
+class MarketingDetails(models.Model):
+    id = models.BigAutoField(primary_key=True)
+
+    order = models.OneToOneField(
+        OrderDetails,
+        on_delete=models.CASCADE,
+        related_name="marketing"
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE
+    )
+
+    total_SO = models.IntegerField(default=0)
+    total_SAM = models.IntegerField(default=0)
+    total_CBO = models.IntegerField(default=0)
+    total_CRET = models.IntegerField(default=0)
+    total_MLOAD = models.IntegerField(default=0)
+    total_MRET = models.IntegerField(default=0)
+    total_VBO = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.order.control_no
