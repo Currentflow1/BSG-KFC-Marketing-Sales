@@ -9,10 +9,10 @@ def search_area_prices(search=None):
 
     if search:
         area_price = area_price.filter(
-            Q(area_name__area_name__icontains=search) |          # Area name
-            Q(product_name__product_code__icontains=search) |    # Product code
-            Q(product_name__product_name__icontains=search) |    # Product name
-            Q(area_price__icontains=search)                      # Area price
+            Q(area_name__area_name__icontains=search) |          
+            Q(product_name__product_code__icontains=search) |   
+            Q(product_name__product_name__icontains=search) |  
+            Q(area_price__icontains=search)                     
         ).distinct()
 
     return area_price
