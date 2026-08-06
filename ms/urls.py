@@ -28,4 +28,6 @@ urlpatterns = [
     path('customers/', include('customers.urls')),
     path('records/', include('records.urls')),
     path('orders/', include('orders.urls')),
+
+    path('forecasting/', include('forecasting.urls')),
 ]

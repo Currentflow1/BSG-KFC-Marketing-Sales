@@ -12,12 +12,6 @@ def dashboard(request):
                     "emoji": "🛒",
                 },
                 {
-                    "title": "Transaction Logs",
-                    "description": "View all user activities and audit history.",
-                    "href": "/transaction_logs/",
-                    "emoji": "📜",
-                },
-                {
                     "title": "Records",
                     "description": "View stock movement and export records.",
                     "href": "/records/",

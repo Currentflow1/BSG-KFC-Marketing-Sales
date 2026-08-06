@@ -1,0 +1,106 @@
+<div class="rounded-lg border border-gray-200 bg-white">
+
+    <div class="border-b border-gray-200 px-4 py-3">
+
+        <h2 class="font-semibold">
+            Inventory Recommendation
+        </h2>
+
+    </div>
+
+    <div class="grid grid-cols-4 gap-6 p-5">
+
+        <div>
+
+            <p class="text-sm text-gray-500">
+                Forecast Demand
+            </p>
+
+            <p class="mt-1 text-2xl font-bold text-blue-600">
+                {{ summary.forecast_total }}
+            </p>
+
+            <p class="text-xs text-gray-400">
+                Expected units
+            </p>
+
+        </div>
+
+        <div>
+
+            <p class="text-sm text-gray-500">
+                Safety Stock
+            </p>
+
+            <p class="mt-1 text-2xl font-bold text-yellow-600">
+                {{ summary.safety_stock }}
+            </p>
+
+            <p class="text-xs text-gray-400">
+                10% buffer
+            </p>
+
+        </div>
+
+        <div>
+
+            <p class="text-sm text-gray-500">
+                Recommended Stock
+            </p>
+
+            <p class="mt-1 text-2xl font-bold text-green-600">
+                {{ summary.recommended_stock }}
+            </p>
+
+            <p class="text-xs text-gray-400">
+                Forecast + buffer
+            </p>
+
+        </div>
+
+        <div>
+
+            <p class="text-sm text-gray-500">
+                Model Used
+            </p>
+
+            <p class="mt-1 text-lg font-semibold">
+                AutoARIMA
+            </p>
+
+            <p class="text-xs text-gray-400">
+                StatsForecast
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="border-t border-gray-200 bg-gray-50 px-5 py-4">
+
+        <h3 class="mb-2 font-medium">
+            Recommendation
+        </h3>
+
+        <p class="text-sm leading-6 text-gray-600">
+            Based on the historical sales transactions, the forecast predicts a
+            demand of
+            <span class="font-semibold text-blue-600">
+                {{ summary.forecast_total }} units
+            </span>
+            for the selected forecast horizon.
+            Maintaining approximately
+            <span class="font-semibold text-green-600">
+                {{ summary.recommended_stock }} units
+            </span>
+            in inventory, including a
+            <span class="font-semibold text-yellow-600">
+                {{ summary.safety_stock }}-unit
+            </span>
+            safety stock, can help reduce the risk of stock shortages while
+            accommodating normal demand fluctuations.
+        </p>
+
+    </div>
+
+</div>

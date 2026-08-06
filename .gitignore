@@ -19,3 +19,16 @@ media/
 # OS
 .DS_Store
 Thumbs.db
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec.bak
+
+# Node / Tauri
+desktop/node_modules/
+desktop/src-tauri/target/
+desktop/src-tauri/binaries/*.exe
+
+# Tauri generated
+desktop/src-tauri/gen/
