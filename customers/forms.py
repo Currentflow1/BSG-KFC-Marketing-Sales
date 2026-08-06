@@ -3,7 +3,6 @@ from .models import Customer
 
 FIELD_CLASS = "w-full rounded-lg border border-gray-300 px-4 py-2"
 
-
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
