@@ -26,39 +26,39 @@
           {{ marketing.product.product_name }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ marketing.total_SO_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ marketing.total_MRET_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ marketing.total_SAM_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ marketing.total_bo_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ marketing.total_VBO_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           {{ marketing.total_BO_percentage|floatformat:2 }}%
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ marketing.total_MLOAD_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ marketing.total_MRET_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           -
         </td>
 
@@ -72,42 +72,90 @@
           TOTAL
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ totals.total_SO_price }}
         </td>
 
-        <td class="p-2 text-right">
-          ₱{{ totals.total_MRET_price }}
+        <td class="p-2 text-right text-xs">
+          ₱{{ totals.total_CRET_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ totals.total_SAM_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ totals.total_bo_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ totals.total_VBO_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           {{ totals.total_BO_percentage|floatformat:2 }}%
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ totals.total_MLOAD_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ totals.total_MRET_price }}
         </td>
 
-        <td class="p-2 text-right">
+        <td class="p-2 text-right text-xs">
           ₱{{ totals.total_short_over_price }}
         </td>
       </tr>
     </tbody>
   </table>
+
+  <div class="overflow-x-auto">
+  <table class="w-80 border border-gray-200 rounded-lg mt-4">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left">Description</th>
+        <th class="px-4 py-2 text-center">Value</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr class="border-t">
+        <td class="px-4 py-2">Samples</td>
+        <td class="px-4 py-2 text-center">
+          {{ totals.total_SAM_price }}
+        </td>
+      </tr>
+
+      <tr class="border-t">
+        <td class="px-4 py-2">Customer Returns</td>
+        <td class="px-4 py-2 text-center">
+          {{ totals.total_CRET_price }}
+        </td>
+      </tr>
+
+      <tr class="border-t">
+        <td class="px-4 py-2">Net Value</td>
+        <td class="px-4 py-2 text-center">
+          {{ totals.net_value }}
+        </td>
+      </tr>
+
+      <tr class="border-t">
+        <td class="px-4 py-2">MLD-MRT</td>
+        <td class="px-4 py-2 text-center">
+          {{ totals.mld_mrt }}
+        </td>
+      </tr>
+
+      <tr class="border-t font-bold bg-gray-100">
+        <td class="px-4 py-2">S/O</td>
+        <td class="px-4 py-2 text-center">
+          {{ totals.so }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 </div>
