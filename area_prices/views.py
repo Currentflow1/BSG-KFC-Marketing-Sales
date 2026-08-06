@@ -16,7 +16,6 @@ def area_price_list(request):
         "area_prices": area_prices,
     })
 
-
 def area_new(request):
   form = AreaForm(request.POST or None)
 
