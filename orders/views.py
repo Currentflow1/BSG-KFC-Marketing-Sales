@@ -27,7 +27,6 @@ def order_detail(request, order_id):
         ),
         pk=order_id,
     )
-
     customer_form = CustomerDetailForm(area=order.area)
 
     return render(

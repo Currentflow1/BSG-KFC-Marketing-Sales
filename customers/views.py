@@ -4,14 +4,10 @@ from .forms import CustomerForm
 from . import services
 
 def customer_list(request):
-  customers = services.search_customers(
-          request.GET.get("search")
-      )
-
+  customers = services.search_customers(request.GET.get("search"))
   return render(request, 'customers/home.html', {
     'customers': customers
   })
-
 
 def customer_new(request):
   form = CustomerForm(request.POST or None)
@@ -23,7 +19,6 @@ def customer_new(request):
   return render (request, 'customers/new.html', {
     'form': form
   })
-
 
 def customer_edit(request, id):
   customer = get_object_or_404(Customer, customer_id=id)

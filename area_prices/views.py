@@ -6,14 +6,14 @@ from .forms import AreaForm
 from .forms import AreaPriceForm
 
 def area_price_list(request):
+    search = request.GET.get("search")
 
-  area_prices = services.search_area_prices(
-            request.GET.get("search")
-        )
+    area_prices = services.search_area_prices(search)
+    areas = services.search_areas(search)
 
-  return render(request, 'area_prices/home.html', {
-    'area_prices': area_prices,
-
+    return render(request, "area_prices/home.html", {
+        "areas": areas,
+        "area_prices": area_prices,
     })
 
 
