@@ -1,9 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Customer
 from .forms import CustomerForm
+from . import services
 
 def customer_list(request):
-  customers = Customer.objects.all()
+  customers = services.search_customers(
+          request.GET.get("search")
+      )
+
   return render(request, 'customers/home.html', {
     'customers': customers
   })

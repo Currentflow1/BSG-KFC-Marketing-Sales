@@ -1,15 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from . import services
 from .models import Area
 from .models import AreaPrice
 from .forms import AreaForm
 from .forms import AreaPriceForm
 
 def area_price_list(request):
-  area_prices = AreaPrice.objects.all()
-  areas = Area.objects.all()
+
+  area_prices = services.search_area_prices(
+            request.GET.get("search")
+        )
+
   return render(request, 'area_prices/home.html', {
     'area_prices': area_prices,
-    'areas': areas,
+
     })
 
 
