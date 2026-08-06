@@ -7,6 +7,7 @@
         <th class="px-4 py-2 text-left">Area</th>
         <th class="px-4 py-2 text-left">Van No.</th>
         <th class="px-4 py-2 text-left">Begin Date</th>
+        <th class="px-4 py-2 text-left">End Date</th>
         <th class="px-4 py-2 text-center">Status</th>
         <th class="px-4 py-2 text-center">Actions</th>
       </tr>
@@ -36,25 +37,33 @@
           {{ order.beg_date|date:"M j, Y" }}
         </td>
 
+        {% if order.end_date %}
+        <td class="px-4 py-2">
+          {{ order.end_date|date:"M j, Y" }}
+        </td>
+        {% else %}
+        <td class="px-2 py-1 font-medium text-sm">
+          In Progress
+        </td>
+        {% endif %}
+
         <td class="px-4 py-2 text-center">
           {% if order.is_complete %}
-            <span class="rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-700">
-              Completed
-            </span>
+          <span class="rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-700">
+            Completed
+          </span>
           {% else %}
-            <span class="rounded bg-yellow-100 px-2 py-1 text-sm font-medium text-yellow-700">
-              In Progress
-            </span>
+          <span class="rounded bg-yellow-100 px-2 py-1 text-sm font-medium text-yellow-700">
+            In Progress
+          </span>
           {% endif %}
         </td>
 
         <td class="px-4 py-2">
           <div class="flex justify-center gap-2">
 
-            <a
-              href="{% url 'report_view' order.id %}"
-              class="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
-            >
+            <a href="{% url 'report_view' order.id %}"
+              class="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600">
               View
             </a>
           </div>

@@ -1,25 +1,24 @@
-<div class="flex items-center justify-between">
-  <div class="space-y-6">
+<div class="flex justify-between items-center">
+  <div class="mb-2">
     <div>
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="font-bold text-2xl">
-            Report No. {{ order.control_no }}
-          </h1>
+      <h1 class="font-bold text-2xl">
+        Report No. {{ order.control_no }}
+      </h1>
 
-          <p>
-            Area: {{ order.area.area_name }}
-          </p>
+      <p>
+        Area: {{ order.area.area_name }}
+      </p>
 
-          <p>
-            Agent: {{ order.agent.employee_name }}
-          </p>
+      <p>
+        Agent: {{ order.agent.employee_name }}
+      </p>
 
-          <p>
-            Date Started: {{ order.beg_date }}
-          </p>
-        </div>
-      </div>
+      <p>
+        Date Started: {{ order.beg_date }}
+      </p>
     </div>
   </div>
+  <a href="{% url 'record_list' %}" class="p-2 rounded font-bold text-white bg-blue-600 hover:bg-blue-700">
+    Back to Record
+  </a>
 </div>
