@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from area_prices.models import Area
+from area_prices.models import Area, AreaPrice
 from customers.models import Customer
 from employees.models import Employee
 from products.models import Product
@@ -138,6 +138,85 @@ class MarketingDetails(models.Model):
     total_MLOAD = models.IntegerField(default=0)
     total_MRET = models.IntegerField(default=0)
     total_VBO = models.IntegerField(default=0)
+
+
+    @property
+    def area_price(self):
+        try:
+            return AreaPrice.objects.get(
+                area_name=self.order.area,
+                product_name=self.product
+            ).area_price
+        except AreaPrice.DoesNotExist:
+            return 0
+
+
+    @property
+    def total_SO_price(self):
+        return self.total_SO * self.area_price
+
+
+    @property
+    def total_CRET_price(self):
+        return self.total_CRET * self.area_price
+
+
+    @property
+    def total_SAM_price(self):
+        return self.total_SAM * self.area_price
+
+
+    @property
+    def total_bo_price(self):
+        return self.total_bo * self.area_price
+
+
+    @property
+    def total_VBO_price(self):
+        return self.total_VBO * self.area_price
+
+
+    @property
+    def total_MLOAD_price(self):
+        return self.total_MLOAD * self.area_price
+
+
+    @property
+    def total_MRET_price(self):
+        return self.total_MRET * self.area_price
+
+    @property
+    def total_short_over_price(self):
+        return self.total_short_over_balance * self.area_price
+
+
+    @property
+    def total_BO_percentage(self):
+        if self.total_MLOAD == 0:
+            return 0
+
+        return (self.total_VBO / self.total_MLOAD) * 100
+
+
+    @property
+    def total_out(self):
+        return self.total_SO + self.total_SAM
+
+
+    @property
+    def total_total(self):
+        return self.total_out + self.total_MRET
+
+
+    @property
+    def total_short_over_balance(self):
+        return self.total_MLOAD - self.total_total
+
+
+    @property
+    def total_bo(self):
+        return self.total_VBO - self.total_CBO
+
 
     def __str__(self):
         return f"{self.order.control_no} - {self.product.product_name}"
