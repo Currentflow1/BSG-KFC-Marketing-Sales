@@ -31,25 +31,46 @@ def record_view(request, order_id):
 
     reports = order.marketing.all()
 
-    reports = order.marketing.all()
-
     totals = reports.aggregate(
-        total_SO=Sum("total_SO"),
-        total_SAM=Sum("total_SAM"),
         total_MRET=Sum("total_MRET"),
         total_MLOAD=Sum("total_MLOAD"),
-        total_CRET=Sum("total_CRET"),
-        total_VBO=Sum("total_VBO"),
-        total_CBO=Sum("total_CBO"),
     )
 
     totals = {key: value or 0 for key, value in totals.items()}
 
-    totals["total_out"] = totals["total_SO"] + totals["total_SAM"]
-    totals["total_total"] = totals["total_out"] + totals["total_MRET"]
-    totals["total_cret_balance"] = totals["total_MLOAD"] - totals["total_total"]
-    totals["total_bo"] = totals["total_VBO"] - totals["total_CBO"]
+    totals["total_SO_price"] = sum(
+    item.total_SO_price for item in reports
+)
+    totals["total_SAM_price"] = sum(
+        item.total_SAM_price for item in reports
+    )
 
+    totals["total_MRET_price"] = sum(
+        item.total_MRET_price for item in reports
+    )
+
+    totals["total_CRET_price"] = sum(
+            item.total_CRET_price for item in reports
+        )
+
+    totals["total_MLOAD_price"] = sum(
+        item.total_MLOAD_price for item in reports
+    )
+
+    totals["total_VBO_price"] = sum(
+        item.total_VBO_price for item in reports
+    )
+
+    totals["total_bo_price"] = sum(
+        item.total_bo_price for item in reports
+
+    )
+
+    totals["net_value"] = totals["total_SO_price"] + totals["total_SAM_price"]
+
+    totals["mld_mrt"] = totals["total_MLOAD_price"] - totals["total_MRET_price"]
+
+    totals["so"] = totals["net_value"] - totals["mld_mrt"]
 
     return render(
         request,
