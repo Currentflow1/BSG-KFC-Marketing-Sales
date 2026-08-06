@@ -1,13 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from . import services
 from .models import Employee
 from .forms import EmployeeForm
 
 # Create your views here.
 def employee_list(request):
-  employees = Employee.objects.all()
-  return render(request, 'employees/home.html', {
-    'employees': employees
-  })
+    employees = services.search_employees(
+        request.GET.get("search")
+    )
+
+    return render(request, "employees/home.html", {
+        "employees": employees,
+    })
 
 def employee_new(request):
   form = EmployeeForm(request.POST or None)

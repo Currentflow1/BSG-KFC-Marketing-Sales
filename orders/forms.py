@@ -12,10 +12,6 @@ class OrderForm(forms.ModelForm):
             "area",
             "agent",
             "van_number",
-            "beg_date",
-            "mload_date",
-            "mret_date",
-            "end_date",
         ]
 
         widgets = {
@@ -23,19 +19,6 @@ class OrderForm(forms.ModelForm):
             "area": forms.Select(attrs={"class": FIELD_CLASS}),
             "agent": forms.Select(attrs={"class": FIELD_CLASS}),
             "van_number": forms.NumberInput(attrs={"class": FIELD_CLASS}),
-
-            "beg_date": forms.DateInput(
-                attrs={"class": FIELD_CLASS, "type": "date"}
-            ),
-            "mload_date": forms.DateInput(
-                attrs={"class": FIELD_CLASS, "type": "date"}
-            ),
-            "mret_date": forms.DateInput(
-                attrs={"class": FIELD_CLASS, "type": "date"}
-            ),
-            "end_date": forms.DateInput(
-                attrs={"class": FIELD_CLASS, "type": "date"}
-            ),
         }
 
 class CustomerDetailForm(forms.ModelForm):

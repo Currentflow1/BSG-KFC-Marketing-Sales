@@ -48,6 +48,7 @@
       </tr>
       {% endif %}
 
+
       <tr class="border-b">
         <td class="py-3 text-lg font-medium">
           Begin
@@ -56,6 +57,31 @@
           {{ order.beg_date|date:"M j, Y" }}
         </td>
       </tr>
+
+
+      {% if order.mload_date %}
+      <tr class="border-b">
+        <td class="py-3 text-lg font-medium">
+          MLOAD
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ order.mload_date|date:"M j, Y" }}
+        </td>
+      </tr>
+      {% endif %}
+
+
+      {% if order.mret_date %}
+      <tr class="border-b">
+        <td class="py-3 text-lg font-medium">
+          MRET
+        </td>
+        <td class="py-3 text-right text-lg">
+          {{ order.mret_date|date:"M j, Y" }}
+        </td>
+      </tr>
+      {% endif %}
+
 
       {% if order.end_date %}
       <tr>
@@ -67,9 +93,9 @@
         </td>
       </tr>
       {% endif %}
-
     </tbody>
   </table>
+
 
   <div class="mt-6 flex flex-wrap gap-3">
 
@@ -78,22 +104,31 @@
       Edit Order
     </a>
 
+
     {% if not order.is_complete %}
+
     <form method="post" action="{% url 'order_complete' order.id %}">
       {% csrf_token %}
+
       <button type="submit" onclick="return confirm('Mark this order as complete?')"
         class="cursor-pointer rounded-lg bg-green-600 px-5 py-3 text-base font-medium text-white hover:bg-green-700">
         Mark Complete
       </button>
+
     </form>
+
     {% else %}
+
     <form method="post" action="{% url 'order_uncomplete' order.id %}">
       {% csrf_token %}
+
       <button type="submit" onclick="return confirm('Reopen this order?')"
         class="cursor-pointer rounded-lg bg-gray-600 px-5 py-3 text-base font-medium text-white hover:bg-gray-700">
         Reopen Order
       </button>
+
     </form>
+
     {% endif %}
 
   </div>

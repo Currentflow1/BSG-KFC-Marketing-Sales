@@ -11,18 +11,26 @@ from .models import (
     MarketingDetails,
 )
 
+
 def get_area_price(area, product):
-    return AreaPrice.objects.get(
-        area_name=area,
-        product_name=product,
-    ).area_price
+    try:
+        return AreaPrice.objects.get(
+            area_name=area,
+            product_name=product,
+        ).area_price
+
+    except AreaPrice.DoesNotExist:
+        raise ValueError(
+            f"No price found for {product} in area {area}. "
+            "Please add the area price first."
+        )
 
 
 def add_delivery_line(order, product, order_type, quantity, remarks=""):
     area_price = get_area_price(order.area, product)
     line_price = Decimal(quantity) * area_price
 
-    line = DeliveryDetail.objects.create(
+    delivery = DeliveryDetail.objects.create(
         order=order,
         product=product,
         order_type=order_type,
@@ -31,8 +39,20 @@ def add_delivery_line(order, product, order_type, quantity, remarks=""):
         remarks=remarks,
     )
 
+    # FIXED TIMEZONE
+    today = timezone.localdate()
+
+    if order_type == "MLOAD" and order.mload_date is None:
+        order.mload_date = today
+        order.save(update_fields=["mload_date"])
+
+    if order_type == "MRET" and order.mret_date is None:
+        order.mret_date = today
+        order.save(update_fields=["mret_date"])
+
     sync_marketing_details(order)
-    return line
+
+    return delivery
 
 
 def add_transaction_line(
@@ -57,6 +77,7 @@ def add_transaction_line(
     )
 
     sync_marketing_details(customer_detail.order)
+
     return line
 
 
@@ -66,7 +87,9 @@ def get_delivery_totals(order):
     by_type = {}
 
     for code, _ in DeliveryDetail.ORDER_TYPE_CHOICES:
-        agg = lines.filter(order_type=code).aggregate(
+        agg = lines.filter(
+            order_type=code
+        ).aggregate(
             qty=Sum("quantity"),
             price=Sum("line_price"),
         )
@@ -84,19 +107,23 @@ def get_delivery_totals(order):
         }
 
     return {
-        "qty": sum(v["qty"] for v in by_type.values()),
-        "price": sum(v["price"] for v in by_type.values()),
+        "qty": sum(x["qty"] for x in by_type.values()),
+        "price": sum(x["price"] for x in by_type.values()),
         "by_type": by_type,
     }
 
 
 def get_transaction_totals(order):
-    lines = TransactionDetail.objects.filter(customer_detail__order=order)
+    lines = TransactionDetail.objects.filter(
+        customer_detail__order=order
+    )
 
     by_type = {}
 
     for code, _ in TransactionDetail.ORDER_TYPE_CHOICES:
-        agg = lines.filter(order_type=code).aggregate(
+        agg = lines.filter(
+            order_type=code
+        ).aggregate(
             qty=Sum("quantity"),
             price=Sum("line_price"),
         )
@@ -113,8 +140,15 @@ def get_transaction_totals(order):
             "price": price,
         }
 
-    total_qty = by_type["SO"]["qty"] + by_type["SAM"]["qty"]
-    total_price = by_type["SO"]["price"] + by_type["SAM"]["price"]
+    total_qty = (
+        by_type["SO"]["qty"] +
+        by_type["SAM"]["qty"]
+    )
+
+    total_price = (
+        by_type["SO"]["price"] +
+        by_type["SAM"]["price"]
+    )
 
     return {
         "qty": total_qty,
@@ -134,6 +168,7 @@ def get_marketing_summary(order):
         "total_SAM": transaction["by_type"]["SAM"]["qty"],
         "total_CRET": transaction["by_type"]["CRET"]["qty"],
         "total_CBO": transaction["by_type"]["CBO"]["qty"],
+
         "total_MLOAD": delivery["by_type"]["MLOAD"]["qty"],
         "total_MRET": delivery["by_type"]["MRET"]["qty"],
         "total_VBO": delivery["by_type"]["VBO"]["qty"],
@@ -141,58 +176,52 @@ def get_marketing_summary(order):
 
 
 def complete_order(order):
-    order.end_date = timezone.now()
+    order.end_date = timezone.localdate()
     order.save(update_fields=["end_date"])
+
     return order
 
 
-def search_orders(
-    control_no=None,
-    area_id=None,
-    customer_id=None,
-    agent_id=None,
-    product_id=None,
-    van_number=None,
-    sort="-beg_date",
-):
-    qs = OrderDetails.objects.select_related(
-        "area",
-        "agent",
-    ).prefetch_related(
-        "customers__customer",
-        "customers__transactions",
+def search_orders(search=None, sort="-beg_date"):
+    orders = (
+        OrderDetails.objects
+        .select_related("area", "agent")
+        .prefetch_related("customers__customer")
     )
 
-    if control_no:
-        qs = qs.filter(control_no__icontains=control_no)
-    if area_id:
-        qs = qs.filter(area_id=area_id)
-    if agent_id:
-        qs = qs.filter(agent_id=agent_id)
-    if van_number:
-        qs = qs.filter(van_number=van_number)
-    if customer_id:
-        qs = qs.filter(customers__customer_id=customer_id).distinct()
-    if product_id:
-        qs = qs.filter(
-            Q(deliveries__product_id=product_id)
-            | Q(customers__transactions__product_id=product_id)
+    if search:
+        orders = orders.filter(
+            Q(control_no__icontains=search) |
+            Q(area__area_name__icontains=search) |
+            Q(agent__employee_name__icontains=search) |
+            Q(van_number__icontains=search) |
+            Q(beg_date__icontains=search) |
+            Q(mload_date__icontains=search) |
+            Q(mret_date__icontains=search) |
+            Q(end_date__icontains=search) |
+            Q(customers__invoice_no__icontains=search) |
+            Q(customers__customer__customer_business_name__icontains=search)
         ).distinct()
 
-    return qs.order_by(sort)
+        if search.lower() in ["completed", "complete"]:
+            orders = orders.completed()
+
+        elif search.lower() in ["in progress", "incomplete", "active"]:
+            orders = orders.incomplete()
+
+    return orders.order_by(sort)
 
 
 def sync_marketing_details(order):
-    """
-    Create/update one MarketingDetails row per product in an order.
-    """
 
     product_ids = set(
-        DeliveryDetail.objects.filter(order=order).values_list("product_id", flat=True)
+        DeliveryDetail.objects
+        .filter(order=order)
+        .values_list("product_id", flat=True)
     ) | set(
-        TransactionDetail.objects.filter(
-            customer_detail__order=order
-        ).values_list("product_id", flat=True)
+        TransactionDetail.objects
+        .filter(customer_detail__order=order)
+        .values_list("product_id", flat=True)
     )
 
     for product_id in product_ids:
@@ -200,46 +229,69 @@ def sync_marketing_details(order):
             order=order,
             product_id=product_id,
             defaults={
-                "total_SO": TransactionDetail.objects.filter(
-                    customer_detail__order=order,
-                    product_id=product_id,
-                    order_type="SO",
-                ).aggregate(total=Sum("quantity"))["total"] or 0,
 
-                "total_SAM": TransactionDetail.objects.filter(
-                    customer_detail__order=order,
-                    product_id=product_id,
-                    order_type="SAM",
-                ).aggregate(total=Sum("quantity"))["total"] or 0,
+                "total_SO":
+                    TransactionDetail.objects.filter(
+                        customer_detail__order=order,
+                        product_id=product_id,
+                        order_type="SO",
+                    )
+                    .aggregate(total=Sum("quantity"))["total"] or 0,
 
-                "total_CRET": TransactionDetail.objects.filter(
-                    customer_detail__order=order,
-                    product_id=product_id,
-                    order_type="CRET",
-                ).aggregate(total=Sum("quantity"))["total"] or 0,
+                "total_SAM":
+                    TransactionDetail.objects.filter(
+                        customer_detail__order=order,
+                        product_id=product_id,
+                        order_type="SAM",
+                    )
+                    .aggregate(total=Sum("quantity"))["total"] or 0,
 
-                "total_CBO": TransactionDetail.objects.filter(
-                    customer_detail__order=order,
-                    product_id=product_id,
-                    order_type="CBO",
-                ).aggregate(total=Sum("quantity"))["total"] or 0,
+                "total_CRET":
+                    -(
+                        TransactionDetail.objects.filter(
+                            customer_detail__order=order,
+                            product_id=product_id,
+                            order_type="CRET",
+                        )
+                        .aggregate(total=Sum("quantity"))["total"] or 0
+                    ),
 
-                "total_MLOAD": DeliveryDetail.objects.filter(
-                    order=order,
-                    product_id=product_id,
-                    order_type="MLOAD",
-                ).aggregate(total=Sum("quantity"))["total"] or 0,
+                "total_CBO":
+                    -(
+                        TransactionDetail.objects.filter(
+                            customer_detail__order=order,
+                            product_id=product_id,
+                            order_type="CBO",
+                        )
+                        .aggregate(total=Sum("quantity"))["total"] or 0
+                    ),
 
-                "total_MRET": DeliveryDetail.objects.filter(
-                    order=order,
-                    product_id=product_id,
-                    order_type="MRET",
-                ).aggregate(total=Sum("quantity"))["total"] or 0,
+                "total_MLOAD":
+                    DeliveryDetail.objects.filter(
+                        order=order,
+                        product_id=product_id,
+                        order_type="MLOAD",
+                    )
+                    .aggregate(total=Sum("quantity"))["total"] or 0,
 
-                "total_VBO": DeliveryDetail.objects.filter(
-                    order=order,
-                    product_id=product_id,
-                    order_type="VBO",
-                ).aggregate(total=Sum("quantity"))["total"] or 0,
-            },
+                "total_MRET":
+                    -(
+                        DeliveryDetail.objects.filter(
+                            order=order,
+                            product_id=product_id,
+                            order_type="MRET",
+                        )
+                        .aggregate(total=Sum("quantity"))["total"] or 0
+                    ),
+
+                "total_VBO":
+                    -(
+                        DeliveryDetail.objects.filter(
+                            order=order,
+                            product_id=product_id,
+                            order_type="VBO",
+                        )
+                        .aggregate(total=Sum("quantity"))["total"] or 0
+                    ),
+            }
         )

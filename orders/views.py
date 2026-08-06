@@ -5,17 +5,15 @@ from .models import OrderDetails, CustomerDetails, DeliveryDetail, TransactionDe
 from .forms import OrderForm, CustomerDetailForm, DeliveryLineForm, TransactionLineForm
 from . import services
 
-
 def order_list(request):
     orders = services.search_orders(
-        control_no=request.GET.get("control_no"),
-        area_id=request.GET.get("area"),
-        agent_id=request.GET.get("agent"),
-        product_id=request.GET.get("product"),
-        van_number=request.GET.get("van_number"),
+        search=request.GET.get("search"),
         sort=request.GET.get("sort", "-beg_date"),
     )
-    return render(request, "orders/home.html", {"orders": orders})
+
+    return render(request, "orders/home.html", {
+        "orders": orders,
+    })
 
 def order_detail(request, order_id):
     order = get_object_or_404(
@@ -51,8 +49,10 @@ def order_new(request):
             return redirect("order_list")
     else:
         form = OrderForm()
-    return render(request, "orders/new.html", {"form": form})
 
+    return render(request, "orders/new.html", {
+        "form": form, 
+    })
 
 def order_edit(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
@@ -134,15 +134,21 @@ def manage_transactions(request, order_id):
     if request.method == "POST":
         form = TransactionLineForm(request.POST, order=order)
         if form.is_valid():
-            services.add_transaction_line(
-                customer_detail=form.cleaned_data["customer_detail"],
-                product=form.cleaned_data["product"],
-                order_type=form.cleaned_data["order_type"],
-                quantity=form.cleaned_data["quantity"],
-                invoice_type=form.cleaned_data["invoice_type"],
-                remarks=form.cleaned_data["remarks"],
-            )
-            messages.success(request, "Transaction line added.")
+            try:
+                services.add_transaction_line(
+                    customer_detail=form.cleaned_data["customer_detail"],
+                    product=form.cleaned_data["product"],
+                    order_type=form.cleaned_data["order_type"],
+                    quantity=form.cleaned_data["quantity"],
+                    invoice_type=form.cleaned_data["invoice_type"],
+                    remarks=form.cleaned_data["remarks"],
+                )
+
+                messages.success(request, "Transaction line added.")
+
+            except ValueError as e:
+                messages.error(request, str(e))
+
             return redirect("manage_transactions", order_id=order.id)
     else:
         form = TransactionLineForm(order=order)
