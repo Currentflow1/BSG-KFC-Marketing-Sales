@@ -16,3 +16,17 @@ def search_area_prices(search=None):
         ).distinct()
 
     return area_price
+
+
+from .models import Area
+
+
+def search_areas(search=None):
+    areas = Area.objects.all()
+
+    if search:
+        areas = areas.filter(
+            area_name__icontains=search
+        )
+
+    return areas.order_by("area_name")

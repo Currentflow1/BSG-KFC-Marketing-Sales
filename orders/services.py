@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.db.models import Q, Sum
-from django.utils import timezone
+from datetime import date
 
 from area_prices.models import AreaPrice
 from .models import (
@@ -39,8 +39,7 @@ def add_delivery_line(order, product, order_type, quantity, remarks=""):
         remarks=remarks,
     )
 
-    # FIXED TIMEZONE
-    today = timezone.localdate()
+    today = date.today()
 
     if order_type == "MLOAD" and order.mload_date is None:
         order.mload_date = today
@@ -174,9 +173,13 @@ def get_marketing_summary(order):
         "total_VBO": delivery["by_type"]["VBO"]["qty"],
     }
 
-
 def complete_order(order):
-    order.end_date = timezone.localdate()
+    today = date.today()
+
+    if today < order.beg_date:
+        today = order.beg_date
+
+    order.end_date = today
     order.save(update_fields=["end_date"])
 
     return order
