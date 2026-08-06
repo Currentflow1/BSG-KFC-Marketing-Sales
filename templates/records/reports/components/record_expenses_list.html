@@ -1,0 +1,135 @@
+<div class="overflow-x-auto mt-4">
+  <table class="w-full table-fixed border-collapse border-2 border-black text-sm print-condensed">
+
+    <colgroup>
+      <col class="w-[12.5%]">
+      <col class="w-[12.5%]">
+      <col class="w-[12.5%]">
+      <col class="w-[12.5%]">
+      <col class="w-[12.5%]">
+      <col class="w-[12.5%]">
+      <col class="w-[12.5%]">
+      <col class="w-[12.5%]">
+    </colgroup>
+
+    <tbody>
+      <tr>
+        <td class="border border-black p-2"></td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2"></td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">+Misc</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2"></td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2 font-medium">Total Bills</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Diesel</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">+Cash Retn</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Prepared By</td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2 font-medium">Net Coll</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Meals</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">+Expenses</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Approved By</td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2 font-medium">Total Coll</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Tolls</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Cash Coll</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Agent</td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2 font-medium">Cash</td>
+        <td class="border border-black">
+          P{{ totals.cash_total|floatformat:2 }}
+        </td>
+
+        <td class="border border-black p-2">Parking</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Budget</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Agent</td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2 font-medium">Charge</td>
+        <td class="border border-black">
+          P{{ totals.charge_total|floatformat:2 }}
+        </td>
+
+        <td class="border border-black p-2">Lodging</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-0">
+          <div class="grid grid-cols-[3fr_1fr_1fr] h-full">
+            <div class="border-r border-black p-2">Coins</div>
+            <div class="border-r border-black p-2 text-center">S</div>
+            <div class="p-2 text-center">O</div>
+          </div>
+        </td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Audited By</td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2 font-medium">Collectible A</td>
+        <td class="border border-black">
+          P{{ totals.collectible_a|floatformat:2 }}
+        </td>
+
+        <td class="border border-black p-2">Misc</td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-0">
+          <div class="grid grid-cols-[3fr_1fr_1fr] h-full">
+            <div class="border-r border-black p-2">Coins</div>
+            <div class="border-r border-black p-2 text-center">S</div>
+            <div class="p-2 text-center">O</div>
+          </div></div>
+          </div>
+        </td>
+        <td class="border border-black"></td>
+
+        <td class="border border-black p-2">Checked By</td>
+        <td class="border border-black"></td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>

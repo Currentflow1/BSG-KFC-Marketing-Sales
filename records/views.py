@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from . import services
 from orders.models import OrderDetails
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 
 def record_list(request):
@@ -39,8 +39,9 @@ def record_view(request, order_id):
     totals = {key: value or 0 for key, value in totals.items()}
 
     totals["total_SO_price"] = sum(
-    item.total_SO_price for item in reports
-)
+        item.total_SO_price for item in reports
+    )
+
     totals["total_SAM_price"] = sum(
         item.total_SAM_price for item in reports
     )
@@ -50,8 +51,8 @@ def record_view(request, order_id):
     )
 
     totals["total_CRET_price"] = sum(
-            item.total_CRET_price for item in reports
-        )
+        item.total_CRET_price for item in reports
+    )
 
     totals["total_MLOAD_price"] = sum(
         item.total_MLOAD_price for item in reports
@@ -63,14 +64,38 @@ def record_view(request, order_id):
 
     totals["total_bo_price"] = sum(
         item.total_bo_price for item in reports
-
     )
 
-    totals["net_value"] = totals["total_SO_price"] + totals["total_SAM_price"]
+    totals["net_value"] = (
+        totals["total_SO_price"] +
+        totals["total_SAM_price"]
+    )
 
-    totals["mld_mrt"] = totals["total_MLOAD_price"] - totals["total_MRET_price"]
+    totals["mld_mrt"] = (
+        totals["total_MLOAD_price"] -
+        totals["total_MRET_price"]
+    )
 
-    totals["so"] = totals["net_value"] - totals["mld_mrt"]
+    totals["so"] = (
+        totals["net_value"] -
+        totals["mld_mrt"]
+    )
+
+    
+    collection_totals = order.customers.aggregate(
+        cash_total=Sum(
+            "transactions__line_price",
+            filter=Q(transactions__invoice_type="CASH"),
+        ),
+        charge_total=Sum(
+            "transactions__line_price",
+            filter=Q(transactions__invoice_type="CHARGE"),
+        ),
+    )
+
+    totals["cash_total"] = collection_totals["cash_total"] or 0
+    totals["charge_total"] = collection_totals["charge_total"] or 0
+    totals["collectible_a"] = totals["charge_total"]
 
     return render(
         request,
@@ -78,6 +103,6 @@ def record_view(request, order_id):
         {
             "order": order,
             "reports": reports,
-            'totals': totals,
+            "totals": totals,
         },
     )
