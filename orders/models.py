@@ -1,10 +1,11 @@
 from django.db import models
-from django.utils import timezone
 from django.core.exceptions import ValidationError
 from area_prices.models import Area
 from customers.models import Customer
 from employees.models import Employee
 from products.models import Product
+
+from datetime import date
 
 
 class OrderQuerySet(models.QuerySet):
@@ -33,7 +34,7 @@ class OrderDetails(models.Model):
 
     van_number = models.IntegerField(null=True, blank=True)
 
-    beg_date = models.DateField(default=timezone.localdate)
+    beg_date = models.DateField(default=date.today)
     mload_date = models.DateField(null=True, blank=True)
     mret_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)

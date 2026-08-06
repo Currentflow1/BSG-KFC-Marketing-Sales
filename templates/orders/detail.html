@@ -2,9 +2,16 @@
 
 {% block content %}
 
-<h1 class="text-2xl font-bold mb-6">
-  Order {{ order.control_no }}
-</h1>
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold">
+    Order #{{ order.control_no }}
+  </h1>
+
+  <a href="{% url 'order_list' %}" class="p-2 rounded font-bold text-white bg-blue-600 hover:bg-blue-700">
+    &larr; Back to Order {{ order.control_no }}
+  </a>
+</div>
+
 
 <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
   {% include "orders/components/order_summary.html" %}
