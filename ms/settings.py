@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,7 +49,6 @@ INSTALLED_APPS = [
     'area_prices',
     'customers',
     'orders',
-    'transactional_logs',
     'records',
     'forecasting',
 ]
@@ -83,6 +83,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = 'ms.urls'
@@ -108,12 +110,20 @@ WSGI_APPLICATION = 'ms.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+APP_DATA_DIR = os.environ.get("APP_DATA_DIR", BASE_DIR)
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(APP_DATA_DIR, "db.sqlite3"),
     }
 }
+
+DEBUG = os.environ.get("APP_FROZEN") != "1"
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
+STATIC_ROOT = os.path.join(APP_DATA_DIR, "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # Password validation
