@@ -18,13 +18,11 @@ def get_area_price(area, product):
             area_name=area,
             product_name=product,
         ).area_price
-
     except AreaPrice.DoesNotExist:
         raise ValueError(
             f"No price found for {product} in area {area}. "
             "Please add the area price first."
         )
-
 
 def add_delivery_line(order, product, order_type, quantity, remarks=""):
     area_price = get_area_price(order.area, product)
@@ -298,3 +296,12 @@ def sync_marketing_details(order):
                     ),
             }
         )
+
+
+def get_unpriced_products(area):
+    """Products that exist but have no AreaPrice entry for this area."""
+    from products.models import Product
+    priced_ids = AreaPrice.objects.filter(
+        area_name=area
+    ).values_list("product_name_id", flat=True)
+    return Product.objects.exclude(pk__in=priced_ids)

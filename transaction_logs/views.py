@@ -1,10 +1,17 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-from .models import TransactionLog
+from . import services
 
 
 @login_required
 def home(request):
-    logs = TransactionLog.objects.select_related("user").all()[:200]
-    return render(request, "transaction_logs/home.html", {"logs": logs})
+    logs = services.search_transaction_logs(
+        search=request.GET.get("search"),
+        date_from=request.GET.get("date_from"),
+        date_to=request.GET.get("date_to"),
+    )[:200]
+
+    return render(request, "transaction_logs/home.html", {
+        "logs": logs,
+    })
