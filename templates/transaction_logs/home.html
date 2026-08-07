@@ -3,14 +3,72 @@
 {% block content %}
 <div class="space-y-6">
 
-  <div class="space-y-2">
+  <div>
     <h1 class="text-2xl font-bold">Transaction Logs</h1>
-    <p class="text-gray-400">A record of who created, changed, or deleted key data.</p>
+    <p class="text-gray-400">
+      A record of who created, changed, or deleted key data.
+    </p>
   </div>
 
-  <div class="overflow-x-auto rounded-lg border border-gray-200">
+  <form method="get" class="flex flex-wrap items-end gap-4">
+
+    <div>
+      <label for="search" class="mb-1 block text-sm font-medium">
+        Search
+      </label>
+      <input
+        id="search"
+        type="text"
+        name="search"
+        value="{{ request.GET.search }}"
+        placeholder="Search Transactions..."
+        class="w-128 rounded-lg border border-gray-300 px-4 py-2 text-sm
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+    </div>
+
+    <div>
+      <label for="date_from" class="mb-1 block text-sm font-medium">
+        From
+      </label>
+      <input
+        type="date"
+        id="date_from"
+        name="date_from"
+        value="{{ request.GET.date_from }}"
+        class="rounded-lg border border-gray-300 px-4 py-2 text-sm
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+    </div>
+
+    <div>
+      <label for="date_to" class="mb-1 block text-sm font-medium">
+        To
+      </label>
+      <input
+        type="date"
+        id="date_to"
+        name="date_to"
+        value="{{ request.GET.date_to }}"
+        class="rounded-lg border border-gray-300 px-4 py-2 text-sm
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+    </div>
+
+    <button
+      type="submit"
+      class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+      Search
+    </button>
+
+    <a
+      href="{% url 'transaction_logs_home' %}"
+      class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-100">
+      Clear
+    </a>
+
+  </form>
+
+  <div class="max-h-[70vh] overflow-auto rounded-lg border border-gray-200">
     <table class="min-w-full">
-      <thead class="bg-gray-100">
+      <thead class="sticky top-0 z-10 bg-gray-100">
         <tr>
           <th class="px-4 py-2 text-left">Timestamp</th>
           <th class="px-4 py-2 text-left">User</th>
@@ -19,25 +77,44 @@
           <th class="px-4 py-2 text-left">Object</th>
         </tr>
       </thead>
+
       <tbody>
         {% for log in logs %}
         <tr class="border-t hover:bg-gray-50">
-          <td class="px-4 py-2">{{ log.timestamp }}</td>
-          <td class="px-4 py-2">{{ log.user|default:"System" }}</td>
+          <td class="px-4 py-2 whitespace-nowrap">
+            {{ log.timestamp }}
+          </td>
+
+          <td class="px-4 py-2">
+            {{ log.user|default:"System" }}
+          </td>
+
           <td class="px-4 py-2">
             <span class="rounded px-2 py-1 text-sm
-              {% if log.action == 'CREATE' %}bg-green-100 text-green-700
-              {% elif log.action == 'UPDATE' %}bg-blue-100 text-blue-700
-              {% else %}bg-red-100 text-red-700{% endif %}">
+              {% if log.action == 'CREATE' %}
+                bg-green-100 text-green-700
+              {% elif log.action == 'UPDATE' %}
+                bg-blue-100 text-blue-700
+              {% else %}
+                bg-red-100 text-red-700
+              {% endif %}">
               {{ log.get_action_display }}
             </span>
           </td>
-          <td class="px-4 py-2">{{ log.model_name }}</td>
-          <td class="px-4 py-2">{{ log.object_repr }}</td>
+
+          <td class="px-4 py-2 whitespace-nowrap">
+            {{ log.model_name }}
+          </td>
+
+          <td class="px-4 py-2">
+            {{ log.object_repr }}
+          </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5" class="py-8 text-center text-gray-500">No logs yet.</td>
+          <td colspan="5" class="py-8 text-center text-gray-500">
+            No logs found.
+          </td>
         </tr>
         {% endfor %}
       </tbody>

@@ -8,6 +8,10 @@ from .forms import OrderForm, CustomerDetailForm, DeliveryLineForm, TransactionL
 from . import services
 
 
+# ---------------------------------------------------------------------------
+# Order list / detail
+# ---------------------------------------------------------------------------
+
 @login_required
 def order_list(request):
     orders = services.search_orders(
@@ -42,11 +46,16 @@ def order_detail(request, order_id):
             "order": order,
             "customer_form": customer_form,
             "marketing_summary": services.get_marketing_summary(order),
+            "unpriced_products": services.get_unpriced_products(order.area),
         },
     )
 
 
-@login_required
+# ---------------------------------------------------------------------------
+# Order CRUD
+# ---------------------------------------------------------------------------
+
+@permission_required_redirect("orders.add_orderdetails")
 def order_new(request):
     if request.method == "POST":
         form = OrderForm(request.POST)
@@ -86,7 +95,7 @@ def order_delete(request, order_id):
     return render(request, "orders/delete.html", {"order": order})
 
 
-@login_required
+@permission_required_redirect("orders.change_orderdetails")
 def order_complete(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     if request.method == "POST":
@@ -95,7 +104,7 @@ def order_complete(request, order_id):
     return redirect("order_detail", order_id=order.id)
 
 
-@login_required
+@permission_required_redirect("orders.change_orderdetails")
 def order_uncomplete(request, order_id):
     """Undo an accidental 'Complete' — just clears end_date, nothing else changes."""
     order = get_object_or_404(OrderDetails, pk=order_id)
@@ -106,29 +115,37 @@ def order_uncomplete(request, order_id):
     return redirect("order_detail", order_id=order.id)
 
 
+# ---------------------------------------------------------------------------
+# Delivery lines
+# ---------------------------------------------------------------------------
+
 @login_required
 def manage_delivery(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     if request.method == "POST":
-        form = DeliveryLineForm(request.POST)
+        form = DeliveryLineForm(request.POST, area=order.area)
         if form.is_valid():
-            services.add_delivery_line(
-                order=order,
-                product=form.cleaned_data["product"],
-                order_type=form.cleaned_data["order_type"],
-                quantity=form.cleaned_data["quantity"],
-                remarks=form.cleaned_data["remarks"],
-            )
-            messages.success(request, "Delivery line added.")
+            try:
+                services.add_delivery_line(
+                    order=order,
+                    product=form.cleaned_data["product"],
+                    order_type=form.cleaned_data["order_type"],
+                    quantity=form.cleaned_data["quantity"],
+                    remarks=form.cleaned_data["remarks"],
+                )
+                messages.success(request, "Delivery line added.")
+            except ValueError as e:
+                messages.error(request, str(e))
             return redirect("manage_delivery", order_id=order.id)
     else:
-        form = DeliveryLineForm()
+        form = DeliveryLineForm(area=order.area)
 
     return render(request, "orders/manage_delivery.html", {
         "order": order,
         "form": form,
         "lines": DeliveryDetail.objects.filter(order=order).select_related("product").order_by("-created_at"),
         "totals": services.get_delivery_totals(order),
+        "unpriced_products": services.get_unpriced_products(order.area),
     })
 
 
@@ -145,6 +162,10 @@ def delivery_delete(request, order_id, line_id):
     return redirect("manage_delivery", order_id=order.id)
 
 
+# ---------------------------------------------------------------------------
+# Transaction lines
+# ---------------------------------------------------------------------------
+
 @login_required
 def manage_transactions(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
@@ -160,12 +181,9 @@ def manage_transactions(request, order_id):
                     invoice_type=form.cleaned_data["invoice_type"],
                     remarks=form.cleaned_data["remarks"],
                 )
-
                 messages.success(request, "Transaction line added.")
-
             except ValueError as e:
                 messages.error(request, str(e))
-
             return redirect("manage_transactions", order_id=order.id)
     else:
         form = TransactionLineForm(order=order)
@@ -177,6 +195,7 @@ def manage_transactions(request, order_id):
                     .select_related("product", "customer_detail__customer")
                     .order_by("-created_at"),
         "totals": services.get_transaction_totals(order),
+        "unpriced_products": services.get_unpriced_products(order.area),
     })
 
 
@@ -197,6 +216,10 @@ def transaction_delete(request, order_id, line_id):
     return redirect("manage_transactions", order_id=order.id)
 
 
+# ---------------------------------------------------------------------------
+# Customers on an order
+# ---------------------------------------------------------------------------
+
 @login_required
 def add_customer(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
@@ -206,9 +229,12 @@ def add_customer(request, order_id):
             cd = form.save(commit=False)
             cd.order = order
             cd.save()
+            services.sync_marketing_details(order)
             messages.success(request, "Customer added to order.")
         else:
-            messages.error(request, "Could not add customer — check the form.")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     return redirect("order_detail", order_id=order.id)
 
 
