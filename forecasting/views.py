@@ -6,9 +6,7 @@ from .services import ForecastService, InsufficientHistoryError
 def dashboard(request):
     search = request.GET.get("search", "").strip()
 
-    products = Product.objects.filter(
-        discontinued=False
-    )
+    products = Product.objects.filter(discontinued=False)
 
     if search:
         products = products.filter(
@@ -18,31 +16,19 @@ def dashboard(request):
     return render(
         request,
         "forecasting/dashboard.html",
-        {
-            "products": products,
-        },
+        {"products": products},
     )
 
 
 def product_forecast(request, product_id):
-    product = get_object_or_404(
-        Product,
-        pk=product_id,
-    )
+    product = get_object_or_404(Product, pk=product_id)
 
-    horizon = int(
-        request.GET.get("days", 30)
-    )
-
-    force_refresh = (
-        request.GET.get("refresh") == "1"
-    )
+    horizon = int(request.GET.get("days", 30))
+    force_refresh = request.GET.get("refresh") == "1"
 
     service = ForecastService()
 
-    history = service.history_for_display(
-        product_id
-    )
+    history = service.history_for_display(product_id)
 
     forecast = []
     summary = None

@@ -1,61 +1,33 @@
-<div class="rounded-lg border border-gray-200 bg-white">
+<div class="border-b border-gray-200 px-4 py-3">
+    <h2 class="font-semibold">Historical Demand</h2>
+</div>
 
-    <div class="border-b border-gray-200 px-4 py-3">
-        <h2 class="font-semibold">
-            Historical Demand
-        </h2>
-    </div>
+<div class="max-h-[70vh] overflow-auto rounded-lg border border-gray-200">
+    <table class="min-w-full">
+        <thead class="sticky top-0 bg-gray-100">
+            <tr>
+                <th class="px-4 py-2 text-left">Date</th>
+                <th class="px-4 py-2 text-center">Demand</th>
+                <th class="px-4 py-2 text-center">CRET</th>
+                <th class="px-4 py-2 text-center">CBO</th>
+            </tr>
+        </thead>
 
-    <div class="max-h-[70vh] overflow-auto rounded-lg border border-gray-200">
-
-        <table class="min-w-full">
-
-            <thead class="sticky top-0 bg-gray-100">
-
-                <tr>
-                    <th class="px-4 py-2 text-left">
-                        Date
-                    </th>
-
-                    <th class="px-4 py-2 text-center">
-                        Demand
-                    </th>
-                </tr>
-
-            </thead>
-
-            <tbody class="sticky top-0 z-10 bg-gray-100">
-
-                {% for row in history %}
-
-                <tr class="border-t hover:bg-gray-50">
-
-                    <td class="px-4 py-2">
-                        {{ row.sales_date }}
-                    </td>
-
-                    <td class="px-4 py-2 text-center font-medium">
-                        {{ row.demand }}
-                    </td>
-
-                </tr>
-
-                {% empty %}
-
-                <tr>
-
-                    <td colspan="2" class="px-4 py-8 text-center text-gray-500">
-                        No historical data found.
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
+        <tbody>
+            {% for row in history %}
+            <tr class="border-t hover:bg-gray-50">
+                <td class="px-4 py-2">{{ row.sales_date }}</td>
+                <td class="px-4 py-2 text-center font-medium text-blue-600">{{ row.demand }}</td>
+                <td class="px-4 py-2 text-center text-orange-600">{{ row.customer_return }}</td>
+                <td class="px-4 py-2 text-center text-red-600">{{ row.customer_bad_order }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                    No historical data found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
