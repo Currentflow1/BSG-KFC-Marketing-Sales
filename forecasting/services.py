@@ -13,17 +13,14 @@ logger = logging.getLogger(__name__)
 
 MODEL_NAME = "AutoARIMA"
 
+
 class InsufficientHistoryError(Exception):
     """Raised when a product doesn't have enough transaction history to forecast."""
 
+
 class ForecastService:
 
-    def get_or_create_forecast(
-        self,
-        product_id,
-        horizon=30,
-        force_refresh=False,
-    ):
+    def get_or_create_forecast(self, product_id, horizon=30, force_refresh=False):
         if not force_refresh:
             cached = self._load_cached_forecast(
                 product_id,
@@ -38,17 +35,24 @@ class ForecastService:
             horizon,
         )
 
-    def get_summary(
-        self,
-        product_id,
-        forecast,
-    ):
+
+    def get_summary(self, product_id, forecast):
         history = list(
             SalesQuery.product_daily_history(product_id)
         )
 
         demands = [
-            row["demand"]
+            row["demand"] or 0
+            for row in history
+        ]
+
+        returns = [
+            row["customer_return"] or 0
+            for row in history
+        ]
+
+        bad_orders = [
+            row["customer_bad_order"] or 0
             for row in history
         ]
 
@@ -57,7 +61,9 @@ class ForecastService:
             for row in forecast
         ]
 
-        forecast_total = round(sum(predictions))
+        forecast_total = round(
+            sum(predictions)
+        )
 
         safety_stock = (
             round(max(predictions) * 0.10)
@@ -66,31 +72,48 @@ class ForecastService:
 
         return {
             "history_days": len(history),
+
             "total_units": sum(demands),
-            "average_daily": round(sum(demands) / len(demands), 2)
+
+            "average_daily": round(
+                sum(demands) / len(demands),
+                2,
+            ) if demands else 0,
+
+            "highest_demand": max(demands)
             if demands else 0,
-            "highest_demand": max(demands) if demands else 0,
-            "lowest_demand": min(demands) if demands else 0,
+
+            "lowest_demand": min(demands)
+            if demands else 0,
+
+            "customer_returns": sum(returns),
+
+            "customer_bad_orders": sum(bad_orders),
+
             "forecast_total": forecast_total,
+
             "forecast_average": round(
                 forecast_total / len(predictions),
                 2,
             ) if predictions else 0,
+
             "recommended_stock": forecast_total + safety_stock,
+
             "safety_stock": safety_stock,
-            "last_transaction": SalesQuery.latest_transaction_date(
-                product_id
-            ),
+
+            "last_transaction":
+                SalesQuery.latest_transaction_date(
+                    product_id
+                ),
         }
 
-    def _load_cached_forecast(
-        self,
-        product_id,
-        horizon,
-    ):
+
+    def _load_cached_forecast(self, product_id, horizon):
         today = date.today()
 
-        target_end = today + timedelta(days=horizon)
+        target_end = today + timedelta(
+            days=horizon
+        )
 
         queryset = (
             Forecast.objects
@@ -102,12 +125,14 @@ class ForecastService:
             .order_by("forecast_date")
         )
 
-        if not queryset.exists():
+        latest = queryset.last()
+
+        if not latest:
             return None
 
-        latest_date = queryset.last().forecast_date
-
-        if latest_date < target_end - timedelta(days=1):
+        if latest.forecast_date < (
+            target_end - timedelta(days=1)
+        ):
             return None
 
         return list(
@@ -119,11 +144,8 @@ class ForecastService:
             )
         )
 
-    def _generate_forecast(
-        self,
-        product_id,
-        horizon,
-    ):
+
+    def _generate_forecast(self, product_id, horizon):
         history = list(
             SalesQuery.product_daily_history(product_id)
         )
@@ -163,11 +185,8 @@ class ForecastService:
             for row in rows
         ]
 
-    def _prepare_dataframe(
-        self,
-        history,
-        product_id,
-    ):
+
+    def _prepare_dataframe(self, history, product_id):
         dataframe = (
             pd.DataFrame(history)
             .rename(
@@ -178,7 +197,9 @@ class ForecastService:
             )
         )
 
-        dataframe["ds"] = pd.to_datetime(dataframe["ds"])
+        dataframe["ds"] = pd.to_datetime(
+            dataframe["ds"]
+        )
 
         dataframe = (
             dataframe
@@ -197,11 +218,8 @@ class ForecastService:
             ]
         ]
 
-    def _run_model(
-        self,
-        dataframe,
-        horizon,
-    ):
+
+    def _run_model(self, dataframe, horizon):
         model = StatsForecast(
             models=[
                 AutoARIMA(),
@@ -215,11 +233,8 @@ class ForecastService:
             level=[90],
         )
 
-    def _save_forecast(
-        self,
-        product_id,
-        rows,
-    ):
+
+    def _save_forecast(self, product_id, rows):
         (
             Forecast.objects
             .filter(
@@ -231,11 +246,8 @@ class ForecastService:
 
         Forecast.objects.bulk_create(rows)
 
-    def _to_forecast_rows(
-        self,
-        forecast_dataframe,
-        product_id,
-    ):
+
+    def _to_forecast_rows(self, forecast_dataframe, product_id):
         lower_column = "AutoARIMA-lo-90"
         upper_column = "AutoARIMA-hi-90"
 
@@ -249,12 +261,22 @@ class ForecastService:
             )
 
             lower = max(
-                float(record.get(lower_column, prediction)),
+                float(
+                    record.get(
+                        lower_column,
+                        prediction,
+                    )
+                ),
                 0,
             )
 
             upper = max(
-                float(record.get(upper_column, prediction)),
+                float(
+                    record.get(
+                        upper_column,
+                        prediction,
+                    )
+                ),
                 0,
             )
 
@@ -273,16 +295,14 @@ class ForecastService:
 
         return rows
 
-    def history_for_display(
-        self,
-        product_id,
-        days=90,
-    ):
+
+    def history_for_display(self, product_id, days=90):
         history = list(
             SalesQuery.product_daily_history(product_id)
         )
 
-        if days:
-            return history[-days:]
-
-        return history
+        return (
+            history[-days:]
+            if days
+            else history
+        )
