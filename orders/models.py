@@ -224,7 +224,7 @@ class MarketingDetails(models.Model):
         if self.total_MLOAD == 0:
             return 0
 
-        return (self.total_VBO / self.total_MLOAD) * 100
+        return (self.total_VBO_display / self.total_MLOAD) * 100
 
 
     # --- Quantity math (must stay on raw fields, sign intact) ---
@@ -236,7 +236,7 @@ class MarketingDetails(models.Model):
 
     @property
     def total_total(self):
-        return self.total_out + self.total_MRET
+        return self.total_out + ( -(self.total_MRET))
 
 
     @property
