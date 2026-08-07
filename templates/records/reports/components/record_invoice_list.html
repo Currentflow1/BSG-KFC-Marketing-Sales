@@ -3,14 +3,14 @@
 
     <thead>
       <tr class="bg-gray-100 text-center font-bold">
-        <th class="w-20 border border-black p-2">Date</th>
+        <th class="w-30 border border-black p-2">Date</th>
         <th class="w-45 border border-black p-2">Customer</th>
-        <th class="w-25 border border-black p-2">Inv Type</th>
+        <th class="w-20 border border-black p-2">Inv Type</th>
         <th class="w-25 border border-black p-2">Amount</th>
         <th class="w-25 border border-black p-2">Inv Bal</th>
         <th class="w-25 border border-black p-2">Cash</th>
         <th class="w-25 border border-black p-2">Check</th>
-        <th class="w-25 border border-black p-2">Balance</th>
+        <th class="w-20 border border-black p-2">Balance</th>
       </tr>
     </thead>
 
@@ -31,7 +31,7 @@
           </td>
 
           <td class="border border-black p-2 text-right">
-            ₱{{ transaction.line_price|floatformat:2|add:"" }}
+            P{{ transaction.line_price|floatformat:2|add:"" }}
           </td>
 
           <td class="border border-black"></td>

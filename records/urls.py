@@ -4,4 +4,5 @@ from . import views
 urlpatterns = [
     path("", views.record_list, name="record_list"),
     path("<int:order_id>/", views.record_view, name="report_view"),
+    path('reports/<int:order_id>/export-csv/', views.export_trip_report_csv, name='export_trip_report_csv'),
 ]
