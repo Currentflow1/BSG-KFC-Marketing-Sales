@@ -47,7 +47,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name="django-backend",
+    name="django-backend-x86_64-pc-windows-msvc",
     console=True,
     debug=False,
     upx=False,

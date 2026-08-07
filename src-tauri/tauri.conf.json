@@ -36,6 +36,9 @@
       "webviewInstallMode": {
         "type": "downloadBootstrapper"
       }
+    },
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
     }
   }
 }

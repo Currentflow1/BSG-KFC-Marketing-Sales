@@ -1,8 +1,18 @@
 from typing import cast
 from django import forms
-from .models import OrderDetails, CustomerDetails, DeliveryDetail, TransactionDetail, MarketingDetails
+
+from .models import (
+    OrderDetails,
+    CustomerDetails,
+    DeliveryDetail,
+    TransactionDetail,
+    MarketingDetails,
+)
+from products.models import Product
+from area_prices.models import AreaPrice
 
 FIELD_CLASS = "w-full rounded-lg border border-gray-300 px-4 py-2"
+
 
 class OrderForm(forms.ModelForm):
     class Meta:
@@ -13,13 +23,13 @@ class OrderForm(forms.ModelForm):
             "agent",
             "van_number",
         ]
-
         widgets = {
             "control_no": forms.TextInput(attrs={"class": FIELD_CLASS}),
             "area": forms.Select(attrs={"class": FIELD_CLASS}),
             "agent": forms.Select(attrs={"class": FIELD_CLASS}),
             "van_number": forms.NumberInput(attrs={"class": FIELD_CLASS}),
         }
+
 
 class CustomerDetailForm(forms.ModelForm):
     class Meta:
@@ -32,77 +42,109 @@ class CustomerDetailForm(forms.ModelForm):
 
     def __init__(self, *args, area=None, **kwargs):
         super().__init__(*args, **kwargs)
+
+        customer_field = cast(forms.ModelChoiceField, self.fields["customer"])
+
         if area is not None:
-            customer_field = cast(forms.ModelChoiceField, self.fields["customer"])
-            if customer_field.queryset is not None:
-                customer_field.queryset = customer_field.queryset.filter(customer_area=area)
+            customer_field.queryset = customer_field.queryset.filter(
+                customer_area=area
+            )
 
 
 class DeliveryLineForm(forms.Form):
-    """Quantity and price are computed in services.add_delivery_line — this form
-    only collects what a person actually chooses."""
     order_type = forms.ChoiceField(
         choices=DeliveryDetail.ORDER_TYPE_CHOICES,
         widget=forms.Select(attrs={"class": FIELD_CLASS}),
     )
+
     product = forms.ModelChoiceField(
-        queryset=None,
+        queryset=Product.objects.none(),
         widget=forms.Select(attrs={"class": FIELD_CLASS}),
     )
+
     quantity = forms.IntegerField(
         min_value=1,
         widget=forms.NumberInput(attrs={"class": FIELD_CLASS}),
     )
+
     remarks = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={"class": FIELD_CLASS}),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, area=None, **kwargs):
         super().__init__(*args, **kwargs)
+
         from products.models import Product
+        from area_prices.models import AreaPrice
+
         product_field = cast(forms.ModelChoiceField, self.fields["product"])
-        product_field.queryset = Product.objects.all()
+
+        if area is None:
+            product_field.queryset = Product.objects.none()
+            return
+
+        product_field.queryset = Product.objects.filter(
+            pk__in=AreaPrice.objects.filter(
+                area_name=area
+            ).values("product_name")
+        ).order_by("product_name")
 
 
 class TransactionLineForm(forms.Form):
-    """Scoped to one customer's invoice (customer_detail) within the order."""
     customer_detail = forms.ModelChoiceField(
-        queryset=None,
+        queryset=CustomerDetails.objects.none(),
         label="Customer / Invoice",
         widget=forms.Select(attrs={"class": FIELD_CLASS}),
     )
+
     order_type = forms.ChoiceField(
         choices=TransactionDetail.ORDER_TYPE_CHOICES,
         widget=forms.Select(attrs={"class": FIELD_CLASS}),
     )
+
     invoice_type = forms.ChoiceField(
         choices=TransactionDetail.INVOICE_TYPE_CHOICES,
         required=False,
         widget=forms.Select(attrs={"class": FIELD_CLASS}),
     )
+
     product = forms.ModelChoiceField(
-        queryset=None,
+        queryset=Product.objects.none(),
         widget=forms.Select(attrs={"class": FIELD_CLASS}),
     )
+
     quantity = forms.IntegerField(
         min_value=1,
         widget=forms.NumberInput(attrs={"class": FIELD_CLASS}),
     )
+
     remarks = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={"class": FIELD_CLASS}),
     )
-
+    
     def __init__(self, *args, order=None, **kwargs):
         super().__init__(*args, **kwargs)
-        from products.models import Product
-        product_field = cast(forms.ModelChoiceField, self.fields["product"])
-        product_field.queryset = Product.objects.all()
-        if order is not None:
-            customer_detail_field = cast(forms.ModelChoiceField, self.fields["customer_detail"])
-            customer_detail_field.queryset = order.customers.all()
 
+        from products.models import Product
+        from area_prices.models import AreaPrice
+
+        product_field = cast(forms.ModelChoiceField, self.fields["product"])
+        customer_detail_field = cast(forms.ModelChoiceField, self.fields["customer_detail"])
+
+        if order is None:
+            product_field.queryset = Product.objects.none()
+            customer_detail_field.queryset = CustomerDetails.objects.none()
+            return
+
+        product_field.queryset = Product.objects.filter(
+            pk__in=AreaPrice.objects.filter(
+                area_name=order.area
+            ).values("product_name")
+        ).order_by("product_name")
+
+        customer_detail_field.queryset = order.customers.order_by("invoice_no")
 
 class MarketingDetailsForm(forms.ModelForm):
     class Meta:

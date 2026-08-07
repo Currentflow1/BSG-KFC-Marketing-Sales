@@ -1,7 +1,5 @@
 from django.shortcuts import get_object_or_404, render
-
 from products.models import Product
-
 from .services import ForecastService, InsufficientHistoryError
 
 
