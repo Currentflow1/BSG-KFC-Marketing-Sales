@@ -1,8 +1,11 @@
 import csv
+from collections import defaultdict
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
+from django.utils.dateparse import parse_date
 from . import services
-from orders.models import OrderDetails
+from orders.models import OrderDetails, MarketingDetails
+from products.models import Product
 from django.db.models import Sum, Q
 
 
@@ -40,13 +43,8 @@ def record_view(request, order_id):
 
     totals = {key: value or 0 for key, value in totals.items()}
 
-    totals["total_SO_price"] = sum(
-        item.total_SO_price for item in reports
-    )
-
-    totals["total_SAM_price"] = sum(
-        item.total_SAM_price for item in reports
-    )
+    totals["total_SO_price"] = sum(item.total_SO_price for item in reports)
+    totals["total_SAM_price"] = sum(item.total_SAM_price for item in reports)
 
     totals["total_MRET_price"] = sum(
         item.total_MRET_price for item in reports
@@ -202,11 +200,6 @@ def export_trip_report_csv(request, order_id):
         totals["total_MLOAD"], "", "", "", "", "",
     ])
     writer.writerow([])
-
-    # --- Price / value totals summary ---
-    # NOTE: fill in per-row prices here too if record_price_list.html
-    # has its own per-product rows (paste that template and I'll add them
-    # the same way as the quantity table above).
     writer.writerow(["Price Summary"])
     writer.writerow(["SO Price Total", totals["total_SO_price"]])
     writer.writerow(["SAM Price Total", totals["total_SAM_price"]])
@@ -247,12 +240,112 @@ def export_trip_report_csv(request, order_id):
             ])
     writer.writerow([])
 
-    # --- Denom / Monetary breakdown ---
-    # These tables (record_header.html denom grid, and most of the
-    # monetary summary grid) are manual-entry cells in the template with
-    # no bound Django variables except cash_total/charge_total/
-    # collectible_a, which are already exported above in "Collections
-    # Summary". Nothing further to export here unless you add real
-    # fields/values to those cells in the template.
+    return response
+
+def short_over_matrix(request):
+    """
+    Product x Date matrix of Short/Over balances.
+    Only includes orders with a completed MRET (mret_date set),
+    filtered to mret_date within the selected range.
+    """
+    start_date = parse_date(request.GET["start_date"]) if request.GET.get("start_date") else None
+    end_date = parse_date(request.GET["end_date"]) if request.GET.get("end_date") else None
+
+    orders = OrderDetails.objects.filter(mret_date__isnull=False)
+    if start_date:
+        orders = orders.filter(mret_date__gte=start_date)
+    if end_date:
+        orders = orders.filter(mret_date__lte=end_date)
+
+    marketing_qs = (
+        MarketingDetails.objects
+        .filter(order__in=orders)
+        .select_related("order", "product")
+    )
+
+    # matrix[product_pk][date] -> summed short/over
+    matrix = defaultdict(lambda: defaultdict(int))
+    date_columns = set()
+
+    for md in marketing_qs:
+        d = md.order.mret_date
+        date_columns.add(d)
+        matrix[md.product.pk][d] += md.total_short_over_balance
+
+    date_columns = sorted(date_columns)
+    products = Product.objects.all().order_by("product_name")
+
+    rows = [
+        {
+            "product": product,
+            "values": [matrix[product.pk].get(d, 0) for d in date_columns],
+        }
+        for product in products
+    ]
+
+    return render(request, "records/short_over_matrix/short_over_matrix.html", {
+        "date_columns": date_columns,
+        "rows": rows,
+        "start_date": request.GET.get("start_date", ""),
+        "end_date": request.GET.get("end_date", ""),
+    })
+
+def export_short_over_matrix_csv(request):
+    """
+    CSV export of the Product x Date Short/Over matrix.
+    Same filtering logic as short_over_matrix.
+    """
+    start_date = parse_date(request.GET["start_date"]) if request.GET.get("start_date") else None
+    end_date = parse_date(request.GET["end_date"]) if request.GET.get("end_date") else None
+
+    orders = OrderDetails.objects.filter(mret_date__isnull=False)
+    if start_date:
+        orders = orders.filter(mret_date__gte=start_date)
+    if end_date:
+        orders = orders.filter(mret_date__lte=end_date)
+
+    marketing_qs = (
+        MarketingDetails.objects
+        .filter(order__in=orders)
+        .select_related("order", "product")
+    )
+
+    matrix = defaultdict(lambda: defaultdict(int))
+    date_columns = set()
+
+    for md in marketing_qs:
+        d = md.order.mret_date
+        date_columns.add(d)
+        matrix[md.product.pk][d] += md.total_short_over_balance
+
+    date_columns = sorted(date_columns)
+    products = Product.objects.all().order_by("product_name")
+
+    response = HttpResponse(content_type="text/csv")
+    filename_bits = []
+    if start_date:
+        filename_bits.append(str(start_date))
+    if end_date:
+        filename_bits.append(str(end_date))
+    suffix = f"_{'_to_'.join(filename_bits)}" if filename_bits else ""
+    response["Content-Disposition"] = (
+        f'attachment; filename="short_over_matrix{suffix}.csv"'
+    )
+
+    writer = csv.writer(response)
+
+    writer.writerow(["Short / Over Report — Post-MRET"])
+    if start_date or end_date:
+        writer.writerow(["From", start_date or "", "To", end_date or ""])
+    writer.writerow([])
+
+    header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns]
+    writer.writerow(header)
+
+    for product in products:
+        row = [product.product_name] + [
+            matrix[product.pk].get(d, 0) for d in date_columns
+        ]
+        writer.writerow(row)
 
     return response
