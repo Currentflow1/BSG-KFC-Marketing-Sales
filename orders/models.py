@@ -151,6 +151,30 @@ class MarketingDetails(models.Model):
             return 0
 
 
+    # --- Positive-value display properties (raw quantities) ---
+
+    @property
+    def total_CRET_display(self):
+        return self.total_CRET * -1
+
+
+    @property
+    def total_VBO_display(self):
+        return self.total_VBO * -1
+
+
+    @property
+    def total_CBO_display(self):
+        return self.total_CBO * -1
+
+
+    @property
+    def total_MRET_display(self):
+        return self.total_MRET * -1
+
+
+    # --- Price properties (built on the raw, sign-correct fields) ---
+
     @property
     def total_SO_price(self):
         return self.total_SO * self.area_price
@@ -158,7 +182,7 @@ class MarketingDetails(models.Model):
 
     @property
     def total_CRET_price(self):
-        return self.total_CRET * self.area_price
+        return self.total_CRET_display * self.area_price
 
 
     @property
@@ -173,7 +197,12 @@ class MarketingDetails(models.Model):
 
     @property
     def total_VBO_price(self):
-        return self.total_VBO * self.area_price
+        return self.total_VBO_display * self.area_price
+
+
+    @property
+    def total_CBO_price(self):
+        return self.total_CBO_display * self.area_price
 
 
     @property
@@ -183,7 +212,7 @@ class MarketingDetails(models.Model):
 
     @property
     def total_MRET_price(self):
-        return self.total_MRET * self.area_price
+        return self.total_MRET_display * self.area_price
 
     @property
     def total_short_over_price(self):
@@ -197,6 +226,8 @@ class MarketingDetails(models.Model):
 
         return (self.total_VBO / self.total_MLOAD) * 100
 
+
+    # --- Quantity math (must stay on raw fields, sign intact) ---
 
     @property
     def total_out(self):
