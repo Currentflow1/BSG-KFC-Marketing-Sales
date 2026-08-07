@@ -30,8 +30,6 @@ a = Analysis(
         ("theme/templates", "theme/templates"),
         ("theme/static", "theme/static"),
         (".venv/Lib/site-packages/tailwind/templates", "tailwind/templates"),
-        (".venv/Lib/site-packages/jazzmin/templates", "jazzmin/templates"),
-        (".venv/Lib/site-packages/jazzmin/static", "jazzmin/static"),
     ],
     hiddenimports=hidden_imports,
     hookspath=[],

@@ -23,6 +23,12 @@ def dashboard(request):
                     "href": "/forecasting/",
                     "emoji": "📊",
                 },
+                                {
+                    "title": "Transaction Logs",
+                    "description": "View User Transactions.",
+                    "href": "/transaction_logs/",
+                    "emoji": "🧾",
+                },
             ],
         },
         {
