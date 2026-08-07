@@ -43,6 +43,8 @@ def record_view(request, order_id):
 
     totals = {key: value or 0 for key, value in totals.items()}
 
+    totals["total_MRET_display"] = totals["total_MRET"] * -1
+
     totals["total_SO_price"] = sum(item.total_SO_price for item in reports)
     totals["total_SAM_price"] = sum(item.total_SAM_price for item in reports)
 
@@ -65,6 +67,10 @@ def record_view(request, order_id):
     totals["total_bo_price"] = sum(
         item.total_bo_price for item in reports
     )
+
+    totals["total_BO_percentage"] = sum(
+            item.total_BO_percentage for item in reports
+        )
 
     totals["net_value"] = (
         totals["total_SO_price"] +
