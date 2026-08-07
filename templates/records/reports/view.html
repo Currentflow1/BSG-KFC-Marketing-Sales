@@ -1,10 +1,23 @@
 {% extends 'base.html' %}
-
 {% block content %}
 <div class="p-2 space-y-6">
-  {% include 'records/reports/components/record_header.html' %}
+  <div class="flex justify-end items-center gap-3 m-2 no-print">
+    <a href="{% url 'record_list' %}" class="w-40 text-center p-2 rounded font-bold text-white bg-gray-600 hover:bg-gray-700">
+      Back to Record
+    </a>
+    <a href="{% url 'export_trip_report_csv' order.id %}" class="w-40 text-center p-2 rounded font-bold text-white bg-green-600 hover:bg-green-700">
+      Export CSV
+    </a>
+    <button onclick="window.print()" class="w-40 text-center p-2 rounded font-bold text-white bg-blue-600 hover:bg-blue-700">
+      Print Report
+    </button>
+  </div>
   {% include 'records/reports/components/record_quantity_list.html' %}
+  <div class="print-page-break"></div>
   {% include 'records/reports/components/record_price_list.html' %}
+  <div class="print-page-break"></div>
   {% include 'records/reports/components/record_monetary_list.html' %}
+  {% include 'records/reports/components/record_expenses_list.html' %}
+  {% include 'records/reports/components/record_invoice_list.html' %}
 </div>
 {% endblock content %}

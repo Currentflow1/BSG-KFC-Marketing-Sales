@@ -1,1 +1,150 @@
-<h1>LIST C</h1>
+<h1 class="font-bold">Agent Collection Report</h1>
+
+<div class="mb-4">
+  <div class="border-2 divide-y-2 print-header-block">
+    <div class="p-4">
+      <h2 class="font-bold text-2xl">
+        Report No. {{ order.control_no }}
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-4 gap-6 p-4">
+      <div>
+        <p>Area: {{ order.area.area_name }}</p>
+        <p>Agent: {{ order.agent.employee_name }}</p>
+      </div>
+
+      <div></div>
+
+      <div class="text-right">
+        <p>Beginning Date: {{ order.beg_date }}</p>
+        <p>End Date: {{ order.end_date }}</p>
+      </div>
+
+      <div class="text-right">
+        <p>MLOAD Date: {{ order.mload_date }}</p>
+        <p>MRET Date: {{ order.mret_date }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overflow-x-auto mt-4">
+  <table class="w-full table-fixed border-collapse border-2 border-black text-sm print-condense">
+
+    <thead>
+      <tr class="bg-gray-100 text-center font-bold">
+        <th class="w-16 border border-black p-2">Denom</th>
+        <th class="w-16 border border-black p-2">QTY</th>
+        <th class="w-32 border border-black p-2">Amount</th>
+        <th class="w-20 border border-black p-2">Date</th>
+        <th class="w-32 border border-black p-2">Bank</th>
+        <th class="w-32 border border-black p-2">Payee</th>
+        <th class="w-32 border border-black p-2">Check #</th>
+        <th class="w-32 border border-black p-2">Amount</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td class="border border-black p-2">1000</td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2">500</td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2">200</td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2">100</td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2">50</td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2">20</td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2">10</td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr>
+        <td class="border border-black p-2">Coins</td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+      </tr>
+
+      <tr class="font-bold">
+        <td class="border border-black p-2">Total</td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+        <td class="border border-black"></td>
+      </tr>
+    </tbody>
+
+  </table>
+</div>
