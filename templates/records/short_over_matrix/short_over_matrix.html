@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="font-bold text-2xl">
+  Short / Over Report
+</h1>
+
+<p class="mb-6 text-gray-400">
+  Post-MRET Summary
+</p>
+
+<form method="get" class="mb-6 flex items-end gap-6">
+
+  <div>
+    <label for="start_date" class="mb-1 block font-medium">
+      From
+    </label>
+    <input
+      type="date"
+      id="start_date"
+      name="start_date"
+      value="{{ start_date }}"
+      class="rounded-lg border border-gray-300 px-4 py-2 text-sm
+             focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+    >
+  </div>
+
+  <div>
+    <label for="end_date" class="mb-1 block font-medium">
+      To
+    </label>
+    <input
+      type="date"
+      id="end_date"
+      name="end_date"
+      value="{{ end_date }}"
+      class="rounded-lg border border-gray-300 px-4 py-2 text-sm
+             focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+    >
+  </div>
+
+  <button
+    type="submit"
+    class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+  >
+    Filter
+  </button>
+
+  <a
+    href="{% url 'export_short_over_matrix_csv' %}?start_date={{ start_date }}&end_date={{ end_date }}"
+    class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
+  >
+    Export CSV
+  </a>
+
+</form>
+
+</form>
+
+<div class="overflow-x-auto">
+  <table class="min-w-full">
+
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left">Product</th>
+
+        {% for d in date_columns %}
+          <th class="px-4 py-2 text-right">
+            {{ d|date:"M d, Y" }}
+          </th>
+        {% endfor %}
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for row in rows %}
+      <tr class="border-t">
+
+        <td class="p-2">
+          {{ row.product.product_name }}
+        </td>
+
+        {% for v in row.values %}
+        <td
+          class="p-2 text-right
+          {% if v < 0 %}
+            text-red-600
+          {% elif v > 0 %}
+            text-green-600
+          {% endif %}"
+        >
+          {{ v }}
+        </td>
+        {% endfor %}
+
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="{{ date_columns|length|add:1 }}" class="p-6 text-center text-gray-500">
+          No records found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+
+  </table>
+</div>
+
+{% endblock %}
