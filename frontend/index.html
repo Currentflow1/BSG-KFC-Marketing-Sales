@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Starting KFC Marketing & Sales App</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .box {
+    text-align: center;
+    color: #374151;
+  }
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  p { font-size: 14px; color: #6b7280; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="spinner"></div>
+    <p id="status">Starting backend...</p>
+  </div>
+
+  <script>
+    const BACKEND_URL = "http://127.0.0.1:8000/";
+    const statusEl = document.getElementById("status");
+    let attempts = 0;
+
+    async function waitForBackend() {
+      attempts++;
+      try {
+        await fetch(BACKEND_URL, { mode: "no-cors" });
+        // no-cors gives an opaque response, but if fetch doesn't throw,
+        // the server is up and accepting connections.
+        window.location.href = BACKEND_URL;
+      } catch (err) {
+        if (attempts > 100) {
+          statusEl.textContent = "Backend is taking longer than expected...";
+        }
+        setTimeout(waitForBackend, 300);
+      }
+    }
+
+    waitForBackend();
+  </script>
+</body>
+</html>
