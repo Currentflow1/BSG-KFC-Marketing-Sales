@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,7 +41,8 @@ INSTALLED_APPS = [
 
     'tailwind',
     'theme',
-    
+
+    'login',
     'dashboard',
     'products',
     'employees',
@@ -51,29 +51,12 @@ INSTALLED_APPS = [
     'orders',
     'records',
     'forecasting',
+    'transaction_logs',
 ]
 
 
 TAILWIND_APP_NAME = 'theme'
 
-JAZZMIN_SETTINGS = {
-    "site_title": "KFC's Marketing and Sales Admin",
-    "site_header": "Marketing and Sales",
-    "site_brand": "Marketing and Sales",
-    "welcome_sign": "Welcome to the admin",
-    "copyright": "BSG Sytems",
-    "search_model": ["auth.User"],
-    "show_sidebar": True,
-    "show_ui_builder": True,
-    "navigation_expanded": True,
-    "icons": {
-        "auth": "fas fa-users-cog",
-        "auth.user": "fas fa-user",
-        "auth.Group": "fas fa-users",
-    },
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-circle",
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -81,11 +64,14 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'login.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
+
+LOGIN_REDIRECT_URL = 'dashboard'
 
 ROOT_URLCONF = 'ms.urls'
 
@@ -161,3 +147,7 @@ USE_I18N = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard_home'
+LOGOUT_REDIRECT_URL = 'login'

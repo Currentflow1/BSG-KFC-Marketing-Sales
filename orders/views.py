@@ -1,10 +1,14 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 
+from login.decorators import permission_required_redirect
 from .models import OrderDetails, CustomerDetails, DeliveryDetail, TransactionDetail
 from .forms import OrderForm, CustomerDetailForm, DeliveryLineForm, TransactionLineForm
 from . import services
 
+
+@login_required
 def order_list(request):
     orders = services.search_orders(
         search=request.GET.get("search"),
@@ -15,6 +19,8 @@ def order_list(request):
         "orders": orders,
     })
 
+
+@login_required
 def order_detail(request, order_id):
     order = get_object_or_404(
         OrderDetails.objects.select_related(
@@ -39,6 +45,8 @@ def order_detail(request, order_id):
         },
     )
 
+
+@login_required
 def order_new(request):
     if request.method == "POST":
         form = OrderForm(request.POST)
@@ -50,9 +58,11 @@ def order_new(request):
         form = OrderForm()
 
     return render(request, "orders/new.html", {
-        "form": form, 
+        "form": form,
     })
 
+
+@permission_required_redirect("orders.change_orderdetails")
 def order_edit(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     if request.method == "POST":
@@ -66,6 +76,7 @@ def order_edit(request, order_id):
     return render(request, "orders/edit.html", {"form": form, "order": order})
 
 
+@permission_required_redirect("orders.delete_orderdetails")
 def order_delete(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     if request.method == "POST":
@@ -75,6 +86,7 @@ def order_delete(request, order_id):
     return render(request, "orders/delete.html", {"order": order})
 
 
+@login_required
 def order_complete(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     if request.method == "POST":
@@ -83,6 +95,7 @@ def order_complete(request, order_id):
     return redirect("order_detail", order_id=order.id)
 
 
+@login_required
 def order_uncomplete(request, order_id):
     """Undo an accidental 'Complete' — just clears end_date, nothing else changes."""
     order = get_object_or_404(OrderDetails, pk=order_id)
@@ -93,6 +106,7 @@ def order_uncomplete(request, order_id):
     return redirect("order_detail", order_id=order.id)
 
 
+@login_required
 def manage_delivery(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     if request.method == "POST":
@@ -117,6 +131,8 @@ def manage_delivery(request, order_id):
         "totals": services.get_delivery_totals(order),
     })
 
+
+@permission_required_redirect("orders.delete_orderdetails")
 def delivery_delete(request, order_id, line_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     line = get_object_or_404(DeliveryDetail, pk=line_id, order=order)
@@ -128,6 +144,8 @@ def delivery_delete(request, order_id, line_id):
 
     return redirect("manage_delivery", order_id=order.id)
 
+
+@login_required
 def manage_transactions(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     if request.method == "POST":
@@ -161,6 +179,8 @@ def manage_transactions(request, order_id):
         "totals": services.get_transaction_totals(order),
     })
 
+
+@permission_required_redirect("orders.delete_orderdetails")
 def transaction_delete(request, order_id, line_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     line = get_object_or_404(
@@ -176,6 +196,8 @@ def transaction_delete(request, order_id, line_id):
 
     return redirect("manage_transactions", order_id=order.id)
 
+
+@login_required
 def add_customer(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     if request.method == "POST":
@@ -189,6 +211,8 @@ def add_customer(request, order_id):
             messages.error(request, "Could not add customer — check the form.")
     return redirect("order_detail", order_id=order.id)
 
+
+@permission_required_redirect("orders.delete_orderdetails")
 def customer_delete(request, order_id, customer_detail_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
     customer_detail = get_object_or_404(

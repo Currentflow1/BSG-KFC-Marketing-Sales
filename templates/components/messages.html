@@ -1,0 +1,24 @@
+{% comment %}
+Include this in base.html wherever your messages loop currently lives, e.g.:
+  {% include "components/messages.html" %}
+Styled to match the amber/red banners used in forecasting/product_forecast.html.
+{% endcomment %}
+
+{% if messages %}
+<div class="mx-auto max-w-7xl px-6 pt-4 space-y-2">
+  {% for message in messages %}
+    <div class="rounded-lg border px-4 py-3 text-sm
+      {% if message.tags == 'error' %}
+        border-red-300 bg-red-50 text-red-700
+      {% elif message.tags == 'success' %}
+        border-green-300 bg-green-50 text-green-700
+      {% elif message.tags == 'warning' %}
+        border-amber-300 bg-amber-50 text-amber-800
+      {% else %}
+        border-gray-300 bg-gray-50 text-gray-700
+      {% endif %}">
+      {{ message }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
