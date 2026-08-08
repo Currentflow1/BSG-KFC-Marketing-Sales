@@ -8,17 +8,28 @@ from orders.models import OrderDetails, MarketingDetails
 from products.models import Product
 from django.db.models import Sum, Q
 
-
 def record_list(request):
     orders = services.search_orders(
         search=request.GET.get("search"),
         sort=request.GET.get("sort", "-beg_date"),
     )
 
-    return render(request, "records/home.html", {
+    context = {
         "orders": orders,
-    })
+    }
 
+    if request.headers.get("HX-Request") == "true":
+        return render(
+            request,
+            "records/components/list.html",
+            context,
+        )
+
+    return render(
+        request,
+        "records/home.html",
+        context,
+    )
 
 def record_view(request, order_id):
     order = get_object_or_404(

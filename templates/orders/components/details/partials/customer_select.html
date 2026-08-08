@@ -1,0 +1,21 @@
+
+<select
+  name="customer"
+  id="id_customer"
+  class="w-full rounded-lg border border-gray-300 px-4 py-2"
+>
+  {% for customer in customer_form.fields.customer.queryset %}
+
+    <option value="{{ customer.pk }}">
+      {{ customer }}
+    </option>
+
+  {% empty %}
+
+    <option value="">
+      No customers found
+    </option>
+
+  {% endfor %}
+</select>
+

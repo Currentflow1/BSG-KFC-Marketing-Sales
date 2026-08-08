@@ -1,0 +1,27 @@
+{% if product %}
+
+<div class="rounded-lg border border-green-200 bg-green-50 p-2 text-sm">
+
+  <div class="font-medium text-green-800">
+    Product Code: {{ product.product_code }}
+  </div>
+
+  <div class="text-green-700">
+    {{ product.product_name }}
+  </div>
+
+  <input
+    type="hidden"
+    name="product"
+    value="{{ product.product_id }}"
+  >
+
+</div>
+
+{% elif query %}
+
+<div class="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">
+  Product "{{ query }}" not found.
+</div>
+
+{% endif %}

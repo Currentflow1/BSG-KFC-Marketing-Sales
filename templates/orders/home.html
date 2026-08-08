@@ -1,8 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <div class="p-6 space-y-6">
-  {% include 'orders/components/main_order_header.html' %}
-  {% include 'orders/components/main_order_list.html' %}
+
+  {% include 'orders/components/main_order/main_order_header.html' %}
+
+  <div id="orders-results">
+    {% include 'orders/components/main_order/main_order_list.html' %}
+  </div>
+
 </div>
+
 {% endblock content %}

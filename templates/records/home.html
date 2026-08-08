@@ -1,8 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <div class="p-6 space-y-6">
+
   {% include 'records/components/header.html' %}
-  {% include 'records/components/list.html' %}
+
+  <div id="records-results">
+    {% include 'records/components/list.html' %}
+  </div>
+
 </div>
+
 {% endblock content %}

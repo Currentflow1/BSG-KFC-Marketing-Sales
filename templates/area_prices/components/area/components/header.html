@@ -11,15 +11,28 @@
 
     </div>
 
-    <form method="get" class="flex items-center space-x-6">
-      <input type="text" name="search" value="{{ request.GET.search }}" placeholder="Search Areas..." class="w-128 rounded-lg border border-gray-300 px-4 py-2 text-sm
-           focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+    <div class="flex items-center space-x-6">
 
-      <button type="submit"
-        class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-        Search
-      </button>
-    </form>
+      <input
+        type="text"
+        name="search"
+        value="{{ request.GET.search }}"
+        placeholder="Search Areas..."
+        autocomplete="off"
+
+        class="w-128 rounded-lg border border-gray-300 px-4 py-2 text-sm
+              outline-none
+              focus:border-blue-500
+              focus:ring-2
+              focus:ring-blue-200"
+
+        hx-get="{% url 'area_search' %}"
+        hx-trigger="keyup changed delay:300ms"
+        hx-target="#areas-results"
+        hx-swap="innerHTML"
+      >
+
+    </div>
   </div>
 
   <a href="{% url 'area_new' %}" class="rounded bg-blue-600 px-4 py-2 text-center text-white font-bold hover:bg-blue-700">

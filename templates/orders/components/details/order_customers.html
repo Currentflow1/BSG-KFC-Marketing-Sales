@@ -49,8 +49,22 @@
     {% csrf_token %}
 
     <div>
-      {{ customer_form.customer }}
-      {{ customer_form.customer.errors }}
+      <input
+          type="text"
+          name="q"
+          placeholder="Search customer..."
+          class="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2"
+
+          hx-get="{% url 'customer_search' order.id %}"
+          hx-trigger="keyup changed delay:300ms"
+          hx-target="#customer-select"
+          hx-swap="innerHTML"
+      >
+
+      <div id="customer-select">
+          {{ customer_form.customer }}
+          {{ customer_form.customer.errors }}
+      </div>
     </div>
 
     <div>

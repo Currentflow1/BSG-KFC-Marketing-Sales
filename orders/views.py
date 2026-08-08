@@ -1,6 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.db.models import Q
+
+from customers.models import Customer
+from products.models import Product
+from area_prices.models import AreaPrice
 
 from login.decorators import permission_required_redirect
 from .models import OrderDetails, CustomerDetails, DeliveryDetail, TransactionDetail
@@ -14,15 +19,40 @@ from . import services
 
 @login_required
 def order_list(request):
+    search = request.GET.get("search", "").strip()
+    sort = request.GET.get("sort", "-beg_date")
+
     orders = services.search_orders(
-        search=request.GET.get("search"),
-        sort=request.GET.get("sort", "-beg_date"),
+        search=search,
+        sort=sort,
     )
 
-    return render(request, "orders/home.html", {
-        "orders": orders,
-    })
+    return render(
+        request,
+        "orders/home.html",
+        {
+            "orders": orders,
+        },
+    )
 
+
+@login_required
+def order_search(request):
+    search = request.GET.get("search", "").strip()
+    sort = request.GET.get("sort", "-beg_date")
+
+    orders = services.search_orders(
+        search=search,
+        sort=sort,
+    )
+
+    return render(
+        request,
+        "orders/components/main_order/main_order_list.html",
+        {
+            "orders": orders,
+        },
+    )
 
 @login_required
 def order_detail(request, order_id):
@@ -161,6 +191,35 @@ def delivery_delete(request, order_id, line_id):
 
     return redirect("manage_delivery", order_id=order.id)
 
+@login_required
+def product_search(request, order_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+
+    query = request.GET.get("q", "").strip()
+
+    product = None
+
+    if query:
+        product = (
+            Product.objects
+            .filter(
+                pk__in=AreaPrice.objects.filter(
+                    area_name=order.area
+                ).values("product_name")
+            )
+            .filter(product_code__iexact=query)
+            .first()
+        )
+
+    return render(
+        request,
+        "orders/components/delivery/partials/product_result.html",
+        {
+            "product": product,
+            "query": query,
+        },
+    )
+
 
 # ---------------------------------------------------------------------------
 # Transaction lines
@@ -215,6 +274,71 @@ def transaction_delete(request, order_id, line_id):
 
     return redirect("manage_transactions", order_id=order.id)
 
+@login_required
+def transaction_customer_search(request, order_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+
+    search = request.GET.get("q", "").strip()
+
+    form = TransactionLineForm(order=order)
+
+    customers = form.fields["customer_detail"].queryset
+
+    if search:
+        customers = customers.filter(
+            customer__customer_business_name__icontains=search
+        )
+
+    form.fields["customer_detail"].queryset = customers
+
+    return render(
+        request,
+        "orders/components/transactional/partials/customer_detail_select.html",
+        {
+            "form": form,
+        },
+    )
+
+
+@login_required
+def transaction_product_search(request, order_id):
+    order = get_object_or_404(OrderDetails, id=order_id)
+
+    query = request.GET.get("q", "").strip()
+
+    product = None
+
+    if query:
+        products = Product.objects.filter(
+            pk__in=AreaPrice.objects.filter(
+                area_name=order.area
+            ).values("product_name")
+        )
+
+        # Exact product code first
+        product = (
+            products
+            .filter(product_code__iexact=query)
+            .first()
+        )
+
+        # Then product name
+        if product is None:
+            product = (
+                products
+                .filter(product_name__icontains=query)
+                .order_by("product_code")
+                .first()
+            )
+
+    return render(
+        request,
+        "orders/components/transactional/partials/product_result.html",
+        {
+            "product": product,
+            "query": query,
+        },
+    )
 
 # ---------------------------------------------------------------------------
 # Customers on an order
@@ -253,3 +377,36 @@ def customer_delete(request, order_id, customer_detail_id):
         messages.success(request, "Invoice removed.")
 
     return redirect("order_detail", order_id=order.id)
+
+@login_required
+def customer_search(request, order_id):
+
+    order = get_object_or_404(
+        OrderDetails,
+        pk=order_id,
+    )
+
+    search = request.GET.get("q", "").strip()
+
+    customer_form = CustomerDetailForm()
+
+    customers = Customer.objects.all()
+
+    if search:
+        customers = customers.filter(
+            Q(customer_business_name__icontains=search)
+            | Q(customer_contact_person__icontains=search)
+            | Q(customer_mobile_no__icontains=search)
+        )
+
+    customer_form.fields["customer"].queryset = customers.order_by(
+        "customer_business_name"
+    )
+
+    return render(
+        request,
+        "orders/components/transactional/partials/customer_select.html",
+        {
+            "customer_form": customer_form,
+        },
+    )

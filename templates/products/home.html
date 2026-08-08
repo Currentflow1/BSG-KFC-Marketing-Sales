@@ -1,9 +1,15 @@
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
 
 {% block content %}
+
 <div class="p-6 space-y-6">
-  {% include 'products/components/header.html' %}
-  {% include 'products/components/list.html' %}
+
+  {% include "products/components/header.html" %}
+
+  <div id="products-results">
+    {% include "products/components/list.html" %}
+  </div>
+
 </div>
+
 {% endblock content %}
