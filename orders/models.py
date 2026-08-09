@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from area_prices.models import Area, AreaPrice
 from customers.models import Customer
@@ -6,6 +6,9 @@ from employees.models import Employee
 from products.models import Product
 
 from datetime import date
+
+
+CONTROL_NO_START = 30000
 
 
 class OrderQuerySet(models.QuerySet):
@@ -53,6 +56,30 @@ class OrderDetails(models.Model):
                 "End date cannot be earlier than begin date."
             )
 
+    @classmethod
+    def _generate_control_no(cls):
+        with transaction.atomic():
+            last = (
+                cls.objects
+                .select_for_update()
+                .exclude(control_no="")
+                .extra(select={"control_no_int": "CAST(control_no AS INTEGER)"})
+                .order_by("-control_no_int")
+                .first()
+            )
+
+            if last and last.control_no.isdigit():
+                next_no = int(last.control_no) + 1
+            else:
+                next_no = CONTROL_NO_START
+
+            return str(next_no)
+
+    def save(self, *args, **kwargs):
+        if not self.control_no:
+            self.control_no = self._generate_control_no()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.control_no
 
@@ -73,6 +100,20 @@ class CustomerDetails(models.Model):
         on_delete=models.CASCADE,
         related_name="customer_details"
     )
+
+    @property
+    def total_so_sam_price(self):
+        result = self.transactions.filter( # type: ignore
+            order_type__in=["SO", "SAM"]
+        ).aggregate(total=models.Sum("line_price"))
+
+        return result["total"] or 0
+
+    @property
+    def latest_so_sam_transaction(self):
+        return self.transactions.filter( # type: ignore
+            order_type__in=["SO", "SAM"]
+        ).order_by("-created_at").first()
 
     def __str__(self):
         return str(self.invoice_no)

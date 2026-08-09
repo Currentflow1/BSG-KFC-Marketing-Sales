@@ -755,7 +755,7 @@ def customer_search(request, order_id):
     )
 
     if customer_field is not None:
-        customer_field.queryset = customers
+        customer_field.queryset = customers # type: ignore
 
     return render(
         request,

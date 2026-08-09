@@ -1,27 +1,26 @@
 {% extends "base.html" %}
-
 {% block content %}
-
 <div class="flex justify-between items-center mb-4 mt-2">
-  <h1 class="text-2xl font-bold">
-    Manage Orders
-  </h1>
-
+  <div>
+    <h1 class="text-2xl font-bold">
+      Manage Orders
+    </h1>
+    <h2 class="mt-1 text-sm font-bold text-gray-500">
+      Order #{{ order.control_no }}
+      &middot;
+      Agent: {{ order.agent }}
+      &middot;
+      Area: {{ order.area }}
+    </h2>
+  </div>
   <a href="{% url 'order_detail' order.id %}" class="font-bold text-white rounded p-2 bg-blue-600 hover:bg-blue-700">
     &larr; Back to Order #{{ order.control_no }}
   </a>
 </div>
-
 {% include "orders/components/messages.html" %}
-
 <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-
   {% include "orders/components/transactional/transaction_form.html" %}
-
   {% include "orders/components/transactional/transaction_list.html" %}
-
 </div>
-
 {% include "orders/components/transactional/transaction_total.html" %}
-
 {% endblock %}

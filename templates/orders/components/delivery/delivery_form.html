@@ -1,94 +1,107 @@
-<!-- PRODUCT -->
-<div>
-  <label
-    for="product-search"
-    class="mb-1 block text-sm font-medium"
-  >
-    Product Code
-  </label>
+<!-- ADD TRANSACTION LINE -->
+<div class="rounded-lg border border-gray-200 bg-white p-4 lg:col-span-1">
 
-  <input
-    type="text"
-    name="q"
-    id="product-search"
-    autocomplete="off"
-    inputmode="numeric"
-    autofocus
-    class="w-full rounded-lg border border-gray-300 px-4 py-2
-           focus:border-blue-500 focus:ring-2 focus:ring-blue-200
-           outline-none"
-    placeholder="Enter product code..."
-    hx-get="{% url 'product_search' order.id %}"
-    hx-trigger="keyup changed delay:300ms"
-    hx-target="#product-result"
-    hx-swap="innerHTML"
-  >
+  <h2 class="mb-2 text-base font-medium">
+    Add Transaction Line
+  </h2>
 
-  <div id="product-result" class="mt-1"></div>
+  <form method="post" class="max-w-xs space-y-2">
+    {% csrf_token %}
 
-  {{ form.product.errors }}
+    <!-- PRODUCT -->
+    <div>
+      <label
+        for="product-search"
+        class="mb-1 block text-sm font-medium"
+      >
+        Product Code
+      </label>
+
+      <input
+        type="text"
+        name="q"
+        id="product-search"
+        autocomplete="off"
+        inputmode="numeric"
+        autofocus
+        class="w-full rounded-lg border border-gray-300 px-4 py-2"
+        placeholder="Enter product code..."
+
+        hx-get="{% url 'product_search' order.id %}"
+        hx-trigger="keyup changed delay:300ms"
+        hx-target="#product-result"
+        hx-swap="innerHTML"
+      >
+
+      <div id="product-result" class="mt-1"></div>
+
+      {{ form.product.errors }}
+    </div>
+
+
+    <!-- ORDER TYPE -->
+    <div>
+      <label
+        for="{{ form.order_type.id_for_label }}"
+        class="mb-1 block text-sm font-medium"
+      >
+        Order Type
+      </label>
+
+      <select
+        name="order_type"
+        id="{{ form.order_type.id_for_label }}"
+        class="w-full rounded-lg border border-gray-300 px-4 py-2"
+      >
+
+        {% for value, label in form.order_type.field.choices %}
+        <option value="{{ value }}">
+          {{ label }}
+        </option>
+        {% endfor %}
+
+      </select>
+
+      {{ form.order_type.errors }}
+    </div>
+
+
+    <!-- QUANTITY -->
+    <div>
+      <label
+        for="{{ form.quantity.id_for_label }}"
+        class="mb-1 block text-sm font-medium"
+      >
+        Quantity
+      </label>
+
+      {{ form.quantity }}
+      {{ form.quantity.errors }}
+    </div>
+
+
+    <!-- REMARKS -->
+    <div>
+      <label
+        for="{{ form.remarks.id_for_label }}"
+        class="mb-1 block text-sm font-medium"
+      >
+        Remarks
+      </label>
+
+      {{ form.remarks }}
+      {{ form.remarks.errors }}
+    </div>
+
+
+    <!-- SUBMIT -->
+    <button
+      type="submit"
+      class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
+    >
+      + Add Line
+    </button>
+
+  </form>
+
 </div>
-
-
-<!-- ORDER TYPE -->
-<div>
-  <label
-    for="{{ form.order_type.id_for_label }}"
-    class="mb-1 block text-sm font-medium"
-  >
-    Order Type
-  </label>
-
-  <select
-    name="order_type"
-    id="{{ form.order_type.id_for_label }}"
-    class="w-full rounded-lg border border-gray-300 px-4 py-2"
-  >
-
-    {% for value, label in form.order_type.field.choices %}
-    <option value="{{ value }}">
-      {{ label }}
-    </option>
-    {% endfor %}
-
-  </select>
-
-  {{ form.order_type.errors }}
-</div>
-
-
-<!-- QUANTITY -->
-<div>
-  <label
-    for="{{ form.quantity.id_for_label }}"
-    class="mb-1 block text-sm font-medium"
-  >
-    Quantity
-  </label>
-
-  {{ form.quantity }}
-  {{ form.quantity.errors }}
-</div>
-
-
-<!-- REMARKS -->
-<div>
-  <label
-    for="{{ form.remarks.id_for_label }}"
-    class="mb-1 block text-sm font-medium"
-  >
-    Remarks
-  </label>
-
-  {{ form.remarks }}
-  {{ form.remarks.errors }}
-</div>
-
-
-<button
-  type="submit"
-  class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white
-         hover:bg-blue-700"
->
-  + Add Line
-</button>
