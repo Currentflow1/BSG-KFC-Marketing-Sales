@@ -198,14 +198,14 @@ def search_orders(search=None, sort="-beg_date"):
         ).distinct()
 
         if search.lower() in ["completed", "complete"]:
-            orders = orders.completed()
+            orders = orders.completed() # type: ignore
 
         elif search.lower() in [
             "in progress",
             "incomplete",
             "active",
         ]:
-            orders = orders.incomplete()
+            orders = orders.incomplete() # type: ignore
 
     return orders.order_by(sort)
 

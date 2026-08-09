@@ -1,5 +1,4 @@
 from django.db.models import Case, F, IntegerField, Sum, When
-
 from orders.models import TransactionDetail
 
 
