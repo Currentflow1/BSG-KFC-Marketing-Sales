@@ -4,10 +4,30 @@ from .forms import CustomerForm
 from . import services
 
 def customer_list(request):
-  customers = services.search_customers(request.GET.get("search"))
-  return render(request, 'customers/home.html', {
-    'customers': customers
-  })
+    customers = services.search_customers(
+        request.GET.get("search")
+    )
+
+    return render(
+        request,
+        "customers/home.html",
+        {
+            "customers": customers,
+        },
+    )
+
+def customer_search(request):
+    search = request.GET.get("search", "").strip()
+
+    customers = services.search_customers(search)
+
+    return render(
+        request,
+        "customers/components/list.html",
+        {
+            "customers": customers,
+        },
+    )
 
 def customer_new(request):
   form = CustomerForm(request.POST or None)

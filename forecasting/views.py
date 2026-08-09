@@ -1,4 +1,6 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
+
 from products.models import Product
 from .services import ForecastService, InsufficientHistoryError
 
@@ -10,13 +12,36 @@ def dashboard(request):
 
     if search:
         products = products.filter(
-            product_name__icontains=search
+            Q(product_code__icontains=search)
+            | Q(product_name__icontains=search)
         )
 
     return render(
         request,
         "forecasting/dashboard.html",
         {"products": products},
+    )
+
+
+def forecasting_search(request):
+    search = request.GET.get("search", "").strip()
+
+    products = Product.objects.filter(
+        discontinued=False
+    )
+
+    if search:
+        products = products.filter(
+            Q(product_code__icontains=search)
+            | Q(product_name__icontains=search)
+        )
+
+    return render(
+        request,
+        "forecasting/components/product_list.html",
+        {
+            "products": products,
+        },
     )
 
 

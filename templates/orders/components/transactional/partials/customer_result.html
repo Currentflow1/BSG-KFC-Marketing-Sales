@@ -1,0 +1,27 @@
+{% if customer_detail %}
+
+  <div class="rounded-lg border border-green-200 bg-green-50 p-2 text-sm">
+
+    <div class="font-medium text-green-800">
+      Invoice {{ customer_detail.invoice_no }}
+    </div>
+
+    <div class="text-green-700">
+      {{ customer_detail.customer }}
+    </div>
+
+    <input
+      type="hidden"
+      name="customer_detail"
+      value="{{ customer_detail.id }}"
+    >
+
+  </div>
+
+{% elif query %}
+
+  <div class="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">
+    Invoice not found.
+  </div>
+
+{% endif %}
