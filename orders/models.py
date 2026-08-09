@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from area_prices.models import Area, AreaPrice
 from customers.models import Customer
@@ -8,13 +8,17 @@ from products.models import Product
 from datetime import date
 
 
+CONTROL_NO_START = 30000
+
+
 class OrderQuerySet(models.QuerySet):
     def incomplete(self):
         return self.filter(end_date__isnull=True)
 
     def completed(self):
         return self.filter(end_date__isnull=False)
-    
+
+
 class OrderDetails(models.Model):
     id = models.BigAutoField(primary_key=True)
 
@@ -31,8 +35,6 @@ class OrderDetails(models.Model):
         on_delete=models.CASCADE,
         related_name="orders"
     )
-
-    van_number = models.IntegerField(null=True, blank=True)
 
     beg_date = models.DateField(default=date.today)
     mload_date = models.DateField(null=True, blank=True)
@@ -54,15 +56,64 @@ class OrderDetails(models.Model):
                 "End date cannot be earlier than begin date."
             )
 
+    @classmethod
+    def _generate_control_no(cls):
+        with transaction.atomic():
+            last = (
+                cls.objects
+                .select_for_update()
+                .exclude(control_no="")
+                .extra(select={"control_no_int": "CAST(control_no AS INTEGER)"})
+                .order_by("-control_no_int")
+                .first()
+            )
+
+            if last and last.control_no.isdigit():
+                next_no = int(last.control_no) + 1
+            else:
+                next_no = CONTROL_NO_START
+
+            return str(next_no)
+
+    def save(self, *args, **kwargs):
+        if not self.control_no:
+            self.control_no = self._generate_control_no()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.control_no
 
-    
+
 class CustomerDetails(models.Model):
     id = models.BigAutoField(primary_key=True)
-    order = models.ForeignKey(OrderDetails, on_delete=models.CASCADE, related_name="customers")
+
+    order = models.ForeignKey(
+        OrderDetails,
+        on_delete=models.CASCADE,
+        related_name="customers"
+    )
+
     invoice_no = models.IntegerField(unique=True)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="customer_details")
+
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name="customer_details"
+    )
+
+    @property
+    def total_so_sam_price(self):
+        result = self.transactions.filter( # type: ignore
+            order_type__in=["SO", "SAM"]
+        ).aggregate(total=models.Sum("line_price"))
+
+        return result["total"] or 0
+
+    @property
+    def latest_so_sam_transaction(self):
+        return self.transactions.filter( # type: ignore
+            order_type__in=["SO", "SAM"]
+        ).order_by("-created_at").first()
 
     def __str__(self):
         return str(self.invoice_no)
@@ -76,13 +127,39 @@ class DeliveryDetail(models.Model):
     ]
 
     id = models.BigAutoField(primary_key=True)
-    order = models.ForeignKey(OrderDetails, on_delete=models.CASCADE, related_name="deliveries")
-    order_type = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="delivery_lines")
+
+    order = models.ForeignKey(
+        OrderDetails,
+        on_delete=models.CASCADE,
+        related_name="deliveries"
+    )
+
+    order_type = models.CharField(
+        max_length=10,
+        choices=ORDER_TYPE_CHOICES
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="delivery_lines"
+    )
+
     quantity = models.IntegerField()
-    line_price = models.DecimalField(max_digits=20, decimal_places=2)
-    remarks = models.CharField(max_length=255, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    line_price = models.DecimalField(
+        max_digits=20,
+        decimal_places=2
+    )
+
+    remarks = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
         return f"{self.order} - {self.product} ({self.order_type})"
@@ -95,6 +172,7 @@ class TransactionDetail(models.Model):
         ("CRET", "CRET (-)"),
         ("CBO", "CBO (-)"),
     ]
+
     INVOICE_TYPE_CHOICES = [
         ("CASH", "Cash"),
         ("CHARGE", "Charge"),
@@ -102,21 +180,50 @@ class TransactionDetail(models.Model):
     ]
 
     id = models.BigAutoField(primary_key=True)
+
     customer_detail = models.ForeignKey(
-        CustomerDetails, on_delete=models.CASCADE, related_name="transactions"
+        CustomerDetails,
+        on_delete=models.CASCADE,
+        related_name="transactions"
     )
-    order_type = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES)
-    invoice_type = models.CharField(max_length=10, choices=INVOICE_TYPE_CHOICES, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="transaction_lines")
+
+    order_type = models.CharField(
+        max_length=10,
+        choices=ORDER_TYPE_CHOICES
+    )
+
+    invoice_type = models.CharField(
+        max_length=10,
+        choices=INVOICE_TYPE_CHOICES,
+        blank=True
+    )
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="transaction_lines"
+    )
+
     quantity = models.IntegerField()
-    line_price = models.DecimalField(max_digits=20, decimal_places=2)
-    remarks = models.CharField(max_length=255, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    line_price = models.DecimalField(
+        max_digits=20,
+        decimal_places=2
+    )
+
+    remarks = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
         return f"{self.customer_detail} - {self.product} ({self.order_type})"
 
-    
+
 class MarketingDetails(models.Model):
     id = models.BigAutoField(primary_key=True)
 
@@ -139,7 +246,6 @@ class MarketingDetails(models.Model):
     total_MRET = models.IntegerField(default=0)
     total_VBO = models.IntegerField(default=0)
 
-
     @property
     def area_price(self):
         try:
@@ -150,65 +256,49 @@ class MarketingDetails(models.Model):
         except AreaPrice.DoesNotExist:
             return 0
 
-
-    # --- Positive-value display properties (raw quantities) ---
-
     @property
     def total_CRET_display(self):
         return self.total_CRET * -1
-
 
     @property
     def total_VBO_display(self):
         return self.total_VBO * -1
 
-
     @property
     def total_CBO_display(self):
         return self.total_CBO * -1
-
 
     @property
     def total_MRET_display(self):
         return self.total_MRET * -1
 
-
-    # --- Price properties (built on the raw, sign-correct fields) ---
-
     @property
     def total_SO_price(self):
         return self.total_SO * self.area_price
-
 
     @property
     def total_CRET_price(self):
         return self.total_CRET_display * self.area_price
 
-
     @property
     def total_SAM_price(self):
         return self.total_SAM * self.area_price
-
 
     @property
     def total_bo_price(self):
         return self.total_bo * self.area_price
 
-
     @property
     def total_VBO_price(self):
         return self.total_VBO_display * self.area_price
-
 
     @property
     def total_CBO_price(self):
         return self.total_CBO_display * self.area_price
 
-
     @property
     def total_MLOAD_price(self):
         return self.total_MLOAD * self.area_price
-
 
     @property
     def total_MRET_price(self):
@@ -218,7 +308,6 @@ class MarketingDetails(models.Model):
     def total_short_over_price(self):
         return self.total_short_over_balance * self.area_price
 
-
     @property
     def total_BO_percentage(self):
         if self.total_MLOAD == 0:
@@ -226,28 +315,21 @@ class MarketingDetails(models.Model):
 
         return (self.total_VBO_display / self.total_MLOAD) * 100
 
-
-    # --- Quantity math (must stay on raw fields, sign intact) ---
-
     @property
     def total_out(self):
         return self.total_SO + self.total_SAM
 
-
     @property
     def total_total(self):
-        return self.total_out + ( -(self.total_MRET))
-
+        return self.total_out + (-(self.total_MRET))
 
     @property
     def total_short_over_balance(self):
         return self.total_MLOAD - self.total_total
 
-
     @property
     def total_bo(self):
         return self.total_VBO - self.total_CBO
-
 
     def __str__(self):
         return f"{self.order.control_no} - {self.product.product_name}"

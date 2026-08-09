@@ -5,9 +5,9 @@
         <th class="px-4 py-2 text-left">Control No.</th>
         <th class="px-4 py-2 text-left">Agent</th>
         <th class="px-4 py-2 text-left">Area</th>
-        <th class="px-4 py-2 text-left">Van No.</th>
         <th class="px-4 py-2 text-left">Begin Date</th>
-        <th class="px-4 py-2 text-left">End Date</th>
+        <th class="px-4 py-2 text-left">Load Date</th>
+        <th class="px-4 py-2 text-left">Return Date</th>
         <th class="px-4 py-2 text-center">Status</th>
         <th class="px-4 py-2 text-center">Actions</th>
       </tr>
@@ -30,22 +30,16 @@
         </td>
 
         <td class="px-4 py-2">
-          {{ order.van_number|default:"—" }}
-        </td>
-
-        <td class="px-4 py-2">
           {{ order.beg_date|date:"M j, Y" }}
         </td>
 
-        {% if order.end_date %}
         <td class="px-4 py-2">
-          {{ order.end_date|date:"M j, Y" }}
+          {{ order.mload_date|date:"M j, Y"|default:"—" }}
         </td>
-        {% else %}
-        <td class="px-2 py-1 font-medium text-sm">
-          In Progress
+
+        <td class="px-4 py-2">
+          {{ order.mret_date|date:"M j, Y"|default:"—" }}
         </td>
-        {% endif %}
 
         <td class="px-4 py-2 text-center">
           {% if order.is_complete %}
@@ -71,7 +65,7 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="7" class="px-4 py-6 text-center text-gray-500">
+        <td colspan="8" class="px-4 py-6 text-center text-gray-500">
           No orders found.
         </td>
       </tr>

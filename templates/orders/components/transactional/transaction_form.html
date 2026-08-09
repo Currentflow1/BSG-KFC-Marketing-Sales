@@ -24,21 +24,43 @@
         inputmode="numeric"
         autocomplete="off"
         autofocus
+        value="{% if selected_customer_detail %}{{ selected_customer_detail.invoice_no }}{% endif %}"
         class="w-full rounded-lg border border-gray-300 px-4 py-2"
         placeholder="Enter invoice number..."
 
-        hx-get="{% url 'customer_search' order.id %}"
+        hx-get="{% url 'transaction_customer_search' order.id %}"
         hx-trigger="keyup changed delay:300ms"
         hx-target="#customer-result"
         hx-swap="innerHTML"
       >
 
-      <div id="customer-result" class="mt-1"></div>
+      <div id="customer-result" class="mt-1">
+
+        {% if selected_customer_detail %}
+
+          <div class="font-medium text-green-800">
+            Invoice {{ selected_customer_detail.invoice_no }}
+          </div>
+
+          <div class="text-green-700">
+            {{ selected_customer_detail.customer }}
+          </div>
+
+          <input
+            type="hidden"
+            name="customer_detail"
+            value="{{ selected_customer_detail.id }}"
+          >
+
+        {% endif %}
+
+      </div>
 
       {{ form.customer_detail.errors }}
     </div>
 
-        <!-- PRODUCT -->
+
+    <!-- PRODUCT -->
     <div>
       <label
         for="product-search"
@@ -93,6 +115,7 @@
       {{ form.invoice_type }}
       {{ form.invoice_type.errors }}
     </div>
+
 
     <!-- QUANTITY -->
     <div>
