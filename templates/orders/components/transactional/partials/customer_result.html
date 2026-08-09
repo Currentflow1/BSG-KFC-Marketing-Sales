@@ -1,19 +1,20 @@
 {% if customer_detail %}
 
-<div class="font-medium text-green-800">
-  Invoice {{ customer_detail.invoice_no }}
+<div class="rounded-lg border border-green-200 bg-green-50 p-2 text-sm">
+  <div class="font-medium text-green-800">
+    Invoice {{ customer_detail.invoice_no }}
+  </div>
+
+  <div class="text-green-700">
+    {{ customer_detail.customer }}
+  </div>
+
+  <input
+    type="hidden"
+    name="customer_detail"
+    value="{{ customer_detail.id }}"
+  >
 </div>
-
-<div class="text-green-700">
-  {{ customer_detail.customer }}
-</div>
-
-<input
-  type="hidden"
-  name="customer_detail"
-  value="{{ customer_detail.id }}"
->
-
 {% elif query %}
 
 <div class="text-sm text-red-600">

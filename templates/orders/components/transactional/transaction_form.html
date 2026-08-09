@@ -28,7 +28,7 @@
         class="w-full rounded-lg border border-gray-300 px-4 py-2"
         placeholder="Enter invoice number..."
 
-        hx-get="{% url 'customer_search' order.id %}"
+        hx-get="{% url 'transaction_customer_search' order.id %}"
         hx-trigger="keyup changed delay:300ms"
         hx-target="#customer-result"
         hx-swap="innerHTML"

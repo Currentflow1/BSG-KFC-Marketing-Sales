@@ -137,7 +137,10 @@ class DeliveryLineForm(forms.Form):
     quantity = forms.IntegerField(
         min_value=1,
         widget=forms.NumberInput(
-            attrs={"class": FIELD_CLASS}
+            attrs={
+                "class": FIELD_CLASS,
+                "autocomplete": "off",
+            }
         ),
     )
 
@@ -205,7 +208,10 @@ class TransactionLineForm(forms.Form):
     quantity = forms.IntegerField(
         min_value=1,
         widget=forms.NumberInput(
-            attrs={"class": FIELD_CLASS},
+            attrs={
+                "class": FIELD_CLASS,
+                "autocomplete": "off",
+            },
         ),
     )
 
