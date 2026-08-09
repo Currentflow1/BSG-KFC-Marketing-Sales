@@ -2,25 +2,27 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.db.models import Q
-from django.http import HttpResponse
 
 from customers.models import Customer
 from products.models import Product
 from area_prices.models import AreaPrice
 
 from login.decorators import permission_required_redirect
+
 from .models import (
     OrderDetails,
     CustomerDetails,
     DeliveryDetail,
     TransactionDetail,
 )
+
 from .forms import (
     OrderForm,
     CustomerDetailForm,
     DeliveryLineForm,
     TransactionLineForm,
 )
+
 from . import services
 
 
@@ -91,7 +93,9 @@ def order_detail(request, order_id):
         {
             "order": order,
             "customer_form": customer_form,
-            "marketing_summary": services.get_marketing_summary(order),
+            "marketing_summary": services.get_marketing_summary(
+                order
+            ),
             "unpriced_products": services.get_unpriced_products(
                 order.area
             ),
@@ -210,11 +214,6 @@ def order_complete(request, order_id):
             f"Order {order.control_no} marked complete.",
         )
 
-        return redirect(
-            "order_detail",
-            order_id=order.id,
-        )
-
     return redirect(
         "order_detail",
         order_id=order.id,
@@ -223,6 +222,11 @@ def order_complete(request, order_id):
 
 @permission_required_redirect("orders.change_orderdetails")
 def order_uncomplete(request, order_id):
+    """
+    Undo an accidental 'Complete' — just clears end_date,
+    nothing else changes.
+    """
+
     order = get_object_or_404(
         OrderDetails,
         pk=order_id,
@@ -238,11 +242,6 @@ def order_uncomplete(request, order_id):
         messages.success(
             request,
             f"Order {order.control_no} reopened.",
-        )
-
-        return redirect(
-            "order_detail",
-            order_id=order.id,
         )
 
     return redirect(
@@ -328,9 +327,13 @@ def manage_delivery(request, order_id):
                 .select_related("product")
                 .order_by("-created_at")
             ),
-            "totals": services.get_delivery_totals(order),
-            "unpriced_products": services.get_unpriced_products(
-                order.area
+            "totals": services.get_delivery_totals(
+                order
+            ),
+            "unpriced_products": (
+                services.get_unpriced_products(
+                    order.area
+                )
             ),
         },
     )
@@ -372,7 +375,10 @@ def product_search(request, order_id):
         pk=order_id,
     )
 
-    query = request.GET.get("q", "").strip()
+    query = request.GET.get(
+        "q",
+        "",
+    ).strip()
 
     product = None
 
@@ -436,28 +442,49 @@ def manage_transactions(request, order_id):
                     customer_detail=form.cleaned_data[
                         "customer_detail"
                     ],
-                    product=form.cleaned_data["product"],
-                    order_type=form.cleaned_data["order_type"],
-                    quantity=form.cleaned_data["quantity"],
-                    invoice_type=form.cleaned_data["invoice_type"],
-                    remarks=form.cleaned_data["remarks"],
+                    product=form.cleaned_data[
+                        "product"
+                    ],
+                    order_type=form.cleaned_data[
+                        "order_type"
+                    ],
+                    quantity=form.cleaned_data[
+                        "quantity"
+                    ],
+                    invoice_type=form.cleaned_data[
+                        "invoice_type"
+                    ],
+                    remarks=form.cleaned_data[
+                        "remarks"
+                    ],
                 )
 
                 request.session[
                     transaction_order_type_key
-                ] = form.cleaned_data["order_type"]
+                ] = form.cleaned_data[
+                    "order_type"
+                ]
 
                 request.session[
                     transaction_customer_key
-                ] = form.cleaned_data["customer_detail"].id
+                ] = form.cleaned_data[
+                    "customer_detail"
+                ].id
 
                 request.session[
                     transaction_invoice_type_key
-                ] = form.cleaned_data["invoice_type"]
+                ] = form.cleaned_data[
+                    "invoice_type"
+                ]
 
                 messages.success(
                     request,
                     "Transaction line added.",
+                )
+
+                return redirect(
+                    "manage_transactions",
+                    order_id=order.id,
                 )
 
             except ValueError as e:
@@ -466,24 +493,19 @@ def manage_transactions(request, order_id):
                     str(e),
                 )
 
-            return redirect(
-                "manage_transactions",
-                order_id=order.id,
-            )
-
     else:
         selected_order_type = request.session.get(
             transaction_order_type_key,
             TransactionDetail.ORDER_TYPE_CHOICES[0][0],
         )
 
-        selected_customer_id = request.session.get(
-            transaction_customer_key,
-        )
-
         selected_invoice_type = request.session.get(
             transaction_invoice_type_key,
             "",
+        )
+
+        selected_customer_id = request.session.get(
+            transaction_customer_key,
         )
 
         initial = {
@@ -492,11 +514,30 @@ def manage_transactions(request, order_id):
         }
 
         if selected_customer_id:
-            initial["customer_detail"] = selected_customer_id
+            initial[
+                "customer_detail"
+            ] = selected_customer_id
 
         form = TransactionLineForm(
             order=order,
             initial=initial,
+        )
+
+    selected_customer_id = request.session.get(
+        transaction_customer_key,
+    )
+
+    selected_customer_detail = None
+
+    if selected_customer_id:
+        selected_customer_detail = (
+            CustomerDetails.objects
+            .filter(
+                pk=selected_customer_id,
+                order=order,
+            )
+            .select_related("customer")
+            .first()
         )
 
     return render(
@@ -505,6 +546,7 @@ def manage_transactions(request, order_id):
         {
             "order": order,
             "form": form,
+            "selected_customer_detail": selected_customer_detail,
             "lines": (
                 TransactionDetail.objects
                 .filter(
@@ -516,16 +558,24 @@ def manage_transactions(request, order_id):
                 )
                 .order_by("-created_at")
             ),
-            "totals": services.get_transaction_totals(order),
-            "unpriced_products": services.get_unpriced_products(
-                order.area
+            "totals": services.get_transaction_totals(
+                order
+            ),
+            "unpriced_products": (
+                services.get_unpriced_products(
+                    order.area
+                )
             ),
         },
     )
 
 
 @permission_required_redirect("orders.delete_orderdetails")
-def transaction_delete(request, order_id, line_id):
+def transaction_delete(
+    request,
+    order_id,
+    line_id,
+):
     order = get_object_or_404(
         OrderDetails,
         pk=order_id,
@@ -540,7 +590,9 @@ def transaction_delete(request, order_id, line_id):
     if request.method == "POST":
         line.delete()
 
-        services.sync_marketing_details(order)
+        services.sync_marketing_details(
+            order
+        )
 
         messages.success(
             request,
@@ -554,7 +606,10 @@ def transaction_delete(request, order_id, line_id):
 
 
 @login_required
-def transaction_customer_search(request, order_id):
+def transaction_customer_search(
+    request,
+    order_id,
+):
     order = get_object_or_404(
         OrderDetails,
         pk=order_id,
@@ -568,15 +623,21 @@ def transaction_customer_search(request, order_id):
     customer_detail = None
 
     if query:
-        customer_detail = (
-            CustomerDetails.objects
-            .filter(
-                order=order,
-                invoice_no=query,
+        try:
+            invoice_no = int(query)
+        except ValueError:
+            invoice_no = None
+
+        if invoice_no is not None:
+            customer_detail = (
+                CustomerDetails.objects
+                .filter(
+                    order=order,
+                    invoice_no=invoice_no,
+                )
+                .select_related("customer")
+                .first()
             )
-            .select_related("customer")
-            .first()
-        )
 
     return render(
         request,
@@ -589,21 +650,30 @@ def transaction_customer_search(request, order_id):
 
 
 @login_required
-def transaction_product_search(request, order_id):
+def transaction_product_search(
+    request,
+    order_id,
+):
     order = get_object_or_404(
         OrderDetails,
-        id=order_id,
+        pk=order_id,
     )
 
-    query = request.GET.get("q", "").strip()
+    query = request.GET.get(
+        "q",
+        "",
+    ).strip()
 
     product = None
 
     if query:
-        products = Product.objects.filter(
-            pk__in=AreaPrice.objects.filter(
-                area_name=order.area
-            ).values("product_name")
+        products = (
+            Product.objects
+            .filter(
+                pk__in=AreaPrice.objects.filter(
+                    area_name=order.area
+                ).values("product_name")
+            )
         )
 
         product = (
@@ -640,7 +710,10 @@ def transaction_product_search(request, order_id):
 
 
 @login_required
-def add_customer(request, order_id):
+def add_customer(
+    request,
+    order_id,
+):
     order = get_object_or_404(
         OrderDetails,
         pk=order_id,
@@ -660,7 +733,9 @@ def add_customer(request, order_id):
             cd.order = order
             cd.save()
 
-            services.sync_marketing_details(order)
+            services.sync_marketing_details(
+                order
+            )
 
             messages.success(
                 request,
@@ -687,7 +762,11 @@ def add_customer(request, order_id):
 
 
 @permission_required_redirect("orders.delete_orderdetails")
-def customer_delete(request, order_id, customer_detail_id):
+def customer_delete(
+    request,
+    order_id,
+    customer_detail_id,
+):
     order = get_object_or_404(
         OrderDetails,
         pk=order_id,
@@ -702,7 +781,9 @@ def customer_delete(request, order_id, customer_detail_id):
     if request.method == "POST":
         customer_detail.delete()
 
-        services.sync_marketing_details(order)
+        services.sync_marketing_details(
+            order
+        )
 
         messages.success(
             request,
@@ -716,14 +797,17 @@ def customer_delete(request, order_id, customer_detail_id):
 
 
 @login_required
-def customer_search(request, order_id):
+def customer_search(
+    request,
+    order_id,
+):
     order = get_object_or_404(
         OrderDetails,
         pk=order_id,
     )
 
     search = request.GET.get(
-        "q",
+        "search",
         "",
     ).strip()
 
@@ -750,16 +834,13 @@ def customer_search(request, order_id):
         area=order.area,
     )
 
-    customer_field = customer_form.fields.get(
+    customer_form.fields[
         "customer"
-    )
-
-    if customer_field is not None:
-        customer_field.queryset = customers # type: ignore
+    ].queryset = customers
 
     return render(
         request,
-        "orders/components/transactional/details/partials/customer_select.html",
+        "orders/components/transactional/partials/customer_select.html",
         {
             "customer_form": customer_form,
         },
