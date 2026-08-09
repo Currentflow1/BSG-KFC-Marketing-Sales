@@ -14,7 +14,6 @@ from customers.models import Customer
 from products.models import Product
 from area_prices.models import AreaPrice
 
-
 FIELD_CLASS = "w-full rounded-lg border border-gray-300 px-4 py-2"
 
 
@@ -24,8 +23,7 @@ FIELD_CLASS = "w-full rounded-lg border border-gray-300 px-4 py-2"
 
 class ProductCodeChoiceField(forms.ModelChoiceField):
     """
-    Display the product code in the <select>,
-    while still returning the actual Product object.
+    Display the product code while still returning the actual Product object.
     """
 
     def label_from_instance(self, obj):
@@ -43,7 +41,8 @@ class OrderForm(forms.ModelForm):
             "control_no",
             "area",
             "agent",
-            "van_number",
+            "mload_date",
+            "mret_date",
         ]
 
         widgets = {
@@ -56,8 +55,17 @@ class OrderForm(forms.ModelForm):
             "agent": forms.Select(
                 attrs={"class": FIELD_CLASS}
             ),
-            "van_number": forms.NumberInput(
-                attrs={"class": FIELD_CLASS}
+            "mload_date": forms.DateInput(
+                attrs={
+                    "class": FIELD_CLASS,
+                    "type": "date",
+                }
+            ),
+            "mret_date": forms.DateInput(
+                attrs={
+                    "class": FIELD_CLASS,
+                    "type": "date",
+                }
             ),
         }
 
