@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.db.models import Q
+from django.http import HttpResponse
 
 from customers.models import Customer
 from products.models import Product
@@ -257,20 +258,12 @@ def order_uncomplete(request, order_id):
 
 @login_required
 def manage_delivery(request, order_id):
-    order = get_object_or_404(
-        OrderDetails,
-        pk=order_id,
-    )
+    order = get_object_or_404(OrderDetails, pk=order_id)
 
-    delivery_order_type_key = (
-        f"delivery_order_type_{order.id}"
-    )
+    delivery_order_type_key = f"delivery_order_type_{order.id}"
 
     if request.method == "POST":
-        form = DeliveryLineForm(
-            request.POST,
-            area=order.area,
-        )
+        form = DeliveryLineForm(request.POST, area=order.area)
 
         if form.is_valid():
             try:
@@ -280,39 +273,19 @@ def manage_delivery(request, order_id):
                     order_type=form.cleaned_data["order_type"],
                     quantity=form.cleaned_data["quantity"],
                 )
-
-                request.session[
-                    delivery_order_type_key
-                ] = form.cleaned_data["order_type"]
-
-                messages.success(
-                    request,
-                    "Delivery line added.",
-                )
-
+                messages.success(request, "Delivery line added.")
             except ValueError as e:
-                messages.error(
-                    request,
-                    str(e),
-                )
+                messages.error(request, str(e))
 
-            return redirect(
-                "manage_delivery",
-                order_id=order.id,
-            )
+            return redirect("manage_delivery", order_id=order.id)
 
     else:
-        selected_order_type = request.session.get(
-            delivery_order_type_key,
-            DeliveryDetail.ORDER_TYPE_CHOICES[0][0],
-        )
+        form = DeliveryLineForm(area=order.area)
 
-        form = DeliveryLineForm(
-            area=order.area,
-            initial={
-                "order_type": selected_order_type,
-            },
-        )
+    selected_order_type = request.session.get(
+        delivery_order_type_key,
+        DeliveryDetail.ORDER_TYPE_CHOICES[0][0],
+    )
 
     return render(
         request,
@@ -320,22 +293,32 @@ def manage_delivery(request, order_id):
         {
             "order": order,
             "form": form,
+            "selected_order_type": selected_order_type,
+            "delivery_order_type_choices": DeliveryDetail.ORDER_TYPE_CHOICES,
             "lines": (
                 DeliveryDetail.objects
                 .filter(order=order)
                 .select_related("product")
                 .order_by("-created_at")
             ),
-            "totals": services.get_delivery_totals(
-                order
-            ),
-            "unpriced_products": (
-                services.get_unpriced_products(
-                    order.area
-                )
-            ),
+            "totals": services.get_delivery_totals(order),
+            "unpriced_products": services.get_unpriced_products(order.area),
         },
     )
+
+
+@login_required
+def set_delivery_order_type(request, order_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+
+    if request.method == "POST":
+        order_type = request.POST.get("order_type")
+        valid_codes = dict(DeliveryDetail.ORDER_TYPE_CHOICES)
+
+        if order_type in valid_codes:
+            request.session[f"delivery_order_type_{order.id}"] = order_type
+
+    return HttpResponse(status=204)
 
 
 @permission_required_redirect("orders.delete_orderdetails")
@@ -417,17 +400,9 @@ def manage_transactions(request, order_id):
         pk=order_id,
     )
 
-    transaction_order_type_key = (
-        f"transaction_order_type_{order.id}"
-    )
-
-    transaction_customer_key = (
-        f"transaction_customer_{order.id}"
-    )
-
-    transaction_invoice_type_key = (
-        f"transaction_invoice_type_{order.id}"
-    )
+    transaction_order_type_key = f"transaction_order_type_{order.id}"
+    transaction_customer_key = f"transaction_customer_{order.id}"
+    transaction_invoice_type_key = f"transaction_invoice_type_{order.id}"
 
     if request.method == "POST":
         form = TransactionLineForm(
@@ -438,40 +413,16 @@ def manage_transactions(request, order_id):
         if form.is_valid():
             try:
                 services.add_transaction_line(
-                    customer_detail=form.cleaned_data[
-                        "customer_detail"
-                    ],
-                    product=form.cleaned_data[
-                        "product"
-                    ],
-                    order_type=form.cleaned_data[
-                        "order_type"
-                    ],
-                    quantity=form.cleaned_data[
-                        "quantity"
-                    ],
-                    invoice_type=form.cleaned_data[
-                        "invoice_type"
-                    ],
+                    customer_detail=form.cleaned_data["customer_detail"],
+                    product=form.cleaned_data["product"],
+                    order_type=form.cleaned_data["order_type"],
+                    quantity=form.cleaned_data["quantity"],
+                    invoice_type=form.cleaned_data["invoice_type"],
                 )
 
-                request.session[
-                    transaction_order_type_key
-                ] = form.cleaned_data[
-                    "order_type"
-                ]
-
-                request.session[
-                    transaction_customer_key
-                ] = form.cleaned_data[
-                    "customer_detail"
-                ].id
-
-                request.session[
-                    transaction_invoice_type_key
-                ] = form.cleaned_data[
-                    "invoice_type"
-                ]
+                request.session[transaction_order_type_key] = form.cleaned_data["order_type"]
+                request.session[transaction_customer_key] = form.cleaned_data["customer_detail"].id
+                request.session[transaction_invoice_type_key] = form.cleaned_data["invoice_type"]
 
                 messages.success(
                     request,
@@ -510,9 +461,7 @@ def manage_transactions(request, order_id):
         }
 
         if selected_customer_id:
-            initial[
-                "customer_detail"
-            ] = selected_customer_id
+            initial["customer_detail"] = selected_customer_id
 
         form = TransactionLineForm(
             order=order,
@@ -564,6 +513,45 @@ def manage_transactions(request, order_id):
             ),
         },
     )
+
+
+@login_required
+def set_transaction_context(request, order_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+
+    if request.method == "POST":
+        transaction_order_type_key = f"transaction_order_type_{order.id}"
+        transaction_invoice_type_key = f"transaction_invoice_type_{order.id}"
+        transaction_customer_key = f"transaction_customer_{order.id}"
+
+        order_type = request.POST.get("order_type")
+        invoice_type = request.POST.get("invoice_type")
+        customer_detail_id = request.POST.get("customer_detail")
+
+        valid_order_types = dict(TransactionDetail.ORDER_TYPE_CHOICES)
+
+        if order_type is not None:
+            if order_type in valid_order_types:
+                request.session[transaction_order_type_key] = order_type
+            elif order_type == "":
+                request.session.pop(transaction_order_type_key, None)
+
+        if invoice_type is not None:
+            request.session[transaction_invoice_type_key] = invoice_type
+
+        if customer_detail_id is not None:
+            if customer_detail_id == "":
+                request.session.pop(transaction_customer_key, None)
+            else:
+                exists = CustomerDetails.objects.filter(
+                    pk=customer_detail_id,
+                    order=order,
+                ).exists()
+
+                if exists:
+                    request.session[transaction_customer_key] = int(customer_detail_id)
+
+    return HttpResponse(status=204)
 
 
 @permission_required_redirect("orders.delete_orderdetails")
