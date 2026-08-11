@@ -25,7 +25,7 @@ def get_area_price(area, product):
         )
 
 
-def add_delivery_line(order, product, order_type, quantity, remarks=""):
+def add_delivery_line(order, product, order_type, quantity):
     area_price = get_area_price(order.area, product)
     line_price = Decimal(quantity) * area_price
 
@@ -35,7 +35,6 @@ def add_delivery_line(order, product, order_type, quantity, remarks=""):
         order_type=order_type,
         quantity=quantity,
         line_price=line_price,
-        remarks=remarks,
     )
 
     sync_marketing_details(order)
@@ -49,7 +48,6 @@ def add_transaction_line(
     order_type,
     quantity,
     invoice_type="",
-    remarks="",
 ):
     area_price = get_area_price(customer_detail.order.area, product)
     line_price = Decimal(quantity) * area_price
@@ -61,7 +59,6 @@ def add_transaction_line(
         invoice_type=invoice_type,
         quantity=quantity,
         line_price=line_price,
-        remarks=remarks,
     )
 
     sync_marketing_details(customer_detail.order)

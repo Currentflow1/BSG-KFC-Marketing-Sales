@@ -8,6 +8,32 @@
   <form method="post" class="max-w-xs space-y-2">
     {% csrf_token %}
 
+        <!-- ORDER TYPE -->
+    <div>
+      <label
+        for="{{ form.order_type.id_for_label }}"
+        class="mb-1 block text-sm font-medium"
+      >
+        Order Type
+      </label>
+
+      <select
+        name="order_type"
+        id="{{ form.order_type.id_for_label }}"
+        class="w-full rounded-lg border border-gray-300 px-4 py-2"
+      >
+
+        {% for value, label in form.order_type.field.choices %}
+        <option value="{{ value }}">
+          {{ label }}
+        </option>
+        {% endfor %}
+
+      </select>
+
+      {{ form.order_type.errors }}
+    </div>
+
     <!-- PRODUCT -->
     <div>
       <label
@@ -38,34 +64,6 @@
       {{ form.product.errors }}
     </div>
 
-
-    <!-- ORDER TYPE -->
-    <div>
-      <label
-        for="{{ form.order_type.id_for_label }}"
-        class="mb-1 block text-sm font-medium"
-      >
-        Order Type
-      </label>
-
-      <select
-        name="order_type"
-        id="{{ form.order_type.id_for_label }}"
-        class="w-full rounded-lg border border-gray-300 px-4 py-2"
-      >
-
-        {% for value, label in form.order_type.field.choices %}
-        <option value="{{ value }}">
-          {{ label }}
-        </option>
-        {% endfor %}
-
-      </select>
-
-      {{ form.order_type.errors }}
-    </div>
-
-
     <!-- QUANTITY -->
     <div>
       <label
@@ -78,21 +76,6 @@
       {{ form.quantity }}
       {{ form.quantity.errors }}
     </div>
-
-
-    <!-- REMARKS -->
-    <div>
-      <label
-        for="{{ form.remarks.id_for_label }}"
-        class="mb-1 block text-sm font-medium"
-      >
-        Remarks
-      </label>
-
-      {{ form.remarks }}
-      {{ form.remarks.errors }}
-    </div>
-
 
     <!-- SUBMIT -->
     <button

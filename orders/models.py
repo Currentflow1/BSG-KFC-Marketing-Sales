@@ -152,11 +152,6 @@ class DeliveryDetail(models.Model):
         decimal_places=2
     )
 
-    remarks = models.CharField(
-        max_length=255,
-        blank=True
-    )
-
     created_at = models.DateTimeField(
         auto_now_add=True
     )
@@ -209,11 +204,6 @@ class TransactionDetail(models.Model):
     line_price = models.DecimalField(
         max_digits=20,
         decimal_places=2
-    )
-
-    remarks = models.CharField(
-        max_length=255,
-        blank=True
     )
 
     created_at = models.DateTimeField(

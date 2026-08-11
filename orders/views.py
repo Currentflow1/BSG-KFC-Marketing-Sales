@@ -279,7 +279,6 @@ def manage_delivery(request, order_id):
                     product=form.cleaned_data["product"],
                     order_type=form.cleaned_data["order_type"],
                     quantity=form.cleaned_data["quantity"],
-                    remarks=form.cleaned_data["remarks"],
                 )
 
                 request.session[
@@ -453,9 +452,6 @@ def manage_transactions(request, order_id):
                     ],
                     invoice_type=form.cleaned_data[
                         "invoice_type"
-                    ],
-                    remarks=form.cleaned_data[
-                        "remarks"
                     ],
                 )
 
