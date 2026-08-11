@@ -152,13 +152,6 @@ class DeliveryLineForm(forms.Form):
         ),
     )
 
-    remarks = forms.CharField(
-        required=False,
-        widget=forms.TextInput(
-            attrs={"class": FIELD_CLASS}
-        ),
-    )
-
     def __init__(self, *args, area=None, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -220,13 +213,6 @@ class TransactionLineForm(forms.Form):
                 "class": FIELD_CLASS,
                 "autocomplete": "off",
             },
-        ),
-    )
-
-    remarks = forms.CharField(
-        required=False,
-        widget=forms.TextInput(
-            attrs={"class": FIELD_CLASS},
         ),
     )
 
