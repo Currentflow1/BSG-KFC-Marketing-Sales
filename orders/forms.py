@@ -69,6 +69,14 @@ class OrderForm(forms.ModelForm):
             ),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Only suggest a number for brand-new orders, and only if the
+        # caller hasn't already supplied one via `initial`.
+        if not self.instance.pk and not self.initial.get("control_no"):
+            self.initial["control_no"] = OrderDetails._generate_control_no()
+
 
 # ---------------------------------------------------------------------------
 # Customers
