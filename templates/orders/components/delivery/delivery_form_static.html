@@ -1,0 +1,21 @@
+<!-- ORDER TYPE — set once, persists on its own, never touched by numpad flow -->
+<div class="rounded-lg border border-gray-200 bg-white p-4 lg:col-span-1 mb-4">
+  <label for="order-type-select" class="mb-1 block text-sm font-medium">
+    Order Type
+  </label>
+
+  <select
+    id="order-type-select"
+    name="order_type"
+    class="w-full rounded-lg border border-gray-300 px-4 py-2"
+    hx-post="{% url 'set_delivery_order_type' order.id %}"
+    hx-trigger="change"
+    hx-swap="none"
+  >
+    {% for value, label in delivery_order_type_choices %}
+    <option value="{{ value }}" {% if value == selected_order_type %}selected{% endif %}>
+      {{ label }}
+    </option>
+    {% endfor %}
+  </select>
+</div>

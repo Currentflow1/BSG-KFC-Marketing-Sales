@@ -19,11 +19,12 @@ urlpatterns = [
 
     path("<int:order_id>/delivery/", views.manage_delivery, name="manage_delivery"),
     path("<int:order_id>/delivery/<int:line_id>/delete/", views.delivery_delete, name="delivery_delete"),
+    path("<int:order_id>/delivery/set-order-type/", views.set_delivery_order_type, name="set_delivery_order_type"),
     path("order/<int:order_id>/product-search/", views.product_search, name="product_search"),
-
 
     path("<int:order_id>/transactions/", views.manage_transactions, name="manage_transactions"),
     path("<int:order_id>/transactions/<int:line_id>/delete/", views.transaction_delete, name="transaction_delete"),
+    path("<int:order_id>/transactions/set-context/", views.set_transaction_context, name="set_transaction_context"),
     path("order/<int:order_id>/transaction-customer-search/", views.transaction_customer_search, name="transaction_customer_search"),
     path("order/<int:order_id>/transaction-product-search/", views.transaction_product_search, name="transaction_product_search"),
 ]
