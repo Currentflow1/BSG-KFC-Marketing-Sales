@@ -24,4 +24,11 @@
   {% include "orders/components/delivery/delivery_list.html" %}
 </div>
 {% include "orders/components/delivery/delivery_total.html" %}
+
+<script>
+  document.getElementById('order-type-select').addEventListener('change', function () {
+    document.querySelector('input[name="order_type"]').value = this.value;
+  });
+</script>
+
 {% endblock %}
