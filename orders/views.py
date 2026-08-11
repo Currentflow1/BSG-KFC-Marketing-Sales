@@ -279,6 +279,10 @@ def manage_delivery(request, order_id):
 
             return redirect("manage_delivery", order_id=order.id)
 
+        else:
+            messages.error(request, "Please correct the errors below.")
+            form = DeliveryLineForm(area=order.area)
+
     else:
         form = DeliveryLineForm(area=order.area)
 
@@ -439,6 +443,14 @@ def manage_transactions(request, order_id):
                     request,
                     str(e),
                 )
+                form = TransactionLineForm(order=order)
+
+        else:
+            messages.error(
+                request,
+                "Please correct the errors below.",
+            )
+            form = TransactionLineForm(order=order)
 
     else:
         selected_order_type = request.session.get(

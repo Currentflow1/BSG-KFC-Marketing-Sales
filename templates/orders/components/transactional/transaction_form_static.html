@@ -44,6 +44,10 @@
               name="customer_detail"
               form="transaction-line-form"
               value="{{ selected_customer_detail.id }}"
+              hx-post="{% url 'set_transaction_context' order.id %}"
+              hx-trigger="load"
+              hx-swap="none"
+              hx-vals='{"customer_detail": "{{ selected_customer_detail.id }}"}'
             >
           {% endif %}
         </div>
@@ -57,7 +61,21 @@
       <label for="{{ form.order_type.id_for_label }}" class="mb-1 block text-sm font-medium">
         Order Type
       </label>
-      {{ form.order_type }}
+      <select
+        name="order_type"
+        id="{{ form.order_type.id_for_label }}"
+        form="transaction-line-form"
+        class="w-full rounded-lg border border-gray-300 px-4 py-2"
+        hx-post="{% url 'set_transaction_context' order.id %}"
+        hx-trigger="change"
+        hx-swap="none"
+      >
+        {% for value, label in form.order_type.field.choices %}
+        <option value="{{ value }}" {% if value == form.order_type.value|stringformat:"s" %}selected{% endif %}>
+          {{ label }}
+        </option>
+        {% endfor %}
+      </select>
       {{ form.order_type.errors }}
     </div>
 
@@ -66,7 +84,21 @@
       <label for="{{ form.invoice_type.id_for_label }}" class="mb-1 block text-sm font-medium">
         Invoice Type
       </label>
-      {{ form.invoice_type }}
+      <select
+        name="invoice_type"
+        id="{{ form.invoice_type.id_for_label }}"
+        form="transaction-line-form"
+        class="w-full rounded-lg border border-gray-300 px-4 py-2"
+        hx-post="{% url 'set_transaction_context' order.id %}"
+        hx-trigger="change"
+        hx-swap="none"
+      >
+        {% for value, label in form.invoice_type.field.choices %}
+        <option value="{{ value }}" {% if value == form.invoice_type.value|stringformat:"s" %}selected{% endif %}>
+          {{ label }}
+        </option>
+        {% endfor %}
+      </select>
       {{ form.invoice_type.errors }}
     </div>
 
