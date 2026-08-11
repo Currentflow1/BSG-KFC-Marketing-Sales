@@ -69,7 +69,7 @@ class OrderDetails(models.Model):
             )
 
             if last and last.control_no.isdigit():
-                next_no = int(last.control_no) + 1
+                next_no = max(int(last.control_no) + 1, CONTROL_NO_START)
             else:
                 next_no = CONTROL_NO_START
 
