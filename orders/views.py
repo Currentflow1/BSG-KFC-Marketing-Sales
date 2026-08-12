@@ -193,6 +193,10 @@ def manage_delivery(request, order_id):
 
             return redirect("manage_delivery", order_id=order.id)
 
+        else:
+            messages.error(request, "Please correct the errors below.")
+            form = DeliveryLineForm(area=order.area)
+
     else:
         form = DeliveryLineForm(area=order.area)
 
@@ -306,7 +310,26 @@ def manage_transactions(request, order_id):
                 return redirect("manage_transactions", order_id=order.id)
 
             except ValueError as e:
-                messages.error(request, str(e))
+                # Genuine business-rule failure (e.g. no AreaPrice for this
+                # product/area). The submitted data was structurally valid,
+                # so it's fine to reset to a fresh form here.
+                messages.error(
+                    request,
+                    str(e),
+                )
+                form = TransactionLineForm(order=order)
+
+        else:
+            # IMPORTANT: do NOT replace `form` with a fresh TransactionLineForm
+            # here. Doing so discards the POST-bound form (and its .errors),
+            # so the template's {{ form.field.errors }} always rendered empty
+            # regardless of what actually failed. Let the invalid, bound
+            # `form` instance fall through to render() below so real
+            # per-field errors show up.
+            messages.error(
+                request,
+                "Please correct the errors below.",
+            )
 
     else:
         selected_order_type = request.session.get(

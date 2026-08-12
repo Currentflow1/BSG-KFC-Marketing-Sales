@@ -40,7 +40,11 @@
       <!-- Normal full-page generation -->
       <button
           type="submit"
+<<<<<<< HEAD
           class="rounded-lg bg-blue-600 px-4 py-2 text-white cursor-pointer hover:bg-blue-700"
+=======
+          class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 cursor-pointer"
+>>>>>>> 79e34bf (Orders and Forecasting fixing)
       >
         Generate
       </button>
@@ -48,6 +52,7 @@
       <!-- HTMX refresh -->
       <button
           type="button"
+<<<<<<< HEAD
           hx-get="{% url 'product_forecast' product.product_id %}?days={{ horizon }}&refresh=1"
           hx-target="#forecast-result"
           hx-swap="innerHTML"
@@ -55,6 +60,18 @@
       >
           Refresh
       </button>
+=======
+          hx-get="."
+          hx-include="[name='days']"
+          hx-vals='{"refresh": "1"}'
+          hx-target="#forecast-result"
+          hx-swap="innerHTML"
+          class="rounded-lg border cursor-pointer border-gray-300 px-4 py-2 hover:bg-gray-50"
+      >
+        Refresh
+      </button>
+
+>>>>>>> 79e34bf (Orders and Forecasting fixing)
     </div>
 
   </form>

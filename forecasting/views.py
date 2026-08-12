@@ -67,6 +67,7 @@ def product_forecast(request, product_id):
     except InsufficientHistoryError as exc:
         error = str(exc)
 
+<<<<<<< HEAD
     # HTMX request: return ONLY the forecast table
     if request.headers.get("HX-Request"):
         return render(
@@ -91,3 +92,19 @@ def product_forecast(request, product_id):
             "error": error,
         },
     )
+=======
+    context = {
+        "product": product,
+        "product_id": product_id,
+        "history": history,
+        "forecast": forecast,
+        "summary": summary,
+        "horizon": horizon,
+        "error": error,
+    }
+
+    if request.headers.get("HX-Request"):
+        return render(request, "forecasting/components/forecast_result.html", context)
+
+    return render(request, "forecasting/product_forecast.html", context)
+>>>>>>> 79e34bf (Orders and Forecasting fixing)
