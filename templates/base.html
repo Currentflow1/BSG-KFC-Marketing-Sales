@@ -22,6 +22,11 @@
   </main>
 
   <script src="{% static 'orders/js/htmx.min.js' %}"></script>
+  <script>
+    document.body.addEventListener('htmx:configRequest', (event) => {
+      event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
+  </script>
   <script src="{% static 'orders/js/form-navigation.js' %}"></script>
 </body>
 

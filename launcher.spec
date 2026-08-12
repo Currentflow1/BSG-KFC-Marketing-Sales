@@ -1,162 +1,69 @@
-# launcher.spec
-#
-# Build with:
-#
-#     pyinstaller launcher.spec
-#
-# Tauri sidecar:
-#
-#     django-backend-x86_64-pc-windows-msvc.exe
+# -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_all
 
-import os
+datas = []
+binaries = []
+hiddenimports = []
 
-from PyInstaller.utils.hooks import (
-    collect_submodules,
-    collect_data_files,
-    collect_dynamic_libs,
-)
+for pkg in [
+    'waitress',
+    'whitenoise',
+    'tailwind',
+    'statsforecast',
+    'coreforecast',
+    'utilsforecast',
+    'fugue',
+    'triad',
+    'adagio',
+    'numba',
+    'llvmlite',
+    'pyarrow',
+    'statsmodels',
+    'scipy',
+]:
+    tmp_ret = collect_all(pkg)
+    datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
-
-# ---------------------------------------------------------------------------
-# Local Django apps (not picked up by collect_submodules, since they're
-# your own top-level packages, not third-party ones)
-# ---------------------------------------------------------------------------
-
-LOCAL_APPS = [
-    "ms",
-    "theme",
-    "login",
-    "dashboard",
-    "products",
-    "employees",
-    "area_prices",
-    "customers",
-    "orders",
-    "records",
-    "forecasting",
-    "transaction_logs",
+# --- project data files ---
+datas += [
+    ('templates', 'templates'),
+    ('theme/templates', 'theme/templates'),
+    ('theme/static', 'theme/static'),
+    ('orders/static', 'orders/static'),
 ]
-
-
-# ---------------------------------------------------------------------------
-# Hidden imports
-# ---------------------------------------------------------------------------
-
-hidden_imports = (
-    collect_submodules("django")
-    + collect_submodules("statsforecast")
-    + collect_submodules("pandas")
-    + collect_submodules("whitenoise")
-    + collect_submodules("tailwind")
-    + [module for app in LOCAL_APPS for module in collect_submodules(app)]
-    + [
-        "waitress",
-        "ms.settings",
-        "ms.wsgi",
-    ]
-)
-
-
-# ---------------------------------------------------------------------------
-# Binaries (numba/llvmlite JIT libs used by statsforecast won't always be
-# picked up by static import analysis)
-# ---------------------------------------------------------------------------
-
-binaries = (
-    collect_dynamic_libs("numba")
-    + collect_dynamic_libs("llvmlite")
-)
-
-
-# ---------------------------------------------------------------------------
-# Data files
-# ---------------------------------------------------------------------------
-
-datas = [
-    # Project templates
-    ("templates", "templates"),
-
-    # Theme templates
-    ("theme/templates", "theme/templates"),
-
-    # Theme static files
-    ("theme/static", "theme/static"),
-
-    # Orders static files (HTMX / form-navigation JS)
-    ("orders/static", "orders/static"),
-
-    # Tailwind templates
-    (
-        ".venv/Lib/site-packages/tailwind/templates",
-        "tailwind/templates",
-    ),
-]
-
-# django.contrib.admin / django.contrib.auth ship their own templates and
-# static files as package data -- collect_submodules() does NOT grab these.
-datas += collect_data_files("django.contrib.admin")
-datas += collect_data_files("django.contrib.auth")
-
-# Bundle each local app's own templates/ and static/ dirs, since APP_DIRS
-# looks these up on disk at runtime and PyInstaller won't auto-include
-# non-.py files from your own packages.
-for app in LOCAL_APPS:
-    for subdir in ("templates", "static"):
-        src = os.path.join(app, subdir)
-        if os.path.isdir(src):
-            datas.append((src, f"{app}/{subdir}"))
-
-
-# ---------------------------------------------------------------------------
-# Analysis
-# ---------------------------------------------------------------------------
 
 a = Analysis(
-    ["launcher.py"],
-
-    pathex=[
-        ".",
-    ],
-
+    ['launcher.py'],
+    pathex=[],
     binaries=binaries,
-
     datas=datas,
-
-    hiddenimports=hidden_imports,
-
+    hiddenimports=hiddenimports,
     hookspath=[],
+    hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
+    optimize=0,
 )
-
-
-# ---------------------------------------------------------------------------
-# Python archive
-# ---------------------------------------------------------------------------
-
-pyz = PYZ(
-    a.pure,
-)
-
-
-# ---------------------------------------------------------------------------
-# Executable
-# ---------------------------------------------------------------------------
+pyz = PYZ(a.pure)
 
 exe = EXE(
     pyz,
     a.scripts,
     a.binaries,
-    a.zipfiles,
     a.datas,
     [],
-
-    name="django-backend-x86_64-pc-windows-msvc",
-
-    console=True,
-
+    name='django-backend-x86_64-pc-windows-msvc',
     debug=False,
-
-    upx=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=True,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
 )
