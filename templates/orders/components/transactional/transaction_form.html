@@ -8,11 +8,6 @@
   <form id="transaction-line-form" method="post" class="max-w-xs space-y-2">
     {% csrf_token %}
 
-    <!-- SYNCED VALUES.
-         order_type / invoice_type / customer_detail all live OUTSIDE this
-         <form> — they're rendered in the separate "Order Info" card
-         (transaction_form_static.html). These hidden inputs are the only
-         copies of those values that actually get submitted with this form. -->
     <input type="hidden" name="order_type" id="sync-order-type" value="{{ form.order_type.value|default:'' }}">
     <input type="hidden" name="invoice_type" id="sync-invoice-type" value="{{ form.invoice_type.value|default:'' }}">
     <input type="hidden" name="customer_detail" id="sync-customer-detail" value="{{ selected_customer_detail.id|default:'' }}">
@@ -28,6 +23,7 @@
         name="q"
         id="product-search"
         autocomplete="off"
+        autofocus
         inputmode="numeric"
         class="w-full rounded-lg border border-gray-300 px-4 py-2"
         placeholder="Enter product code..."
@@ -37,9 +33,6 @@
         hx-swap="innerHTML"
       >
 
-      <!-- #product-result IS inside this <form>, and its partial renders its
-           own <input name="product" value="..."> — that one submits on its
-           own, no JS sync needed for product. -->
       <div id="product-result" class="mt-1"></div>
       {{ form.product.errors }}
     </div>
@@ -82,9 +75,6 @@
     }
   }
 
-  // Sync everything immediately on page load, in case the user submits
-  // without touching any of the Order Info fields (relying on session
-  // defaults / selected_customer_detail rendered server-side).
   document.addEventListener('DOMContentLoaded', function () {
     syncOrderAndInvoiceType();
     syncCustomerDetail();
@@ -97,9 +87,6 @@
     }
   });
 
-  // Keep customer_detail synced whenever the invoice search swaps in a
-  // new #customer-result (this fires on every htmx swap page-wide, so we
-  // just re-check — cheap and safe).
   document.body.addEventListener('htmx:afterSwap', function (e) {
     syncCustomerDetail();
   });
