@@ -11,14 +11,39 @@
 
   <input
     type="hidden"
-    name="customer_detail"
+    name="customer_detail_value"
     value="{{ customer_detail.id }}"
   >
 </div>
+
+<script>
+  // Runs immediately when this partial is swapped in — sets the real
+  // submitted field (sync-customer-detail, inside #transaction-line-form)
+  // directly, instead of relying on a separate global afterSwap listener.
+  (function () {
+    var sync = document.getElementById('sync-customer-detail');
+    if (sync) {
+      sync.value = "{{ customer_detail.id }}";
+    }
+  })();
+</script>
+
 {% elif query %}
 
 <div class="text-sm text-red-600">
   Invoice not found.
 </div>
+
+<script>
+  // Clear the synced value if a new search no longer matches anything,
+  // so a stale customer_detail from a previous successful search can't
+  // slip through on submit.
+  (function () {
+    var sync = document.getElementById('sync-customer-detail');
+    if (sync) {
+      sync.value = "";
+    }
+  })();
+</script>
 
 {% endif %}
