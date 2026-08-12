@@ -8,6 +8,15 @@
   <form id="transaction-line-form" method="post" class="max-w-xs space-y-2">
     {% csrf_token %}
 
+    <!-- SYNCED VALUES.
+         order_type / invoice_type / customer_detail all live OUTSIDE this
+         <form> — they're rendered in the separate "Order Info" card
+         (transaction_form_static.html). These hidden inputs are the only
+         copies of those values that actually get submitted with this form. -->
+    <input type="hidden" name="order_type" id="sync-order-type" value="{{ form.order_type.value|default:'' }}">
+    <input type="hidden" name="invoice_type" id="sync-invoice-type" value="{{ form.invoice_type.value|default:'' }}">
+    <input type="hidden" name="customer_detail" id="sync-customer-detail" value="{{ selected_customer_detail.id|default:'' }}">
+
     <!-- PRODUCT -->
     <div>
       <label for="product-search" class="mb-1 block text-sm font-medium">
@@ -28,6 +37,9 @@
         hx-swap="innerHTML"
       >
 
+      <!-- #product-result IS inside this <form>, and its partial renders its
+           own <input name="product" value="..."> — that one submits on its
+           own, no JS sync needed for product. -->
       <div id="product-result" class="mt-1"></div>
       {{ form.product.errors }}
     </div>
@@ -47,3 +59,48 @@
   </form>
 
 </div>
+
+<script>
+  function syncOrderAndInvoiceType() {
+    var orderTypeEl = document.getElementById('{{ form.order_type.id_for_label }}');
+    var invoiceTypeEl = document.getElementById('{{ form.invoice_type.id_for_label }}');
+    if (orderTypeEl) {
+      document.getElementById('sync-order-type').value = orderTypeEl.value;
+    }
+    if (invoiceTypeEl) {
+      document.getElementById('sync-invoice-type').value = invoiceTypeEl.value;
+    }
+  }
+
+  function syncCustomerDetail() {
+    // The live value lives in #customer-result's hidden input, which is
+    // OUTSIDE this <form> (it's in the separate Order Info card).
+    var customerInput = document.querySelector('#customer-result input[name="customer_detail_value"]');
+    var syncCustomer = document.getElementById('sync-customer-detail');
+    if (customerInput && syncCustomer) {
+      syncCustomer.value = customerInput.value;
+    }
+  }
+
+  // Sync everything immediately on page load, in case the user submits
+  // without touching any of the Order Info fields (relying on session
+  // defaults / selected_customer_detail rendered server-side).
+  document.addEventListener('DOMContentLoaded', function () {
+    syncOrderAndInvoiceType();
+    syncCustomerDetail();
+  });
+
+  // Keep order_type / invoice_type synced whenever their <select>s change.
+  document.addEventListener('change', function (e) {
+    if (e.target.id === '{{ form.order_type.id_for_label }}' || e.target.id === '{{ form.invoice_type.id_for_label }}') {
+      syncOrderAndInvoiceType();
+    }
+  });
+
+  // Keep customer_detail synced whenever the invoice search swaps in a
+  // new #customer-result (this fires on every htmx swap page-wide, so we
+  // just re-check — cheap and safe).
+  document.body.addEventListener('htmx:afterSwap', function (e) {
+    syncCustomerDetail();
+  });
+</script>
