@@ -1,54 +1,69 @@
-# launcher.spec
-# Build with: pyinstaller launcher.spec
-#
-# Naming convention Tauri requires for sidecars:
-# <name>-<target-triple>.exe  e.g. django-backend-x86_64-pc-windows-msvc.exe
-# Run `rustc -Vv` to find your triple, then rename the dist output accordingly
-# (or set the name below directly, see notes at bottom).
+# -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_all
 
-import sys
-from PyInstaller.utils.hooks import collect_submodules
+datas = []
+binaries = []
+hiddenimports = []
 
-hidden_imports = (
-    collect_submodules("django")
-    + collect_submodules("statsforecast")
-    + collect_submodules("pandas")
-    + collect_submodules("whitenoise")
-    + [
-        "waitress",
-        "ms.settings",
-        "ms.wsgi",
-    ]
-)
+for pkg in [
+    'waitress',
+    'whitenoise',
+    'tailwind',
+    'statsforecast',
+    'coreforecast',
+    'utilsforecast',
+    'fugue',
+    'triad',
+    'adagio',
+    'numba',
+    'llvmlite',
+    'pyarrow',
+    'statsmodels',
+    'scipy',
+]:
+    tmp_ret = collect_all(pkg)
+    datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+
+# --- project data files ---
+datas += [
+    ('templates', 'templates'),
+    ('theme/templates', 'theme/templates'),
+    ('theme/static', 'theme/static'),
+    ('orders/static', 'orders/static'),
+]
 
 a = Analysis(
-    ["launcher.py"],
-    pathex=["."],
-    binaries=[],
-    datas=[
-        ("templates", "templates"),
-        ("theme/templates", "theme/templates"),
-        ("theme/static", "theme/static"),
-        (".venv/Lib/site-packages/tailwind/templates", "tailwind/templates"),
-    ],
-    hiddenimports=hidden_imports,
+    ['launcher.py'],
+    pathex=[],
+    binaries=binaries,
+    datas=datas,
+    hiddenimports=hiddenimports,
     hookspath=[],
+    hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
+    optimize=0,
 )
-
 pyz = PYZ(a.pure)
 
 exe = EXE(
     pyz,
     a.scripts,
     a.binaries,
-    a.zipfiles,
     a.datas,
     [],
-    name="django-backend-x86_64-pc-windows-msvc",
-    console=True,
+    name='django-backend-x86_64-pc-windows-msvc',
     debug=False,
-    upx=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=True,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
 )

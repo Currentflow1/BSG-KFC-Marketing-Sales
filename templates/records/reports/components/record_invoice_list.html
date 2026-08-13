@@ -1,48 +1,41 @@
-<div class="overflow-x-auto mt-4">
-  <table class="w-full table-fixed border-collapse border-2 border-black text-sm">
-
+<div class="overflow-x-auto">
+  <table class="min-w-full border border-black">
     <thead class="sticky top-0 z-10 bg-gray-100">
-      <tr class="bg-gray-100 text-center font-bold">
-        <th class="w-30 border border-black p-2">Date</th>
-        <th class="w-45 border border-black p-2">Customer</th>
-        <th class="w-20 border border-black p-2">Inv Type</th>
-        <th class="w-25 border border-black p-2">Amount</th>
-        <th class="w-25 border border-black p-2">Inv Bal</th>
-        <th class="w-25 border border-black p-2">Cash</th>
-        <th class="w-25 border border-black p-2">Check</th>
-        <th class="w-20 border border-black p-2">Balance</th>
+      <tr>
+        <th class="border border-black p-2 text-left">Date</th>
+        <th class="border border-black p-2 text-left">Customer</th>
+        <th class="border border-black p-2 text-left">Inv Type</th>
+        <th class="border border-black p-2 text-right">Amount</th>
+        <th class="border border-black p-2 text-right">Inv Bal</th>
+        <th class="border border-black p-2 text-right">Cash</th>
+        <th class="border border-black p-2 text-right">Check</th>
+        <th class="border border-black p-2 text-right">Balance</th>
       </tr>
     </thead>
-
     <tbody>
       {% for customer_detail in order.customers.all %}
-        {% for transaction in customer_detail.transactions.all %}
+        {% with latest=customer_detail.latest_so_sam_transaction %}
+        {% if latest %}
         <tr>
           <td class="border border-black p-2">
-            {{ transaction.created_at|date:"Y-m-d" }}
+            {{ latest.created_at|date:"Y-m-d" }}
           </td>
-
           <td class="border border-black p-2">
             {{ customer_detail.customer }}
           </td>
-
           <td class="border border-black p-2">
-            {{ transaction.get_invoice_type_display }}
+            {{ latest.get_invoice_type_display }}
           </td>
-
           <td class="border border-black p-2 text-right">
-            P{{ transaction.line_price|floatformat:2|add:"" }}
+            P{{ customer_detail.total_so_sam_price|floatformat:2 }}
           </td>
-
           <td class="border border-black"></td>
-
           <td class="border border-black"></td>
-
           <td class="border border-black"></td>
-
           <td class="border border-black"></td>
         </tr>
-        {% endfor %}
+        {% endif %}
+        {% endwith %}
       {% empty %}
         <tr>
           <td colspan="8" class="border border-black p-2 text-center">

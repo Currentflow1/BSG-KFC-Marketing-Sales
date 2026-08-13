@@ -1,49 +1,20 @@
-<!-- ADD TRANSACTION LINE -->
+<!-- ADD TRANSACTION LINE — product + quantity, numpad flow -->
 <div class="rounded-lg border border-gray-200 bg-white p-4 lg:col-span-1">
 
   <h2 class="mb-2 text-base font-medium">
     Add Transaction Line
   </h2>
 
-  <form method="post" class="max-w-xs space-y-2">
+  <form id="transaction-line-form" method="post" class="max-w-xs space-y-2">
     {% csrf_token %}
 
-    <!-- INVOICE -->
+    <input type="hidden" name="order_type" id="sync-order-type" value="{{ form.order_type.value|default:'' }}">
+    <input type="hidden" name="invoice_type" id="sync-invoice-type" value="{{ form.invoice_type.value|default:'' }}">
+    <input type="hidden" name="customer_detail" id="sync-customer-detail" value="{{ selected_customer_detail.id|default:'' }}">
+
+    <!-- PRODUCT -->
     <div>
-      <label
-        for="invoice-search"
-        class="mb-1 block text-sm font-medium"
-      >
-        Invoice
-      </label>
-
-      <input
-        type="text"
-        name="invoice"
-        id="invoice-search"
-        inputmode="numeric"
-        autocomplete="off"
-        autofocus
-        class="w-full rounded-lg border border-gray-300 px-4 py-2"
-        placeholder="Enter invoice number..."
-
-        hx-get="{% url 'customer_search' order.id %}"
-        hx-trigger="keyup changed delay:300ms"
-        hx-target="#customer-result"
-        hx-swap="innerHTML"
-      >
-
-      <div id="customer-result" class="mt-1"></div>
-
-      {{ form.customer_detail.errors }}
-    </div>
-
-        <!-- PRODUCT -->
-    <div>
-      <label
-        for="product-search"
-        class="mb-1 block text-sm font-medium"
-      >
+      <label for="product-search" class="mb-1 block text-sm font-medium">
         Product Code
       </label>
 
@@ -52,9 +23,10 @@
         name="q"
         id="product-search"
         autocomplete="off"
+        autofocus
+        inputmode="numeric"
         class="w-full rounded-lg border border-gray-300 px-4 py-2"
         placeholder="Enter product code..."
-
         hx-get="{% url 'transaction_product_search' order.id %}"
         hx-trigger="keyup changed delay:300ms"
         hx-target="#product-result"
@@ -62,74 +34,60 @@
       >
 
       <div id="product-result" class="mt-1"></div>
-
       {{ form.product.errors }}
-    </div>
-
-
-    <!-- ORDER TYPE -->
-    <div>
-      <label
-        for="{{ form.order_type.id_for_label }}"
-        class="mb-1 block text-sm font-medium"
-      >
-        Order Type
-      </label>
-
-      {{ form.order_type }}
-      {{ form.order_type.errors }}
-    </div>
-
-
-    <!-- INVOICE TYPE -->
-    <div>
-      <label
-        for="{{ form.invoice_type.id_for_label }}"
-        class="mb-1 block text-sm font-medium"
-      >
-        Invoice Type
-      </label>
-
-      {{ form.invoice_type }}
-      {{ form.invoice_type.errors }}
     </div>
 
     <!-- QUANTITY -->
     <div>
-      <label
-        for="{{ form.quantity.id_for_label }}"
-        class="mb-1 block text-sm font-medium"
-      >
+      <label for="{{ form.quantity.id_for_label }}" class="mb-1 block text-sm font-medium">
         Quantity
       </label>
-
       {{ form.quantity }}
       {{ form.quantity.errors }}
     </div>
 
-
-    <!-- REMARKS -->
-    <div>
-      <label
-        for="{{ form.remarks.id_for_label }}"
-        class="mb-1 block text-sm font-medium"
-      >
-        Remarks
-      </label>
-
-      {{ form.remarks }}
-      {{ form.remarks.errors }}
-    </div>
-
-
-    <!-- SUBMIT -->
-    <button
-      type="submit"
-      class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
-    >
+    <button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700">
       + Add Line
     </button>
-
   </form>
 
 </div>
+
+<script>
+  function syncOrderAndInvoiceType() {
+    var orderTypeEl = document.getElementById('{{ form.order_type.id_for_label }}');
+    var invoiceTypeEl = document.getElementById('{{ form.invoice_type.id_for_label }}');
+    if (orderTypeEl) {
+      document.getElementById('sync-order-type').value = orderTypeEl.value;
+    }
+    if (invoiceTypeEl) {
+      document.getElementById('sync-invoice-type').value = invoiceTypeEl.value;
+    }
+  }
+
+  function syncCustomerDetail() {
+    // The live value lives in #customer-result's hidden input, which is
+    // OUTSIDE this <form> (it's in the separate Order Info card).
+    var customerInput = document.querySelector('#customer-result input[name="customer_detail_value"]');
+    var syncCustomer = document.getElementById('sync-customer-detail');
+    if (customerInput && syncCustomer) {
+      syncCustomer.value = customerInput.value;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    syncOrderAndInvoiceType();
+    syncCustomerDetail();
+  });
+
+  // Keep order_type / invoice_type synced whenever their <select>s change.
+  document.addEventListener('change', function (e) {
+    if (e.target.id === '{{ form.order_type.id_for_label }}' || e.target.id === '{{ form.invoice_type.id_for_label }}') {
+      syncOrderAndInvoiceType();
+    }
+  });
+
+  document.body.addEventListener('htmx:afterSwap', function (e) {
+    syncCustomerDetail();
+  });
+</script>

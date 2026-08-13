@@ -1,27 +1,49 @@
 {% if customer_detail %}
 
-  <div class="rounded-lg border border-green-200 bg-green-50 p-2 text-sm">
-
-    <div class="font-medium text-green-800">
-      Invoice {{ customer_detail.invoice_no }}
-    </div>
-
-    <div class="text-green-700">
-      {{ customer_detail.customer }}
-    </div>
-
-    <input
-      type="hidden"
-      name="customer_detail"
-      value="{{ customer_detail.id }}"
-    >
-
+<div class="rounded-lg border border-green-200 bg-green-50 p-2 text-sm">
+  <div class="font-medium text-green-800">
+    Invoice {{ customer_detail.invoice_no }}
   </div>
+
+  <div class="text-green-700">
+    {{ customer_detail.customer }}
+  </div>
+
+  <input
+    type="hidden"
+    name="customer_detail_value"
+    value="{{ customer_detail.id }}"
+  >
+</div>
+
+<script>
+  // Runs immediately when this partial is swapped in — sets the real
+  // submitted field (sync-customer-detail, inside #transaction-line-form)
+  // directly, instead of relying on a separate global afterSwap listener.
+  (function () {
+    var sync = document.getElementById('sync-customer-detail');
+    if (sync) {
+      sync.value = "{{ customer_detail.id }}";
+    }
+  })();
+</script>
 
 {% elif query %}
 
-  <div class="rounded-lg border border-red-200 bg-red-50 p-2 text-sm text-red-700">
-    Invoice not found.
-  </div>
+<div class="text-sm text-red-600">
+  Invoice not found.
+</div>
+
+<script>
+  // Clear the synced value if a new search no longer matches anything,
+  // so a stale customer_detail from a previous successful search can't
+  // slip through on submit.
+  (function () {
+    var sync = document.getElementById('sync-customer-detail');
+    if (sync) {
+      sync.value = "";
+    }
+  })();
+</script>
 
 {% endif %}

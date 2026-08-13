@@ -24,7 +24,8 @@ def get_area_price(area, product):
             "Please add the area price first."
         )
 
-def add_delivery_line(order, product, order_type, quantity, remarks=""):
+
+def add_delivery_line(order, product, order_type, quantity):
     area_price = get_area_price(order.area, product)
     line_price = Decimal(quantity) * area_price
 
@@ -34,18 +35,7 @@ def add_delivery_line(order, product, order_type, quantity, remarks=""):
         order_type=order_type,
         quantity=quantity,
         line_price=line_price,
-        remarks=remarks,
     )
-
-    today = date.today()
-
-    if order_type == "MLOAD" and order.mload_date is None:
-        order.mload_date = today
-        order.save(update_fields=["mload_date"])
-
-    if order_type == "MRET" and order.mret_date is None:
-        order.mret_date = today
-        order.save(update_fields=["mret_date"])
 
     sync_marketing_details(order)
 
@@ -58,7 +48,6 @@ def add_transaction_line(
     order_type,
     quantity,
     invoice_type="",
-    remarks="",
 ):
     area_price = get_area_price(customer_detail.order.area, product)
     line_price = Decimal(quantity) * area_price
@@ -70,7 +59,6 @@ def add_transaction_line(
         invoice_type=invoice_type,
         quantity=quantity,
         line_price=line_price,
-        remarks=remarks,
     )
 
     sync_marketing_details(customer_detail.order)
@@ -171,6 +159,7 @@ def get_marketing_summary(order):
         "total_VBO": delivery["by_type"]["VBO"]["qty"],
     }
 
+
 def complete_order(order):
     today = date.today()
 
@@ -195,26 +184,30 @@ def search_orders(search=None, sort="-beg_date"):
             Q(control_no__icontains=search) |
             Q(area__area_name__icontains=search) |
             Q(agent__employee_name__icontains=search) |
-            Q(van_number__icontains=search) |
             Q(beg_date__icontains=search) |
             Q(mload_date__icontains=search) |
             Q(mret_date__icontains=search) |
             Q(end_date__icontains=search) |
             Q(customers__invoice_no__icontains=search) |
-            Q(customers__customer__customer_business_name__icontains=search)
+            Q(
+                customers__customer__customer_business_name__icontains=search
+            )
         ).distinct()
 
         if search.lower() in ["completed", "complete"]:
-            orders = orders.completed()
+            orders = orders.completed() # type: ignore
 
-        elif search.lower() in ["in progress", "incomplete", "active"]:
-            orders = orders.incomplete()
+        elif search.lower() in [
+            "in progress",
+            "incomplete",
+            "active",
+        ]:
+            orders = orders.incomplete() # type: ignore
 
     return orders.order_by(sort)
 
 
 def sync_marketing_details(order):
-
     product_ids = set(
         DeliveryDetail.objects
         .filter(order=order)
@@ -300,8 +293,16 @@ def sync_marketing_details(order):
 
 def get_unpriced_products(area):
     """Products that exist but have no AreaPrice entry for this area."""
+
     from products.models import Product
+
     priced_ids = AreaPrice.objects.filter(
         area_name=area
-    ).values_list("product_name_id", flat=True)
-    return Product.objects.exclude(pk__in=priced_ids)
+    ).values_list(
+        "product_name_id",
+        flat=True
+    )
+
+    return Product.objects.exclude(
+        pk__in=priced_ids
+    )

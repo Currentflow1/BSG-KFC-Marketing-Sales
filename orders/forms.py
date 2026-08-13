@@ -14,7 +14,6 @@ from customers.models import Customer
 from products.models import Product
 from area_prices.models import AreaPrice
 
-
 FIELD_CLASS = "w-full rounded-lg border border-gray-300 px-4 py-2"
 
 
@@ -24,8 +23,7 @@ FIELD_CLASS = "w-full rounded-lg border border-gray-300 px-4 py-2"
 
 class ProductCodeChoiceField(forms.ModelChoiceField):
     """
-    Display the product code in the <select>,
-    while still returning the actual Product object.
+    Display the product code while still returning the actual Product object.
     """
 
     def label_from_instance(self, obj):
@@ -43,7 +41,8 @@ class OrderForm(forms.ModelForm):
             "control_no",
             "area",
             "agent",
-            "van_number",
+            "mload_date",
+            "mret_date",
         ]
 
         widgets = {
@@ -56,10 +55,27 @@ class OrderForm(forms.ModelForm):
             "agent": forms.Select(
                 attrs={"class": FIELD_CLASS}
             ),
-            "van_number": forms.NumberInput(
-                attrs={"class": FIELD_CLASS}
+            "mload_date": forms.DateInput(
+                attrs={
+                    "class": FIELD_CLASS,
+                    "type": "date",
+                }
+            ),
+            "mret_date": forms.DateInput(
+                attrs={
+                    "class": FIELD_CLASS,
+                    "type": "date",
+                }
             ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Only suggest a number for brand-new orders, and only if the
+        # caller hasn't already supplied one via `initial`.
+        if not self.instance.pk and not self.initial.get("control_no"):
+            self.initial["control_no"] = OrderDetails._generate_control_no()
 
 
 # ---------------------------------------------------------------------------
@@ -129,14 +145,10 @@ class DeliveryLineForm(forms.Form):
     quantity = forms.IntegerField(
         min_value=1,
         widget=forms.NumberInput(
-            attrs={"class": FIELD_CLASS}
-        ),
-    )
-
-    remarks = forms.CharField(
-        required=False,
-        widget=forms.TextInput(
-            attrs={"class": FIELD_CLASS}
+            attrs={
+                "class": FIELD_CLASS,
+                "autocomplete": "off",
+            }
         ),
     )
 
@@ -197,14 +209,10 @@ class TransactionLineForm(forms.Form):
     quantity = forms.IntegerField(
         min_value=1,
         widget=forms.NumberInput(
-            attrs={"class": FIELD_CLASS},
-        ),
-    )
-
-    remarks = forms.CharField(
-        required=False,
-        widget=forms.TextInput(
-            attrs={"class": FIELD_CLASS},
+            attrs={
+                "class": FIELD_CLASS,
+                "autocomplete": "off",
+            },
         ),
     )
 
