@@ -183,9 +183,7 @@ def search_orders(search=None, sort="-beg_date"):
             Q(mret_date__icontains=search) |
             Q(end_date__icontains=search) |
             Q(customers__invoice_no__icontains=search) |
-            Q(
-                customers__customer__customer_business_name__icontains=search
-            )
+            Q(customers__customer__customer_business_name__icontains=search)
         ).distinct()
 
         if search.lower() in ["completed", "complete"]:

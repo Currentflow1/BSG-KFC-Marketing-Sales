@@ -514,10 +514,7 @@ def add_customer(request,order_id):
     if request.method == "POST":
         form = CustomerDetailForm(request.POST, area=order.area)
         if form.is_valid():
-            cd = form.save(
-                commit=False
-            )
-
+            cd = form.save(commit=False)
             cd.order = order
             cd.save()
             services.sync_marketing_details(order)
