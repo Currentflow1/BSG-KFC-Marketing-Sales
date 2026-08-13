@@ -16,24 +16,19 @@ def dashboard(request):
             | Q(product_name__icontains=search)
         )
 
-    return render(
-        request,
-        "forecasting/dashboard.html",
-        {"products": products},
-    )
+    return render(request, "forecasting/dashboard.html", {
+        "products": products
+    })
 
 
 def forecasting_search(request):
     search = request.GET.get("search", "").strip()
-
-    products = Product.objects.filter(
-        discontinued=False
-    )
+    products = Product.objects.filter(discontinued=False)
 
     if search:
         products = products.filter(
-            Q(product_code__icontains=search)
-            | Q(product_name__icontains=search)
+            Q(product_code__icontains=search)| 
+            Q(product_name__icontains=search)
         )
 
     return render(
