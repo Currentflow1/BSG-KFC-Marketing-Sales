@@ -10,26 +10,17 @@ def employee_list(request):
         request.GET.get("search")
     )
 
-    return render(
-        request,
-        "employees/home.html",
-        {
-            "employees": employees,
-        },
-    )
+    return render(request, "employees/home.html", {
+      "employees": employees,
+    })
 
 def employee_search(request):
     search = request.GET.get("search", "").strip()
-
     employees = services.search_employees(search)
 
-    return render(
-        request,
-        "employees/components/list.html",
-        {
-            "employees": employees,
-        },
-    )
+    return render(request, "employees/components/list.html", {
+      "employees": employees,
+    })
 
 def employee_new(request):
   form = EmployeeForm(request.POST or None)

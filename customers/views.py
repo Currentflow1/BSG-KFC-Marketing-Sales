@@ -8,26 +8,17 @@ def customer_list(request):
         request.GET.get("search")
     )
 
-    return render(
-        request,
-        "customers/home.html",
-        {
-            "customers": customers,
-        },
-    )
+    return render(request, "customers/home.html", {
+      "customers": customers,
+    })
 
 def customer_search(request):
     search = request.GET.get("search", "").strip()
-
     customers = services.search_customers(search)
 
-    return render(
-        request,
-        "customers/components/list.html",
-        {
-            "customers": customers,
-        },
-    )
+    return render(request, "customers/components/list.html", {
+      "customers": customers,
+    })
 
 def customer_new(request):
   form = CustomerForm(request.POST or None)
@@ -43,10 +34,7 @@ def customer_new(request):
 def customer_edit(request, id):
   customer = get_object_or_404(Customer, customer_id=id)
 
-  form = CustomerForm(
-    request.POST or None,
-    instance=customer
-  )
+  form = CustomerForm(request.POST or None, instance=customer)
 
   if request.method == 'POST' and form.is_valid():
     form.save()

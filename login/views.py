@@ -16,7 +16,9 @@ def login(request):
     else:
         form = AuthenticationForm(request)
 
-    return render(request, "registration/login.html", {"form": form, "next": request.GET.get("next", "")})
+    return render(request, "registration/login.html", {
+        "form": form, "next": request.GET.get("next", "")
+    })
 
 
 def first_run_setup(request):

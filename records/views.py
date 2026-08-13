@@ -14,22 +14,12 @@ def record_list(request):
         sort=request.GET.get("sort", "-beg_date"),
     )
 
-    context = {
-        "orders": orders,
-    }
+    context = {"orders": orders}
 
     if request.headers.get("HX-Request") == "true":
-        return render(
-            request,
-            "records/components/list.html",
-            context,
-        )
+        return render(request, "records/components/list.html", context)
 
-    return render(
-        request,
-        "records/home.html",
-        context,
-    )
+    return render(request, "records/home.html", context)
 
 def record_view(request, order_id):
     order = get_object_or_404(
@@ -46,7 +36,6 @@ def record_view(request, order_id):
     )
 
     reports = order.marketing.all()
-
     totals = reports.aggregate(
         total_MRET=Sum("total_MRET"),
         total_MLOAD=Sum("total_MLOAD"),
@@ -98,7 +87,6 @@ def record_view(request, order_id):
         totals["mld_mrt"]
     )
 
-    
     collection_totals = order.customers.aggregate(
         cash_total=Sum(
             "transactions__line_price",
@@ -114,15 +102,11 @@ def record_view(request, order_id):
     totals["charge_total"] = collection_totals["charge_total"] or 0
     totals["collectible_a"] = totals["charge_total"]
 
-    return render(
-        request,
-        "records/reports/view.html",
-        {
-            "order": order,
-            "reports": reports,
-            "totals": totals,
-        },
-    )
+    return render(request, "records/reports/view.html", {
+        "order": order,
+        "reports": reports,
+        "totals": totals,
+    })
 
 
 def export_trip_report_csv(request, order_id):

@@ -8,9 +8,7 @@ from .services import ForecastService, InsufficientHistoryError
 def dashboard(request):
     search = request.GET.get("search", "").strip()
 
-    products = Product.objects.filter(
-        discontinued=False
-    )
+    products = Product.objects.filter(discontinued=False)
 
     if search:
         products = products.filter(
@@ -18,26 +16,19 @@ def dashboard(request):
             | Q(product_name__icontains=search)
         )
 
-    return render(
-        request,
-        "forecasting/dashboard.html",
-        {
-            "products": products,
-        },
-    )
+    return render(request, "forecasting/dashboard.html", {
+        "products": products
+    })
 
 
 def forecasting_search(request):
     search = request.GET.get("search", "").strip()
-
-    products = Product.objects.filter(
-        discontinued=False
-    )
+    products = Product.objects.filter(discontinued=False)
 
     if search:
         products = products.filter(
-            Q(product_code__icontains=search)
-            | Q(product_name__icontains=search)
+            Q(product_code__icontains=search)| 
+            Q(product_name__icontains=search)
         )
 
     return render(
@@ -50,24 +41,14 @@ def forecasting_search(request):
 
 
 def product_forecast(request, product_id):
-    product = get_object_or_404(
-        Product,
-        pk=product_id,
-    )
+    product = get_object_or_404(Product, pk=product_id)
 
-    horizon = int(
-        request.GET.get("days", 30)
-    )
-
-    force_refresh = (
-        request.GET.get("refresh") == "1"
-    )
+    horizon = int(request.GET.get("days", 30))
+    force_refresh = request.GET.get("refresh") == "1"
 
     service = ForecastService()
 
-    history = service.history_for_display(
-        product_id
-    )
+    history = service.history_for_display(product_id)
 
     forecast = []
     summary = None
