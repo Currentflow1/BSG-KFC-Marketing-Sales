@@ -551,7 +551,7 @@ def customer_delete(request, order_id, customer_detail_id):
 @login_required
 def customer_search(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
-    search = request.GET.get("search", "",).strip()
+    search = request.GET.get("search", "").strip()
     customers = Customer.objects.all()
 
     if search:
@@ -562,9 +562,6 @@ def customer_search(request, order_id):
         )
 
     customers = customers.order_by("customer_business_name")
-    customer_form = CustomerDetailForm(area=order.area,)
-    customer_form.fields["customer"].queryset = customers
-
-    return render(request, "orders/components/transactional/partials/customer_select.html", {
-        "customer_form": customer_form,
+    return render(request, "orders/components/details/partials/customer_select.html", {
+        "customers": customers,
     })

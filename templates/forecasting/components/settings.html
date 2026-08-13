@@ -1,27 +1,62 @@
-<div class="space-y-4">
+<div class="rounded-lg border border-gray-200 bg-white p-5">
 
-  <div>
-    <label class="mb-2 block font-medium">Forecast Horizon</label>
+  <h2 class="mb-4 text-lg font-semibold">
+    Forecast Settings
+  </h2>
 
-    <select name="days" class="w-full rounded-lg border border-gray-300 px-4 py-2">
-      <option value="7" {% if horizon == 7 %}selected{% endif %}>7 Days</option>
-      <option value="30" {% if horizon == 30 %}selected{% endif %}>30 Days</option>
-      <option value="60" {% if horizon == 60 %}selected{% endif %}>60 Days</option>
-      <option value="90" {% if horizon == 90 %}selected{% endif %}>90 Days</option>
-      <option value="180" {% if horizon == 180 %}selected{% endif %}>6 Months</option>
-      <option value="365" {% if horizon == 365 %}selected{% endif %}>12 Months</option>
-    </select>
-  </div>
+  <form method="get" class="space-y-4">
 
-  <div class="flex items-stretch gap-2">
-    <button class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-center text-white hover:bg-blue-700">
-      Generate
-    </button>
+    <div>
 
-    <a href="?days={{ horizon }}&refresh=1"
-       class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-center hover:bg-gray-50">
-      Refresh
-    </a>
-  </div>
+      <label class="mb-2 block font-medium">
+        Forecast Horizon
+      </label>
+
+      <select
+          name="days"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2"
+      >
+        <option value="7" {% if horizon == 7 %}selected{% endif %}>
+          7 Days
+        </option>
+
+        <option value="30" {% if horizon == 30 %}selected{% endif %}>
+          30 Days
+        </option>
+
+        <option value="60" {% if horizon == 60 %}selected{% endif %}>
+          60 Days
+        </option>
+
+        <option value="90" {% if horizon == 90 %}selected{% endif %}>
+          90 Days
+        </option>
+      </select>
+
+    </div>
+
+    <div class="flex gap-2">
+
+      <!-- Normal full-page generation -->
+      <button
+          type="submit"
+          class="rounded-lg bg-blue-600 px-4 py-2 text-white cursor-pointer hover:bg-blue-700"
+      >
+        Generate
+      </button>
+
+      <!-- HTMX refresh -->
+      <button
+          type="button"
+          hx-get="{% url 'product_forecast' product.product_id %}?days={{ horizon }}&refresh=1"
+          hx-target="#forecast-result"
+          hx-swap="innerHTML"
+          class="rounded-lg border border-gray-300 px-4 py-2 cursor-pointer hover:bg-gray-50"
+      >
+          Refresh
+      </button>
+    </div>
+
+  </form>
 
 </div>

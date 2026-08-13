@@ -48,8 +48,6 @@ def product_forecast(request, product_id):
 
     service = ForecastService()
 
-    history = service.history_for_display(product_id)
-
     forecast = []
     summary = None
     error = None
@@ -69,12 +67,24 @@ def product_forecast(request, product_id):
     except InsufficientHistoryError as exc:
         error = str(exc)
 
+    # HTMX request: return ONLY the forecast table
+    if request.headers.get("HX-Request"):
+        return render(
+            request,
+            "forecasting/components/forecast_result.html",
+            {
+                "forecast": forecast,
+                "error": error,
+            },
+        )
+
+    # Normal request: return the entire page
     return render(
         request,
         "forecasting/product_forecast.html",
         {
             "product": product,
-            "history": history,
+            "history": service.history_for_display(product_id),
             "forecast": forecast,
             "summary": summary,
             "horizon": horizon,

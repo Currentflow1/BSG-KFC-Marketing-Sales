@@ -14,7 +14,9 @@
 
     <div class="grid grid-cols-2 gap-6">
         {% include "forecasting/components/history_table.html" %}
-        {% include "forecasting/components/forecast_table.html" %}
+        <div id="forecast-result">
+            {% include "forecasting/components/forecast_result.html" %}
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -11,27 +11,12 @@
         <table class="min-w-full">
 
             <thead class="sticky top-0 z-10 bg-gray-100">
-
                 <tr>
-
-                    <th class="px-4 py-2 text-left">
-                        Date
-                    </th>
-
-                    <th class="px-4 py-2 text-center">
-                        Prediction
-                    </th>
-
-                    <th class="px-4 py-2 text-center">
-                        Lower
-                    </th>
-
-                    <th class="px-4 py-2 text-center">
-                        Upper
-                    </th>
-
+                    <th class="px-4 py-2 text-left">Date</th>
+                    <th class="px-4 py-2 text-center">Prediction</th>
+                    <th class="px-4 py-2 text-center">Lower</th>
+                    <th class="px-4 py-2 text-center">Upper</th>
                 </tr>
-
             </thead>
 
             <tbody>
@@ -39,7 +24,6 @@
                 {% for row in forecast %}
 
                 <tr class="border-t hover:bg-gray-50">
-
                     <td class="px-4 py-2">
                         {{ row.forecast_date }}
                     </td>
@@ -55,17 +39,14 @@
                     <td class="px-4 py-2 text-center text-gray-500">
                         {{ row.upper_bound|floatformat:0 }}
                     </td>
-
                 </tr>
 
                 {% empty %}
 
                 <tr>
-
                     <td colspan="4" class="px-4 py-8 text-center text-gray-500">
                         No forecast available.
                     </td>
-
                 </tr>
 
                 {% endfor %}

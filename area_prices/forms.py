@@ -2,7 +2,7 @@ from django import forms
 from .models import Area, AreaPrice
 
 FIELD_CLASS_SELECT = "w-50 rounded-lg border px-3 py-2"
-FIELD_CLASS_ALL = "w-full rounded-lg border px-3 py-2",
+FIELD_CLASS_ALL = "w-full rounded-lg border px-3 py-2"
 
 class AreaForm(forms.ModelForm):
   class Meta: 
