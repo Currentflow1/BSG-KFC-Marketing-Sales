@@ -42,13 +42,7 @@ def add_delivery_line(order, product, order_type, quantity):
     return delivery
 
 
-def add_transaction_line(
-    customer_detail,
-    product,
-    order_type,
-    quantity,
-    invoice_type="",
-):
+def add_transaction_line(customer_detail, product, order_type, quantity, invoice_type=""):
     area_price = get_area_price(customer_detail.order.area, product)
     line_price = Decimal(quantity) * area_price
 

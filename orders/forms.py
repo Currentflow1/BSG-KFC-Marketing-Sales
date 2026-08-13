@@ -179,7 +179,6 @@ class DeliveryLineForm(forms.Form):
 # ---------------------------------------------------------------------------
 
 class TransactionLineForm(forms.Form):
-
     customer_detail = forms.ModelChoiceField(
         queryset=CustomerDetails.objects.none(),
         label="Customer / Invoice",
@@ -205,7 +204,7 @@ class TransactionLineForm(forms.Form):
         queryset=Product.objects.none(),
         widget=forms.HiddenInput(),
     )
-
+    
     quantity = forms.IntegerField(
         min_value=1,
         widget=forms.NumberInput(

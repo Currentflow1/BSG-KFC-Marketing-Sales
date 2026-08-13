@@ -30,7 +30,6 @@ from . import services
 # Order list / detail
 # ---------------------------------------------------------------------------
 
-
 @login_required
 def order_list(request):
     search = request.GET.get("search", "").strip()
@@ -58,7 +57,6 @@ def order_search(request):
     return render(request, "orders/components/main_order/main_order_list.html", {
         "orders": orders,
     })
-
 
 
 @login_required
@@ -98,43 +96,27 @@ def order_detail(request, order_id):
 def order_new(request):
     if request.method == "POST":
         form = OrderForm(request.POST)
-
         if form.is_valid():
             order = form.save()
             messages.success(request, f"Order {order.control_no} created.",)
             return redirect("order_list")
-
     else:
         form = OrderForm()
 
-    return render(
-        request,
-        "orders/new.html",
-        {
-            "form": form,
-        },
-    )
+    return render(request, "orders/new.html", {
+        "form": form,
+    })
 
 
 @permission_required_redirect("orders.change_orderdetails")
 def order_edit(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id,)
     if request.method == "POST":
-        form = OrderForm(
-            request.POST,
-            instance=order,
-        )
-
+        form = OrderForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
-
-            messages.success(
-                request,
-                f"Order {order.control_no} updated.",
-            )
-
+            messages.success(request, f"Order {order.control_no} updated.")
             return redirect("order_list")
-
     else:
         form = OrderForm(instance=order)
 
@@ -150,12 +132,7 @@ def order_delete(request, order_id):
 
     if request.method == "POST":
         order.delete()
-
-        messages.success(
-            request,
-            "Order deleted.",
-        )
-
+        messages.success(request, "Order deleted.")
         return redirect("order_list")
 
     return render(request, "orders/delete.html", {
@@ -169,16 +146,8 @@ def order_complete(request, order_id):
 
     if request.method == "POST":
         services.complete_order(order)
-
-        messages.success(
-            request,
-            f"Order {order.control_no} marked complete.",
-        )
-
-    return redirect(
-        "order_detail",
-        order_id=order.id,
-    )
+        messages.success(request, f"Order {order.control_no} marked complete.")
+    return redirect("order_detail", order_id=order.id)
 
 
 @permission_required_redirect("orders.change_orderdetails")
@@ -264,31 +233,15 @@ def set_delivery_order_type(request, order_id):
 
 @permission_required_redirect("orders.delete_orderdetails")
 def delivery_delete(request, order_id, line_id):
-    order = get_object_or_404(
-        OrderDetails,
-        pk=order_id,
-    )
-
-    line = get_object_or_404(
-        DeliveryDetail,
-        pk=line_id,
-        order=order,
-    )
+    order = get_object_or_404(OrderDetails, pk=order_id)
+    line = get_object_or_404(DeliveryDetail, pk=line_id, order=order)
 
     if request.method == "POST":
         line.delete()
-
         services.sync_marketing_details(order)
+        messages.success(request, "Delivery line removed.")
 
-        messages.success(
-            request,
-            "Delivery line removed.",
-        )
-
-    return redirect(
-        "manage_delivery",
-        order_id=order.id,
-    )
+    return redirect("manage_delivery", order_id=order.id)
 
 
 
@@ -333,11 +286,7 @@ def manage_transactions(request, order_id):
     transaction_invoice_type_key = f"transaction_invoice_type_{order.id}"
 
     if request.method == "POST":
-        form = TransactionLineForm(
-            request.POST,
-            order=order,
-        )
-
+        form = TransactionLineForm(request.POST, order=order)
         if form.is_valid():
             try:
                 services.add_transaction_line(
@@ -429,9 +378,6 @@ def manage_transactions(request, order_id):
         ),
     })
 
-        selected_customer_id = request.session.get(
-            transaction_customer_key,
-        )
 
 @login_required
 def set_transaction_context(request, order_id):
@@ -479,10 +425,10 @@ def transaction_delete(request, order_id, line_id):
 
     if request.method == "POST":
         line.delete()
+        services.sync_marketing_details(order)
+        messages.success(request, "Transaction line removed.")
 
-        services.sync_marketing_details(
-            order
-        )
+    return redirect("manage_transactions", order_id=order.id)
 
 
 @login_required
@@ -556,7 +502,6 @@ def transaction_product_search(request, order_id):
     })
 
 
-
 # ---------------------------------------------------------------------------
 # Customers on an order
 # ---------------------------------------------------------------------------
@@ -567,11 +512,7 @@ def add_customer(request,order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
 
     if request.method == "POST":
-        form = CustomerDetailForm(
-            request.POST,
-            area=order.area,
-        )
-
+        form = CustomerDetailForm(request.POST, area=order.area)
         if form.is_valid():
             cd = form.save(
                 commit=False
@@ -601,26 +542,16 @@ def customer_delete(request, order_id, customer_detail_id):
 
     if request.method == "POST":
         customer_detail.delete()
+        services.sync_marketing_details(order)
+        messages.success(request, "Invoice removed.")
 
-        services.sync_marketing_details(
-            order
-        )
-
-        messages.success(
-            request,
-            "Invoice removed.",
-        )
-
-    return redirect(
-        "order_detail",
-        order_id=order.id,
-    )
+    return redirect("order_detail", order_id=order.id)
 
 
 @login_required
 def customer_search(request, order_id):
     order = get_object_or_404(OrderDetails, pk=order_id)
-    search = request.GET.get("search", "").strip()
+    search = request.GET.get("search", "",).strip()
     customers = Customer.objects.all()
 
     if search:
@@ -631,7 +562,9 @@ def customer_search(request, order_id):
         )
 
     customers = customers.order_by("customer_business_name")
+    customer_form = CustomerDetailForm(area=order.area,)
+    customer_form.fields["customer"].queryset = customers
 
-    return render(request, "orders/components/details/partials/customer_select.html", {
-        "customers": customers,
+    return render(request, "orders/components/transactional/partials/customer_select.html", {
+        "customer_form": customer_form,
     })

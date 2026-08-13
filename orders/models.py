@@ -5,11 +5,7 @@ from customers.models import Customer
 from employees.models import Employee
 from products.models import Product
 
-from datetime import date
-
-
 CONTROL_NO_START = 30000
-
 
 class OrderQuerySet(models.QuerySet):
     def incomplete(self):
@@ -26,20 +22,23 @@ class OrderDetails(models.Model):
 
     area = models.ForeignKey(
         Area,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="orders"
     )
 
     agent = models.ForeignKey(
         Employee,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="orders"
     )
 
-    beg_date = models.DateField(default=date.today)
+    beg_date = models.DateField(auto_now_add=True)
     mload_date = models.DateField(null=True, blank=True)
     mret_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = OrderQuerySet.as_manager()
 
@@ -89,7 +88,7 @@ class CustomerDetails(models.Model):
 
     order = models.ForeignKey(
         OrderDetails,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="customers"
     )
 
@@ -97,7 +96,7 @@ class CustomerDetails(models.Model):
 
     customer = models.ForeignKey(
         Customer,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="customer_details"
     )
 
@@ -130,14 +129,11 @@ class DeliveryDetail(models.Model):
 
     order = models.ForeignKey(
         OrderDetails,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="deliveries"
     )
 
-    order_type = models.CharField(
-        max_length=10,
-        choices=ORDER_TYPE_CHOICES
-    )
+    order_type = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES)
 
     product = models.ForeignKey(
         Product,
@@ -145,16 +141,9 @@ class DeliveryDetail(models.Model):
         related_name="delivery_lines"
     )
 
-    quantity = models.IntegerField()
-
-    line_price = models.DecimalField(
-        max_digits=20,
-        decimal_places=2
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    quantity = models.PositiveIntegerField()
+    line_price = models.DecimalField(max_digits=20, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.order} - {self.product} ({self.order_type})"
@@ -178,37 +167,21 @@ class TransactionDetail(models.Model):
 
     customer_detail = models.ForeignKey(
         CustomerDetails,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="transactions"
     )
 
-    order_type = models.CharField(
-        max_length=10,
-        choices=ORDER_TYPE_CHOICES
-    )
-
-    invoice_type = models.CharField(
-        max_length=10,
-        choices=INVOICE_TYPE_CHOICES,
-        blank=True
-    )
+    order_type = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES)
+    invoice_type = models.CharField(max_length=10, choices=INVOICE_TYPE_CHOICES, blank=True)
 
     product = models.ForeignKey(
         Product,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="transaction_lines"
     )
-
-    quantity = models.IntegerField()
-
-    line_price = models.DecimalField(
-        max_digits=20,
-        decimal_places=2
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    quantity = models.PositiveIntegerField()
+    line_price = models.DecimalField(max_digits=20, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.customer_detail} - {self.product} ({self.order_type})"
@@ -219,15 +192,15 @@ class MarketingDetails(models.Model):
 
     order = models.ForeignKey(
         OrderDetails,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="marketing"
     )
 
     product = models.ForeignKey(
         Product,
-        on_delete=models.CASCADE
+        on_delete=models.PROTECT,
+        related_name="marketing"
     )
-
     total_SO = models.IntegerField(default=0)
     total_SAM = models.IntegerField(default=0)
     total_CBO = models.IntegerField(default=0)
