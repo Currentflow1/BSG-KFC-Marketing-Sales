@@ -58,7 +58,7 @@
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_SO }}
+            {{ marketing.net_qty }}
         </td>
 
         <td class="p-2 text-right">
@@ -120,8 +120,11 @@
               {{ totals.total_MLOAD }}
           </td>
 
-          <td colspan="5"></td>
+          <td colspan="4"></td>
 
+          <td class="p-2 text-right">
+              {{ totals.total_BO }}
+          </td>
     </tr>
     </tbody>
   </table>

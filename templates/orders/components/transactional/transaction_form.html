@@ -1,4 +1,3 @@
-<!-- ADD TRANSACTION LINE — product + quantity, numpad flow -->
 <div class="rounded-lg border border-gray-200 bg-white p-4 lg:col-span-1">
 
   <h2 class="mb-2 text-base font-medium">
@@ -11,6 +10,25 @@
     <input type="hidden" name="order_type" id="sync-order-type" value="{{ form.order_type.value|default:'' }}">
     <input type="hidden" name="invoice_type" id="sync-invoice-type" value="{{ form.invoice_type.value|default:'' }}">
     <input type="hidden" name="customer_detail" id="sync-customer-detail" value="{{ selected_customer_detail.id|default:'' }}">
+
+    <div>
+      <label for="quick-order-type-input" class="mb-1 block text-sm font-medium">
+        Order Type (SO / SAM / RET / BO)
+      </label>
+      <input
+        type="text"
+        id="quick-order-type-input"
+        autocomplete="off"
+        inputmode="text"
+        maxlength="4"
+        class="w-full rounded-lg border border-gray-300 px-4 py-2 uppercase"
+        placeholder="SO, SAM, RET, BO..."
+        value="{{ form.order_type.value|default:'' }}"
+      >
+      <div id="quick-order-type-error" class="mt-1 text-sm text-red-600" style="display: none;">
+        Enter SO, SAM, RET, or BO.
+      </div>
+    </div>
 
     <!-- PRODUCT -->
     <div>
@@ -54,11 +72,83 @@
 </div>
 
 <script>
+  var QUICK_ORDER_TYPE_MAP = {
+    "SO": "SO",
+    "SAM": "SAM",
+    "RET": "CRET",
+    "BO": "CBO"
+  };
+
+  // Reverse map, used to show RET/BO instead of CRET/CBO when the real
+  // order_type comes from elsewhere (e.g. the Order Info dropdown).
+  var QUICK_ORDER_TYPE_DISPLAY = {
+    "SO": "SO",
+    "SAM": "SAM",
+    "CRET": "RET",
+    "CBO": "BO"
+  };
+
+  function getCsrfToken() {
+    var el = document.querySelector('#transaction-line-form input[name="csrfmiddlewaretoken"]');
+    return el ? el.value : "";
+  }
+
+  function postOrderType(realOrderType) {
+    fetch("{% url 'set_transaction_context' order.id %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-CSRFToken": getCsrfToken()
+      },
+      body: "order_type=" + encodeURIComponent(realOrderType)
+    });
+  }
+
+  function applyQuickOrderType(rawValue, options) {
+    options = options || {};
+    var input = document.getElementById('quick-order-type-input');
+    var errorEl = document.getElementById('quick-order-type-error');
+    var code = (rawValue || "").trim().toUpperCase();
+
+    if (!code) {
+      errorEl.style.display = 'none';
+      return;
+    }
+
+    var realOrderType = QUICK_ORDER_TYPE_MAP[code];
+
+    if (!realOrderType) {
+      errorEl.style.display = 'block';
+      input.classList.add('border-red-500');
+      return;
+    }
+
+    errorEl.style.display = 'none';
+    input.classList.remove('border-red-500');
+    input.value = code;
+
+    document.getElementById('sync-order-type').value = realOrderType;
+
+    var orderTypeEl = document.getElementById('{{ form.order_type.id_for_label }}');
+    if (orderTypeEl) {
+      orderTypeEl.value = realOrderType;
+    }
+
+    if (!options.skipPost) {
+      postOrderType(realOrderType);
+    }
+  }
+
   function syncOrderAndInvoiceType() {
     var orderTypeEl = document.getElementById('{{ form.order_type.id_for_label }}');
     var invoiceTypeEl = document.getElementById('{{ form.invoice_type.id_for_label }}');
+    var quickInput = document.getElementById('quick-order-type-input');
+
     if (orderTypeEl) {
       document.getElementById('sync-order-type').value = orderTypeEl.value;
+      if (quickInput) {
+        quickInput.value = QUICK_ORDER_TYPE_DISPLAY[orderTypeEl.value] || orderTypeEl.value;
+      }
     }
     if (invoiceTypeEl) {
       document.getElementById('sync-invoice-type').value = invoiceTypeEl.value;
@@ -78,9 +168,28 @@
   document.addEventListener('DOMContentLoaded', function () {
     syncOrderAndInvoiceType();
     syncCustomerDetail();
+
+    var quickInput = document.getElementById('quick-order-type-input');
+    if (quickInput) {
+      // Show the display-mapped code (RET/BO) rather than the raw
+      // CRET/CBO value the field may have started with.
+      applyQuickOrderType(quickInput.value, { skipPost: true });
+
+      quickInput.addEventListener('change', function () {
+        applyQuickOrderType(quickInput.value);
+      });
+
+      quickInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyQuickOrderType(quickInput.value);
+        }
+      });
+    }
   });
 
-  // Keep order_type / invoice_type synced whenever their <select>s change.
+  // Keep order_type / invoice_type synced whenever their <select>s change
+  // (e.g. from the Order Info card).
   document.addEventListener('change', function (e) {
     if (e.target.id === '{{ form.order_type.id_for_label }}' || e.target.id === '{{ form.invoice_type.id_for_label }}') {
       syncOrderAndInvoiceType();

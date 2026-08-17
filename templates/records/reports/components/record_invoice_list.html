@@ -29,7 +29,11 @@
           <td class="border border-black p-2 text-right">
             P{{ customer_detail.total_so_sam_price|floatformat:2 }}
           </td>
-          <td class="border border-black"></td>
+          <td class="border border-black p-2 text-right">
+            {% if customer_detail.invoice_balance is not None %}
+              P{{ customer_detail.invoice_balance|floatformat:2 }}
+            {% endif %}
+          </td>
           <td class="border border-black"></td>
           <td class="border border-black"></td>
           <td class="border border-black"></td>
@@ -42,6 +46,20 @@
             No transaction records
           </td>
         </tr>
+      {% endfor %}
+
+      <!-- Blank rows for manual/handwritten entries -->
+      {% for i in "0123456789" %}
+      <tr>
+        <td class="border border-black p-2">&nbsp;</td>
+        <td class="border border-black p-2">&nbsp;</td>
+        <td class="border border-black p-2">&nbsp;</td>
+        <td class="border border-black p-2 text-right">&nbsp;</td>
+        <td class="border border-black p-2 text-right">&nbsp;</td>
+        <td class="border border-black p-2 text-right">&nbsp;</td>
+        <td class="border border-black p-2 text-right">&nbsp;</td>
+        <td class="border border-black p-2 text-right">&nbsp;</td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>

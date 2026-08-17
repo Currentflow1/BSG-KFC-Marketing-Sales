@@ -94,10 +94,28 @@
     </form>
     {% endif %}
   </div>
-  <div class="mt-3">
-    <a href="{% url 'manage_delivery' order.id %}"
-      class="block w-full rounded-lg border border-gray-300 px-5 py-3 text-center text-base font-medium hover:bg-gray-100">
-      Manage Delivery
-    </a>
+
+  <div class="mt-3 grid grid-cols-3 gap-3">
+    <form method="post" action="{% url 'manage_delivery_mload' order.id %}" id="delivery-mload-form">
+      {% csrf_token %}
+      <button type="submit" id="delivery-mload-btn"
+        class="block w-full rounded-lg border border-gray-300 px-5 py-3 text-center text-base font-medium hover:bg-gray-100">
+        Marketing LOAD
+      </button>
+    </form>
+    <form method="post" action="{% url 'manage_delivery_mret' order.id %}" id="delivery-mret-form">
+      {% csrf_token %}
+      <button type="submit" id="delivery-mret-btn"
+        class="block w-full rounded-lg border border-gray-300 px-5 py-3 text-center text-base font-medium hover:bg-gray-100">
+        Marketing RET
+      </button>
+    </form>
+    <form method="post" action="{% url 'manage_delivery_vbo' order.id %}" id="delivery-vbo-form">
+      {% csrf_token %}
+      <button type="submit" id="delivery-vbo-btn"
+        class="block w-full rounded-lg border border-gray-300 px-5 py-3 text-center text-base font-medium hover:bg-gray-100">
+        Van BO
+      </button>
+    </form>
   </div>
 </div>

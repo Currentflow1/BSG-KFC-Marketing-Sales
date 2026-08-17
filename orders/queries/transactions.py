@@ -55,12 +55,17 @@ def get_transaction_totals(order):
         + by_type["SAM"]["price"]
     )
 
+    so_net_qty = by_type["SO"]["qty"] + by_type["CBO"]["qty"]
+    so_net_price = by_type["SO"]["price"] + by_type["CBO"]["price"]
+ 
     return {
         "qty": total_qty,
         "price": total_price,
         "amount_due": total_price,
         "bo_amount": abs(by_type["CBO"]["price"]),
         "by_type": by_type,
+        "so_net_qty": so_net_qty,
+        "so_net_price": so_net_price,
     }
 
 

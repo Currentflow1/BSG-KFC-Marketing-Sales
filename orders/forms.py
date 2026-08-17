@@ -194,7 +194,7 @@ class TransactionLineForm(forms.Form):
 
     invoice_type = forms.ChoiceField(
         choices=TransactionDetail.INVOICE_TYPE_CHOICES,
-        required=False,
+        required=True,
         widget=forms.Select(
             attrs={"class": FIELD_CLASS},
         ),

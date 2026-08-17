@@ -100,6 +100,13 @@ class CustomerDetails(models.Model):
         related_name="customer_details"
     )
 
+    invoice_balance = models.DecimalField(
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+
     @property
     def total_so_sam_price(self):
         result = self.transactions.filter( # type: ignore
@@ -288,11 +295,19 @@ class MarketingDetails(models.Model):
 
     @property
     def total_short_over_balance(self):
-        return self.total_MLOAD - self.total_total
+        return self.total_total - self.total_MLOAD
 
     @property
     def total_bo(self):
-        return self.total_VBO - self.total_CBO
+        return self.total_CBO - self.total_VBO
 
     def __str__(self):
         return f"{self.order.control_no} - {self.product.product_name}"
+
+    @property
+    def net_qty(self):
+        return self.total_SO - self.total_CBO_display
+ 
+    @property
+    def net_price(self):
+        return self.total_SO_price - self.total_CBO_price

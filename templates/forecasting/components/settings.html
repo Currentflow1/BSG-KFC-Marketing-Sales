@@ -8,11 +8,12 @@
 
     <div>
 
-      <label class="mb-2 block font-medium">
+      <label for="forecast-days" class="mb-2 block font-medium">
         Forecast Horizon
       </label>
 
       <select
+          id="forecast-days"
           name="days"
           class="w-full rounded-lg border border-gray-300 px-4 py-2"
       >
@@ -31,6 +32,22 @@
         <option value="90" {% if horizon == 90 %}selected{% endif %}>
           90 Days
         </option>
+
+        <option value="180" {% if horizon == 180 %}selected{% endif %}>
+          6 Months
+        </option>
+
+        <option value="365" {% if horizon == 365 %}selected{% endif %}>
+          1 Year
+        </option>
+
+        <option value="730" {% if horizon == 730 %}selected{% endif %}>
+          2 Years
+        </option>
+
+        <option value="1095" {% if horizon == 1095 %}selected{% endif %}>
+          3 Years
+        </option>
       </select>
 
     </div>
@@ -45,29 +62,17 @@
         Generate
       </button>
 
-      <!-- HTMX refresh -->
+      <!-- HTMX refresh: reads whatever is currently selected, not the stale server value -->
       <button
           type="button"
-<<<<<<< HEAD
-          hx-get="{% url 'product_forecast' product.product_id %}?days={{ horizon }}&refresh=1"
+          hx-get="{% url 'product_forecast' product.product_id %}?refresh=1"
+          hx-include="#forecast-days"
           hx-target="#forecast-result"
           hx-swap="innerHTML"
           class="rounded-lg border border-gray-300 px-4 py-2 cursor-pointer hover:bg-gray-50"
       >
           Refresh
       </button>
-=======
-          hx-get="."
-          hx-include="[name='days']"
-          hx-vals='{"refresh": "1"}'
-          hx-target="#forecast-result"
-          hx-swap="innerHTML"
-          class="rounded-lg border cursor-pointer border-gray-300 px-4 py-2 hover:bg-gray-50"
-      >
-        Refresh
-      </button>
-
->>>>>>> 79e34bf (Orders and Forecasting fixing)
     </div>
 
   </form>

@@ -68,6 +68,17 @@ def record_view(request, order_id):
         item.total_bo_price for item in reports
     )
 
+    totals["total_BO"] = sum(
+        item.total_bo for item in reports
+    )
+
+    totals["total_CBO_price"] = sum(
+        item.total_CBO_price for item in reports
+    )
+ 
+    totals["net_qty"] = sum(item.net_qty for item in reports)
+    totals["net_price"] = sum(item.net_price for item in reports)
+
     totals["total_BO_percentage"] = sum(
             item.total_BO_percentage for item in reports
         )
@@ -138,7 +149,9 @@ def export_trip_report_csv(request, order_id):
     totals["total_MLOAD_price"] = sum(item.total_MLOAD_price for item in reports)
     totals["total_VBO_price"] = sum(item.total_VBO_price for item in reports)
     totals["total_bo_price"] = sum(item.total_bo_price for item in reports)
-
+    totals["total_CBO_price"] = sum(item.total_CBO_price for item in reports)
+    totals["net_qty"] = sum(item.net_qty for item in reports)
+    totals["net_price"] = sum(item.net_price for item in reports)
     totals["net_value"] = totals["total_SO_price"] + totals["total_SAM_price"]
     totals["mld_mrt"] = totals["total_MLOAD_price"] - totals["total_MRET_price"]
     totals["so"] = totals["net_value"] - totals["mld_mrt"]
@@ -184,7 +197,7 @@ def export_trip_report_csv(request, order_id):
     for marketing in reports:
         writer.writerow([
             marketing.product.product_name,
-            marketing.total_SO,
+            marketing.net_qty,
             marketing.total_SAM,
             marketing.total_out,
             marketing.total_MRET,
@@ -202,7 +215,7 @@ def export_trip_report_csv(request, order_id):
     ])
     writer.writerow([])
     writer.writerow(["Price Summary"])
-    writer.writerow(["SO Price Total", totals["total_SO_price"]])
+    writer.writerow(["SO Price Total", totals["net_price"]])
     writer.writerow(["SAM Price Total", totals["total_SAM_price"]])
     writer.writerow(["MRET Price Total", totals["total_MRET_price"]])
     writer.writerow(["CRET Price Total", totals["total_CRET_price"]])

@@ -1,4 +1,3 @@
-<!-- ORDER INFO — invoice lookup, order type, invoice type. Persists independently. -->
 <div class="rounded-lg border border-gray-200 bg-white p-4 lg:col-span-1 mb-4">
 
   <h2 class="mb-2 text-base font-medium">
@@ -7,71 +6,36 @@
 
   <div class="flex flex-row gap-4">
 
-    <!-- INVOICE -->
+    <!-- INVOICE (read-only, set by selecting a row on order_customers.html) -->
     <div class="flex-1">
-      <label for="invoice-search" class="mb-1 block text-sm font-medium">
+      <label class="mb-1 block text-sm font-medium">
         Invoice
       </label>
 
-      <div class="flex items-start gap-2">
-        <input
-          type="text"
-          name="invoice"
-          id="invoice-search"
-          inputmode="numeric"
-          autocomplete="off"
-          value="{% if selected_customer_detail %}{{ selected_customer_detail.invoice_no }}{% endif %}"
-          class="w-full rounded-lg border border-gray-300 px-4 py-2"
-          placeholder="Enter invoice number..."
-          hx-get="{% url 'transaction_customer_search' order.id %}"
-          hx-trigger="keyup changed delay:300ms"
-          hx-target="#customer-result"
-          hx-swap="innerHTML"
-        >
-
-        <div id="customer-result" class="mt-1 min-w-[200px]">
-          {% if selected_customer_detail %}
-            <div class="font-medium text-green-800">
+      <div id="customer-result">
+        {% if selected_customer_detail %}
+          <div class="rounded-lg border border-gray-300 bg-gray-50 px-4 py-2">
+            <div class="font-medium text-gray-900">
               Invoice {{ selected_customer_detail.invoice_no }}
             </div>
-            <div class="text-green-700">
+            <div class="text-sm text-gray-600">
               {{ selected_customer_detail.customer }}
             </div>
-            <input
-              type="hidden"
-              name="customer_detail_value"
-              value="{{ selected_customer_detail.id }}"
-              hx-post="{% url 'set_transaction_context' order.id %}"
-              hx-trigger="load"
-              hx-swap="none"
-              hx-vals='{"customer_detail": "{{ selected_customer_detail.id }}"}'
-            >
-          {% endif %}
-        </div>
+          </div>
+          <input
+            type="hidden"
+            name="customer_detail_value"
+            value="{{ selected_customer_detail.id }}"
+          >
+        {% else %}
+          <div class="rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-500">
+            No invoice selected. Go back and choose one from the customer list.
+          </div>
+          <input type="hidden" name="customer_detail_value" value="">
+        {% endif %}
       </div>
 
       {{ form.customer_detail.errors }}
-    </div>
-
-    <!-- ORDER TYPE -->
-    <div class="flex-1">
-      <label for="{{ form.order_type.id_for_label }}" class="mb-1 block text-sm font-medium">
-        Order Type
-      </label>
-      <select
-        id="{{ form.order_type.id_for_label }}"
-        class="w-full rounded-lg border border-gray-300 px-4 py-2"
-        hx-post="{% url 'set_transaction_context' order.id %}"
-        hx-trigger="change"
-        hx-swap="none"
-      >
-        {% for value, label in form.order_type.field.choices %}
-        <option value="{{ value }}" {% if value == form.order_type.value|stringformat:"s" %}selected{% endif %}>
-          {{ label }}
-        </option>
-        {% endfor %}
-      </select>
-      {{ form.order_type.errors }}
     </div>
 
     <!-- INVOICE TYPE -->
@@ -95,5 +59,27 @@
       {{ form.invoice_type.errors }}
     </div>
 
+    <div>
+      <label
+          for="invoice_balance"
+          class="block text-sm font-semibold text-gray-700 mb-1"
+      >
+          Invoice Balance
+      </label>
+
+      <input
+        type="number"
+        name="invoice_balance"
+        id="invoice_balance"
+        step="1"
+        min="0"
+        value="{{ selected_customer_detail.invoice_balance|default_if_none:'' }}"
+        placeholder="0"
+        class="w-full border border-gray-300 rounded px-3 py-2"
+        hx-post="{% url 'save_invoice_balance' order.id %}"
+        hx-trigger="change, blur"
+        hx-swap="none"
+    >
+    </div>
   </div>
 </div>
