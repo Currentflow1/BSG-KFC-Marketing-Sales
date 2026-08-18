@@ -30,6 +30,17 @@ datas += [
     ('theme/templates', 'theme/templates'),
     ('theme/static', 'theme/static'),
     ('orders/static', 'orders/static'),
+
+    ('login/migrations', 'login/migrations'),
+    ('dashboard/migrations', 'dashboard/migrations'),
+    ('products/migrations', 'products/migrations'),
+    ('employees/migrations', 'employees/migrations'),
+    ('area_prices/migrations', 'area_prices/migrations'),
+    ('customers/migrations', 'customers/migrations'),
+    ('orders/migrations', 'orders/migrations'),
+    ('records/migrations', 'records/migrations'),
+    ('forecasting/migrations', 'forecasting/migrations'),
+    ('transaction_logs/migrations', 'transaction_logs/migrations'),
 ]
 
 a = Analysis(
