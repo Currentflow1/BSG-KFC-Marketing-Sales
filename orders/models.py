@@ -88,7 +88,7 @@ class CustomerDetails(models.Model):
 
     order = models.ForeignKey(
         OrderDetails,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,  # changed from PROTECT: owned by the order
         related_name="customers"
     )
 
@@ -96,7 +96,7 @@ class CustomerDetails(models.Model):
 
     customer = models.ForeignKey(
         Customer,
-        on_delete=models.PROTECT,
+        on_delete=models.PROTECT,  # unchanged: Customer is independent master data
         related_name="customer_details"
     )
 
@@ -136,7 +136,7 @@ class DeliveryDetail(models.Model):
 
     order = models.ForeignKey(
         OrderDetails,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,  # changed from PROTECT: owned by the order
         related_name="deliveries"
     )
 
@@ -174,7 +174,7 @@ class TransactionDetail(models.Model):
 
     customer_detail = models.ForeignKey(
         CustomerDetails,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,  # changed from PROTECT: owned by the order via CustomerDetails
         related_name="transactions"
     )
 
@@ -183,7 +183,7 @@ class TransactionDetail(models.Model):
 
     product = models.ForeignKey(
         Product,
-        on_delete=models.PROTECT,
+        on_delete=models.PROTECT,  # unchanged: Product is independent master data
         related_name="transaction_lines"
     )
     quantity = models.PositiveIntegerField()
@@ -199,13 +199,13 @@ class MarketingDetails(models.Model):
 
     order = models.ForeignKey(
         OrderDetails,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,  # changed from PROTECT: owned by the order
         related_name="marketing"
     )
 
     product = models.ForeignKey(
         Product,
-        on_delete=models.PROTECT,
+        on_delete=models.PROTECT,  # unchanged: Product is independent master data
         related_name="marketing"
     )
     total_SO = models.IntegerField(default=0)
