@@ -9,13 +9,8 @@ def search_customers(search=None):
             Q(customer_business_name__icontains=search) |
             Q(customer_contact_person__icontains=search) |
             Q(customer_mobile_no__icontains=search) |
-            Q(customer_business_address__icontains=search)
-        )
-
-        
-        if search.lower() in ["active", "false", "no"]:
-            customers = customers | Customer.objects.filter(discontinued=False)
-
-        customers = customers.distinct()
+            Q(customer_business_address__icontains=search) |
+            Q(customer_area__area_name__icontains=search)
+        ).distinct()
 
     return customers

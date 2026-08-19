@@ -65,23 +65,8 @@ class ForecastService:
             sum(predictions)
         )
 
-        # Safety stock should reflect forecast *uncertainty*, not just the
-        # single highest-demand day. AutoARIMA already gives us a 90%
-        # confidence interval per day (lower_bound/upper_bound) — use the
-        # cumulative gap between predicted and upper bound across the whole
-        # horizon as the buffer, since that's the model's own estimate of
-        # how much demand could exceed the point forecast.
-        safety_stock = round(
-            sum(
-                max(
-                    (row.get("upper_bound") or row["predicted_quantity"])
-                    - row["predicted_quantity"],
-                    0,
-                )
-                for row in forecast
-            )
-        ) if forecast else 0
-
+        safety_stock = round(forecast_total * 0.10)
+        
         return {
             "history_days": len(history),
 
