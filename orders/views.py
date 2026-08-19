@@ -168,29 +168,23 @@ def manage_delivery(request, order_id):
             messages.error(request, "Please correct the errors below.")
     else:
         form = DeliveryLineForm(area=order.area)
-    page_data = queries.delivery_page_data(order)
+
+    selected_order_type = request.session.get(
+        session_key,
+        DeliveryDetail.ORDER_TYPE_CHOICES[0][0],
+    )
+
+    page_data = queries.delivery_page_data(order, order_type=selected_order_type)
 
     return render(request, "orders/manage_delivery.html", {
         "order": order,
         "form": form,
-
-        "selected_order_type": request.session.get(
-            session_key,
-            DeliveryDetail.ORDER_TYPE_CHOICES[0][0],
-        ),
-
-        "delivery_order_type_choices": (
-            DeliveryDetail.ORDER_TYPE_CHOICES
-        ),
-
+        "selected_order_type": selected_order_type,
+        "delivery_order_type_choices": DeliveryDetail.ORDER_TYPE_CHOICES,
         **page_data,
-
-        "unpriced_products": (
-            queries.get_unpriced_products(
-                order.area
-            )
-        ),
+        "unpriced_products": queries.get_unpriced_products(order.area),
     })
+
 
 def _manage_delivery_with_type(request, order_id, order_type):
     order = get_object_or_404(OrderDetails, pk=order_id)

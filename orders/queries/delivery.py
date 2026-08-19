@@ -5,13 +5,16 @@ from decimal import Decimal
 from ..models import DeliveryDetail
 
 
-def delivery_lines(order):
-    return (
+def delivery_lines(order, order_type=None):
+    qs = (
         DeliveryDetail.objects
         .filter(order=order)
         .select_related("product")
         .order_by("-created_at")
     )
+    if order_type:
+        qs = qs.filter(order_type=order_type)
+    return qs
 
 def get_delivery_totals(order):
     lines = DeliveryDetail.objects.filter(order=order)
@@ -44,8 +47,8 @@ def get_delivery_totals(order):
         "by_type": by_type,
     }
 
-def delivery_page_data(order):
+def delivery_page_data(order, order_type=None):
     return {
-        "lines": delivery_lines(order),
+        "lines": delivery_lines(order, order_type),
         "totals": get_delivery_totals(order),
     }
