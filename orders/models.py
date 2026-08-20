@@ -109,11 +109,17 @@ class CustomerDetails(models.Model):
 
     @property
     def total_so_sam_price(self):
-        result = self.transactions.filter( # type: ignore
-            order_type__in=["SO", "SAM"]
+        result = self.transactions.filter(  # type: ignore
+            order_type="SO"
         ).aggregate(total=models.Sum("line_price"))
+        so_price = result["total"] or 0
 
-        return result["total"] or 0
+        result = self.transactions.filter(  # type: ignore
+            order_type="CBO"
+        ).aggregate(total=models.Sum("line_price"))
+        cbo_price = result["total"] or 0
+
+        return so_price - cbo_price
 
     @property
     def latest_so_sam_transaction(self):

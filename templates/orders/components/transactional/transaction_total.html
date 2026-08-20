@@ -4,7 +4,7 @@
       Totals
     </h2>
     <div class="rounded bg-blue-100 px-4 py-2 text-xl font-bold text-blue-700">
-      Amount Due: ₱{{ totals.amount_due }}
+      Amount Due: ₱{{ totals.so_net_price }}
     </div>
   </div>
   <table class="w-full">
@@ -38,7 +38,7 @@
           Overall
         </td>
         <td class="py-4 text-right text-xl font-semibold">
-          {{ totals.qty }} &middot; ₱{{ totals.price }}
+          {{ totals.so_net_qty }} &middot; ₱{{ totals.so_net_price }}
         </td>
       </tr>
     </tbody>

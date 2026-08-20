@@ -52,12 +52,12 @@ def get_transaction_totals(order, customer_id=None):
 
     total_qty = (
         by_type["SO"]["qty"]
-        + by_type["SAM"]["qty"]
+        + by_type["CBO"]["qty"]
     )
 
     total_price = (
         by_type["SO"]["price"]
-        + by_type["SAM"]["price"]
+        + by_type["CBO"]["price"]
     )
 
     so_net_qty = by_type["SO"]["qty"] + by_type["CBO"]["qty"]

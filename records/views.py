@@ -83,6 +83,10 @@ def record_view(request, order_id):
             item.total_BO_percentage for item in reports
         )
 
+    totals["total_VBO_display"] = sum(
+            item.total_VBO_display for item in reports
+        )
+
     totals["net_value"] = (
         totals["total_SO_price"] +
         totals["total_SAM_price"]
