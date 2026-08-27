@@ -10,9 +10,6 @@ urlpatterns = [
     path("<int:order_id>/edit/", views.order_edit, name="order_edit"),
     path("<int:order_id>/delete/", views.order_delete, name="order_delete"),
 
-    path("<int:order_id>/complete/", views.order_complete, name="order_complete"),
-    path("<int:order_id>/uncomplete/", views.order_uncomplete, name="order_uncomplete"),
-
     path("<int:order_id>/add-customer/", views.add_customer, name="add_customer"),
     path("<int:order_id>/customers/<int:customer_detail_id>/delete/", views.customer_delete, name="customer_delete"),
     path("order/<int:order_id>/customer-search/", views.customer_search, name="customer_search"),

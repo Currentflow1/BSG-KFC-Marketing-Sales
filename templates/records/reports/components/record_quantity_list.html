@@ -1,3 +1,5 @@
+{% load humanize %}
+
 <h1 class="font-bold">Trip Sales Inventory</h1>
 
 <div class="mb-4">
@@ -58,47 +60,47 @@
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.net_qty }}
+            {{ marketing.net_qty|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_SAM }}
+            {{ marketing.total_SAM|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_out }}
+            {{ marketing.total_out|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_MRET_display }}
+            {{ marketing.total_MRET_display|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_total }}
+            {{ marketing.total_total|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_MLOAD }}
+            {{ marketing.total_MLOAD|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_short_over_balance }}
+            {{ marketing.total_short_over_balance|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_CRET_display }}
+            {{ marketing.total_CRET_display|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_VBO_display }}
+            {{ marketing.total_VBO_display|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_CBO_display }}
+            {{ marketing.total_CBO_display|floatformat:0|intcomma }}
         </td>
 
         <td class="p-2 text-right">
-            {{ marketing.total_bo }}
+            {{ marketing.total_bo|floatformat:0|intcomma }}
         </td>
 
       </tr>
@@ -111,19 +113,19 @@
           <td colspan="3"></td>
 
           <td class="p-2 text-right">
-              {{ totals.total_MRET_display }}
+              {{ totals.total_MRET_display|floatformat:0|intcomma }}
           </td>
 
           <td colspan="1"></td>
 
           <td class="p-2 text-right">
-              {{ totals.total_MLOAD }}
+              {{ totals.total_MLOAD|floatformat:0|intcomma }}
           </td>
 
           <td colspan="2"></td>
 
           <td class="p-2 text-right">
-              {{ totals.total_VBO_display }}
+              {{ totals.total_VBO_display|floatformat:0|intcomma }}
           </td>
 
           <td colspan="2"></td>

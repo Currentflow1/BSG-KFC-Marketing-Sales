@@ -1,3 +1,5 @@
+{% load humanize %}
+
 <div class="overflow-x-auto">
   <table class="min-w-full border border-black">
     <thead class="sticky top-0 z-10 bg-gray-100">
@@ -27,11 +29,11 @@
             {{ latest.get_invoice_type_display }}
           </td>
           <td class="border border-black p-2 text-right">
-            P{{ customer_detail.total_so_sam_price|floatformat:2 }}
+            P{{ customer_detail.total_so_sam_price|floatformat:2|intcomma }}
           </td>
           <td class="border border-black p-2 text-right">
             {% if customer_detail.invoice_balance is not None %}
-              P{{ customer_detail.invoice_balance|floatformat:2 }}
+              P{{ customer_detail.invoice_balance|floatformat:2|intcomma }}
             {% endif %}
           </td>
           <td class="border border-black"></td>

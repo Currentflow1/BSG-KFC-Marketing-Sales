@@ -1,3 +1,5 @@
+{% load humanize %}
+
 <h1 class="font-bold">Product Sales</h1>
 
 <div class="mb-4">
@@ -56,23 +58,23 @@
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ marketing.net_price }}
+          P{{ marketing.net_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ marketing.total_MRET_price }}
+          P{{ marketing.total_MRET_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ marketing.total_SAM_price }}
+          P{{ marketing.total_SAM_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ marketing.total_bo_price }}
+          P{{ marketing.total_bo_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ marketing.total_VBO_price }}
+          P{{ marketing.total_VBO_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
@@ -80,11 +82,11 @@
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ marketing.total_MLOAD_price }}
+          P{{ marketing.total_MLOAD_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ marketing.total_MRET_price }}
+          P{{ marketing.total_MRET_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
@@ -102,23 +104,23 @@
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ totals.net_price }}
+          P{{ totals.net_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ totals.total_MRET_price }}
+          P{{ totals.total_MRET_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ totals.total_SAM_price }}
+          P{{ totals.total_SAM_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ totals.total_bo_price }}
+          P{{ totals.total_bo_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ totals.total_VBO_price }}
+          P{{ totals.total_VBO_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
@@ -126,15 +128,15 @@
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ totals.total_MLOAD_price }}
+          P{{ totals.total_MLOAD_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ totals.total_MRET_price }}
+          P{{ totals.total_MRET_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ totals.total_short_over_price }}
+          P{{ totals.total_short_over_price|floatformat:2|intcomma }}
         </td>
       </tr>
     </tbody>
@@ -153,35 +155,35 @@
       <tr class="border-t">
         <td class="px-4 py-2">Samples</td>
         <td class="px-4 py-2 text-center">
-          {{ totals.total_SAM_price }}
+          {{ totals.total_SAM_price|floatformat:2|intcomma }}
         </td>
       </tr>
 
       <tr class="border-t">
         <td class="px-4 py-2">Customer Returns</td>
         <td class="px-4 py-2 text-center">
-          {{ totals.total_CRET_price }}
+          {{ totals.total_CRET_price|floatformat:2|intcomma }}
         </td>
       </tr>
 
       <tr class="border-t">
         <td class="px-4 py-2">Net Value</td>
         <td class="px-4 py-2 text-center">
-          {{ totals.net_value }}
+          {{ totals.net_value|floatformat:2|intcomma }}
         </td>
       </tr>
 
       <tr class="border-t">
         <td class="px-4 py-2">MLD-MRT</td>
         <td class="px-4 py-2 text-center">
-          {{ totals.mld_mrt }}
+          {{ totals.mld_mrt|floatformat:2|intcomma }}
         </td>
       </tr>
 
       <tr class="border-t font-bold bg-gray-100">
         <td class="px-4 py-2">S/O</td>
         <td class="px-4 py-2 text-center">
-          {{ totals.so }}
+          {{ totals.so|floatformat:2|intcomma }}
         </td>
       </tr>
     </tbody>

@@ -1,5 +1,4 @@
 from django.db import models, transaction
-from django.core.exceptions import ValidationError
 from area_prices.models import Area, AreaPrice
 from customers.models import Customer
 from employees.models import Employee
@@ -9,10 +8,10 @@ CONTROL_NO_START = 30000
 
 class OrderQuerySet(models.QuerySet):
     def incomplete(self):
-        return self.filter(end_date__isnull=True)
+        return self.filter(mret_date__isnull=True)
 
     def completed(self):
-        return self.filter(end_date__isnull=False)
+        return self.filter(mret_date__isnull=False)
 
 
 class OrderDetails(models.Model):
@@ -32,10 +31,10 @@ class OrderDetails(models.Model):
         related_name="orders"
     )
 
-    beg_date = models.DateField(auto_now_add=True)
+    # beg_date always mirrors mret_date (see save()).
+    beg_date = models.DateField(null=True, blank=True)
     mload_date = models.DateField(null=True, blank=True)
     mret_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -44,16 +43,6 @@ class OrderDetails(models.Model):
 
     class Meta:
         ordering = ["-beg_date"]
-
-    @property
-    def is_complete(self):
-        return self.end_date is not None
-
-    def clean(self):
-        if self.end_date and self.end_date < self.beg_date:
-            raise ValidationError(
-                "End date cannot be earlier than begin date."
-            )
 
     @classmethod
     def _generate_control_no(cls):
@@ -77,6 +66,9 @@ class OrderDetails(models.Model):
     def save(self, *args, **kwargs):
         if not self.control_no:
             self.control_no = self._generate_control_no()
+
+        self.beg_date = self.mret_date
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -88,7 +80,7 @@ class CustomerDetails(models.Model):
 
     order = models.ForeignKey(
         OrderDetails,
-        on_delete=models.CASCADE,  # changed from PROTECT: owned by the order
+        on_delete=models.CASCADE,
         related_name="customers"
     )
 
@@ -96,7 +88,7 @@ class CustomerDetails(models.Model):
 
     customer = models.ForeignKey(
         Customer,
-        on_delete=models.PROTECT,  # unchanged: Customer is independent master data
+        on_delete=models.PROTECT,
         related_name="customer_details"
     )
 
@@ -142,7 +134,7 @@ class DeliveryDetail(models.Model):
 
     order = models.ForeignKey(
         OrderDetails,
-        on_delete=models.CASCADE,  # changed from PROTECT: owned by the order
+        on_delete=models.CASCADE,
         related_name="deliveries"
     )
 
@@ -180,7 +172,7 @@ class TransactionDetail(models.Model):
 
     customer_detail = models.ForeignKey(
         CustomerDetails,
-        on_delete=models.CASCADE,  # changed from PROTECT: owned by the order via CustomerDetails
+        on_delete=models.CASCADE,
         related_name="transactions"
     )
 
@@ -189,7 +181,7 @@ class TransactionDetail(models.Model):
 
     product = models.ForeignKey(
         Product,
-        on_delete=models.PROTECT,  # unchanged: Product is independent master data
+        on_delete=models.PROTECT,
         related_name="transaction_lines"
     )
     quantity = models.PositiveIntegerField()
@@ -205,13 +197,13 @@ class MarketingDetails(models.Model):
 
     order = models.ForeignKey(
         OrderDetails,
-        on_delete=models.CASCADE,  # changed from PROTECT: owned by the order
+        on_delete=models.CASCADE,
         related_name="marketing"
     )
 
     product = models.ForeignKey(
         Product,
-        on_delete=models.PROTECT,  # unchanged: Product is independent master data
+        on_delete=models.PROTECT,
         related_name="marketing"
     )
     total_SO = models.IntegerField(default=0)

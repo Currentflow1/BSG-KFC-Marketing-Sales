@@ -116,27 +116,6 @@ def order_delete(request, order_id):
         "order": order,
     })
 
-@permission_required_redirect("orders.change_orderdetails")
-def order_complete(request, order_id):
-    order = get_object_or_404(OrderDetails, pk=order_id)
-    if request.method == "POST":
-        services.complete_order(order)
-
-        messages.success(request, f"Order {order.control_no} marked complete.")
-
-    return redirect("order_detail", order_id=order.id)
-
-@permission_required_redirect("orders.change_orderdetails")
-def order_uncomplete(request, order_id):
-    order = get_object_or_404(OrderDetails, pk=order_id)
-
-    if request.method == "POST":
-        services.reopen_order(order)
-
-        messages.success(request, f"Order {order.control_no} reopened.")
-
-    return redirect("order_detail", order_id=order.id)
-
 # ============================================================
 # Delivery
 # ============================================================
