@@ -157,6 +157,14 @@
     font-size: inherit !important;
     position: relative;
   }
+
+  table.print-rows th,
+  table.print-rows td,
+  table.print-money th,
+  table.print-money td {
+    padding-top: 1.5pt !important;
+    padding-bottom: 1.5pt !important;
+  }
   table.print-rows th,
   table.print-money th {
     border-bottom: 2px solid #000 !important;
