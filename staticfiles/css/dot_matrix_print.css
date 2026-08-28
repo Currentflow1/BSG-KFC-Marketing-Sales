@@ -162,8 +162,8 @@
   table.print-rows td,
   table.print-money th,
   table.print-money td {
-    padding-top: 0.5pt !important;
-    padding-bottom: 0.5pt !important;
+    padding-top: 1.5pt !important;
+    padding-bottom: 1.5pt !important;
   }
   table.print-rows th,
   table.print-money th {

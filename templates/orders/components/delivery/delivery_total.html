@@ -14,7 +14,7 @@
           MLOAD
         </td>
         <td class="py-3 text-right text-lg">
-          {{ totals.by_type.MLOAD.qty }}
+          {{ totals.by_type.MLOAD.qty|intcomma }}
           &middot;
           ₱{{ totals.by_type.MLOAD.price|floatformat:2|intcomma }}
         </td>
@@ -24,7 +24,7 @@
           MRET
         </td>
         <td class="py-3 text-right text-lg">
-          {{ totals.by_type.MRET.qty }}
+          {{ totals.by_type.MRET.qty|intcomma }}
           &middot;
           ₱{{ totals.by_type.MRET.price|floatformat:2|intcomma }}
         </td>
@@ -34,7 +34,7 @@
           VBO
         </td>
         <td class="py-3 text-right text-lg">
-          {{ totals.by_type.VBO.qty }}
+          {{ totals.by_type.VBO.qty|intcomma }}
           &middot;
           ₱{{ totals.by_type.VBO.price|floatformat:2|intcomma }}
         </td>
@@ -44,7 +44,7 @@
           Net Total
         </td>
         <td class="py-4 text-right text-xl font-semibold">
-          {{ totals.qty }}
+          {{ totals.qty|intcomma }}
           &middot;
           ₱{{ totals.price|floatformat:2|intcomma }}
         </td>

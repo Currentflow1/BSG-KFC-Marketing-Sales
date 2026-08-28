@@ -81,10 +81,6 @@
     width: 100% !important;
   }
 
-  /* ============================================
-     BASE TABLE STYLES — condensed by default
-     ============================================ */
-
   table {
     width: 100%;
     border-collapse: collapse;
@@ -128,13 +124,6 @@
     break-inside: avoid;
   }
 
-  /* ============================================
-     BORDER STYLE VARIANTS (add ONE of these to <table>)
-     ============================================ */
-
-  /* Row lines only, no column lines — colon-separated columns instead.
-     border-collapse: separate is required here — Chromium silently drops
-     box-shadow/border rendering quirks on collapsed-border table cells. */
   table.print-rows {
     font-size: 11.5pt !important;
     border-collapse: separate !important;
@@ -162,8 +151,8 @@
   table.print-rows td,
   table.print-money th,
   table.print-money td {
-    padding-top: 1.5pt !important;
-    padding-bottom: 1.5pt !important;
+    padding-top: 2.5pt !important;
+    padding-bottom: 2.5pt !important;
   }
   table.print-rows th,
   table.print-money th {
@@ -197,8 +186,8 @@
   table.print-grid th,
   table.print-grid td {
     border: 1px solid #000 !important;
-    padding-top: 1pt !important;
-    padding-bottom: 1pt !important;
+    padding-top: 2pt !important;
+    padding-bottom: 2pt !important;
     font-size: inherit !important;
   }
   table.print-grid th {
