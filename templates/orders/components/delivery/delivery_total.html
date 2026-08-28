@@ -4,7 +4,7 @@
       Totals
     </h2>
     <div class="rounded bg-blue-100 px-4 py-2 text-xl font-bold text-blue-700">
-      Overall: {{ totals.net_qty }} &middot; ₱{{ totals.net_price }}
+      Overall: {{ totals.qty|floatformat:2|intcomma }} &middot; ₱{{ totals.price|floatformat:2|intcomma }}
     </div>
   </div>
   <table class="w-full">
@@ -16,7 +16,7 @@
         <td class="py-3 text-right text-lg">
           {{ totals.by_type.MLOAD.qty }}
           &middot;
-          ₱{{ totals.by_type.MLOAD.price }}
+          ₱{{ totals.by_type.MLOAD.price|floatformat:2|intcomma }}
         </td>
       </tr>
       <tr class="border-b text-red-600">
@@ -26,7 +26,7 @@
         <td class="py-3 text-right text-lg">
           {{ totals.by_type.MRET.qty }}
           &middot;
-          ₱{{ totals.by_type.MRET.price }}
+          ₱{{ totals.by_type.MRET.price|floatformat:2|intcomma }}
         </td>
       </tr>
       <tr class="border-b text-red-600">
@@ -36,7 +36,7 @@
         <td class="py-3 text-right text-lg">
           {{ totals.by_type.VBO.qty }}
           &middot;
-          ₱{{ totals.by_type.VBO.price }}
+          ₱{{ totals.by_type.VBO.price|floatformat:2|intcomma }}
         </td>
       </tr>
       <tr class="bg-gray-50">
@@ -46,7 +46,7 @@
         <td class="py-4 text-right text-xl font-semibold">
           {{ totals.qty }}
           &middot;
-          ₱{{ totals.price }}
+          ₱{{ totals.price|floatformat:2|intcomma }}
         </td>
       </tr>
     </tbody>

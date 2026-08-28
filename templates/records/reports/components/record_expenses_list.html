@@ -1,5 +1,7 @@
+{% load humanize %}
+
 <div class="overflow-x-auto mt-4">
-  <table class="w-full table-fixed border-collapse border-2 border-black text-sm print-condense">
+  <table class="w-full table-fixed border-collapse border-2 border-black text-sm print-grid">
 
     <colgroup>
       <col class="w-[12.5%]">
@@ -72,7 +74,7 @@
       <tr>
         <td class="border border-black p-2 font-medium">Cash</td>
         <td class="border border-black">
-          P{{ totals.cash_total|floatformat:2 }}
+          P{{ totals.cash_total|floatformat:2|intcomma }}
         </td>
 
         <td class="border border-black p-2">Parking</td>
@@ -88,7 +90,7 @@
       <tr>
         <td class="border border-black p-2 font-medium">Charge</td>
         <td class="border border-black">
-          P{{ totals.charge_total|floatformat:2 }}
+          P{{ totals.charge_total|floatformat:2|intcomma }}
         </td>
 
         <td class="border border-black p-2">Lodging</td>

@@ -1,3 +1,5 @@
+{% load humanize %}
+
 <div class="rounded-lg border border-gray-200 bg-white p-5">
 
   <div class="mb-4 flex items-center justify-between">
@@ -18,7 +20,7 @@
           MLOAD
         </td>
         <td class="py-2 text-right">
-          {{ marketing_summary.total_MLOAD }}
+          {{ marketing_summary.total_MLOAD|intcomma }}
         </td>
       </tr>
 
@@ -27,7 +29,7 @@
           MRET
         </td>
         <td class="py-2 text-right font-semibold">
-          {{ marketing_summary.total_MRET }}
+          {{ marketing_summary.total_MRET|intcomma }}
         </td>
       </tr>
 
@@ -36,7 +38,7 @@
           VBO
         </td>
         <td class="py-2 text-right font-semibold">
-          {{ marketing_summary.total_VBO }}
+          {{ marketing_summary.total_VBO|intcomma }}
         </td>
       </tr>
 
@@ -45,7 +47,7 @@
           SO
         </td>
         <td class="py-2 text-right">
-          {{ marketing_summary.total_SO }}
+          {{ marketing_summary.total_SO|intcomma }}
         </td>
       </tr>
 
@@ -54,7 +56,7 @@
           SAM
         </td>
         <td class="py-2 text-right">
-          {{ marketing_summary.total_SAM }}
+          {{ marketing_summary.total_SAM|intcomma }}
         </td>
       </tr>
 
@@ -63,7 +65,7 @@
           CRET
         </td>
         <td class="py-2 text-right font-semibold">
-          {{ marketing_summary.total_CRET }}
+          {{ marketing_summary.total_CRET|intcomma }}
         </td>
       </tr>
 
@@ -72,7 +74,7 @@
           CBO
         </td>
         <td class="py-2 text-right font-semibold">
-          {{ marketing_summary.total_CBO }}
+          {{ marketing_summary.total_CBO|intcomma }}
         </td>
       </tr>
 
