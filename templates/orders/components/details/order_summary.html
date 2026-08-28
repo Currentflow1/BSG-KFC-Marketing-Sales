@@ -22,14 +22,6 @@
           {{ order.area }}
         </td>
       </tr>
-      <tr class="border-b">
-        <td class="py-3 text-lg font-medium">
-          Begin
-        </td>
-        <td class="py-3 text-right text-lg">
-          {{ order.beg_date|date:"M j, Y" }}
-        </td>
-      </tr>
       {% if order.mload_date %}
       <tr class="border-b">
         <td class="py-3 text-lg font-medium">
@@ -49,17 +41,6 @@
           {{ order.mret_date|date:"M j, Y" }}
         </td>
       </tr>
-      {% endif %}
-      {% if order.end_date %}
-      <tr>
-        <td class="py-3 text-lg font-medium">
-          Ended
-        </td>
-        <td class="py-3 text-right text-lg">
-          {{ order.end_date|date:"M j, Y" }}
-        </td>
-      </tr>
-      {% endif %}
     </tbody>
   </table>
   <div class="mt-6">
