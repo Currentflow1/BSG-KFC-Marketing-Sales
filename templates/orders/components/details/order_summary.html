@@ -22,26 +22,34 @@
           {{ order.area }}
         </td>
       </tr>
-      {% if order.mload_date %}
       <tr class="border-b">
         <td class="py-3 text-lg font-medium">
           MLOAD
         </td>
         <td class="py-3 text-right text-lg">
-          {{ order.mload_date|date:"M j, Y" }}
+          <input type="date" name="mload_date"
+            value="{{ order.mload_date|date:'Y-m-d' }}"
+            class="rounded-lg border border-gray-300 px-3 py-1 text-right"
+            hx-post="{% url 'save_order_dates' order.id %}"
+            hx-trigger="change"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            hx-swap="none">
         </td>
       </tr>
-      {% endif %}
-      {% if order.mret_date %}
       <tr class="border-b">
         <td class="py-3 text-lg font-medium">
           MRET
         </td>
         <td class="py-3 text-right text-lg">
-          {{ order.mret_date|date:"M j, Y" }}
+          <input type="date" name="mret_date"
+            value="{{ order.mret_date|date:'Y-m-d' }}"
+            class="rounded-lg border border-gray-300 px-3 py-1 text-right"
+            hx-post="{% url 'save_order_dates' order.id %}"
+            hx-trigger="change"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            hx-swap="none">
         </td>
       </tr>
-      {% endif %}
     </tbody>
   </table>
   <div class="mt-6">

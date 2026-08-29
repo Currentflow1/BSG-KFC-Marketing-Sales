@@ -116,6 +116,16 @@ def order_delete(request, order_id):
         "order": order,
     })
 
+@login_required
+def save_order_dates(request, order_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+
+    if request.method == "POST":
+        order.mload_date = request.POST.get("mload_date") or None
+        order.mret_date = request.POST.get("mret_date") or None
+        order.save()
+
+    return HttpResponse(status=204)
 # ============================================================
 # Delivery
 # ============================================================
