@@ -27,7 +27,7 @@ from .models import (
 @login_required
 def order_list(request):
     search = request.GET.get("search", "").strip()
-    sort = request.GET.get("sort", "-beg_date")
+    sort = request.GET.get("sort", "-control_no")
 
     orders = queries.search_orders(search=search, sort=sort)
 
@@ -38,7 +38,7 @@ def order_list(request):
 @login_required
 def order_search(request):
     search = request.GET.get("search", "").strip()
-    sort = request.GET.get("sort", "-beg_date")
+    sort = request.GET.get("sort", "-control_no")
 
     orders = queries.search_orders(search=search, sort=sort)
 

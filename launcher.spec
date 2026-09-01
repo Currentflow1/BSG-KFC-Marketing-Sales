@@ -1,5 +1,22 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
+import sys
+
 from PyInstaller.utils.hooks import collect_all
+
+# ----------------------------------------------------------------------------
+# Configure Django settings BEFORE analysis, so hook-django.py (and any
+# submodule collection for apps like 'orders') can actually import them.
+# ----------------------------------------------------------------------------
+PROJECT_ROOT = os.path.dirname(os.path.abspath(SPEC))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ms.settings")
+os.environ.setdefault("APP_DATA_DIR", PROJECT_ROOT)
+
+import django
+django.setup()
 
 datas = []
 binaries = []

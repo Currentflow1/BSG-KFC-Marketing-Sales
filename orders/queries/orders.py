@@ -2,8 +2,26 @@ from django.db.models import Q
 
 from ..models import OrderDetails
 
+ORDER_SORT_FIELDS = {
+    "control_no",
+    "beg_date",
+    "mload_date",
+    "mret_date",
+    "area__area_name",
+    "agent__employee_name",
+}
 
-def search_orders(search="", sort="-beg_date"):
+DEFAULT_SORT = "-control_no"
+
+
+def _clean_sort(sort):
+    field = sort.lstrip("-")
+    if field not in ORDER_SORT_FIELDS:
+        return DEFAULT_SORT
+    return sort
+
+def search_orders(search="", sort="-control_no"):
+    sort = _clean_sort(sort)
     orders = (
         OrderDetails.objects
         .select_related("area", "agent")
