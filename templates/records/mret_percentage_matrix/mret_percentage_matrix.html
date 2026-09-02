@@ -3,11 +3,11 @@
 {% block content %}
 
 <h1 class="font-bold text-2xl">
-  Short Over Reports
+  MRET % Report
 </h1>
 
 <p class="mb-6 text-gray-400">
-  Post-MRET Summary — Short / Over
+  Post-MRET Summary — MRET / MLOAD
 </p>
 
 <form method="get" class="mb-6 flex flex-wrap items-end gap-6">
@@ -86,7 +86,7 @@
   </button>
 
   <a
-    href="{% url 'export_short_over_matrix_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}&amp;product={{ product_id|default:'' }}&amp;area={{ area_id|default:'' }}&amp;employee={{ employee_id|default:'' }}"
+    href="{% url 'export_mret_percentage_matrix_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}&amp;product={{ product_id|default:'' }}&amp;area={{ area_id|default:'' }}&amp;employee={{ employee_id|default:'' }}"
     class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
   >
     Export CSV
@@ -130,7 +130,7 @@
 
         {% for v in row.values %}
         <td class="p-2 text-right">
-          {{ v }}
+          {{ v }}%
         </td>
         {% endfor %}
 

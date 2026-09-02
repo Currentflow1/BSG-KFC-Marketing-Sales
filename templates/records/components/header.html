@@ -33,12 +33,24 @@
 
   </div>
 
-  <a
-    href="{% url 'short_over_matrix' %}"
-    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium
-           text-white transition-colors hover:bg-blue-700"
-  >
-    Short / Over Report
-  </a>
+  <div class="flex items-center gap-3">
+
+    <a
+      href="{% url 'short_over_matrix' %}"
+      class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium
+             text-white transition-colors hover:bg-blue-700"
+    >
+      Short / Over Report
+    </a>
+
+    <a
+      href="{% url 'mret_percentage_matrix' %}"
+      class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium
+             text-white transition-colors hover:bg-blue-700"
+    >
+      MRET % Report
+    </a>
+
+  </div>
 
 </div>

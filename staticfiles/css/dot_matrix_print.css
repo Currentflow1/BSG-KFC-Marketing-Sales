@@ -166,8 +166,7 @@
     padding-right: 10px !important;
   }
 
-  table.print-rows th:not(:last-child)::after,
-  table.print-rows td:not(:last-child)::after,
+  /* Colon column dividers — print-money only (removed for print-rows) */
   table.print-money th:not(:last-child)::after,
   table.print-money td:not(:last-child)::after {
     content: ":";
@@ -223,11 +222,11 @@
   }
 
   .print-header-block h2 {
-    font-size: 12pt !important;
+    font-size: 15pt !important;
   }
 
   .print-header-block p {
-    font-size: 10pt !important;
+    font-size: 13pt !important;
     margin: 0 !important;
     line-height: 1.15 !important;
   }

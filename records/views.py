@@ -8,6 +8,7 @@ from orders.models import OrderDetails, MarketingDetails
 from products.models import Product
 from django.db.models import Sum, Q
 
+
 def record_list(request):
     orders = services.search_orders(
         search=request.GET.get("search"),
@@ -20,6 +21,7 @@ def record_list(request):
         return render(request, "records/components/list.html", context)
 
     return render(request, "records/home.html", context)
+
 
 def record_view(request, order_id):
     order = get_object_or_404(
@@ -75,7 +77,7 @@ def record_view(request, order_id):
     totals["total_CBO_price"] = sum(
         item.total_CBO_price for item in reports
     )
- 
+
     totals["net_qty"] = sum(item.net_qty for item in reports)
     totals["net_price"] = sum(item.net_price for item in reports)
 
@@ -186,8 +188,6 @@ def export_trip_report_csv(request, order_id):
     writer.writerow(["Report No.", order.control_no])
     writer.writerow(["Area", order.area.area_name])
     writer.writerow(["Agent", order.agent.employee_name])
-    writer.writerow(["Beginning Date", order.beg_date])
-    writer.writerow(["End Date", order.end_date])
     writer.writerow(["MLOAD Date", order.mload_date])
     writer.writerow(["MRET Date", order.mret_date])
     writer.writerow([])
@@ -260,28 +260,140 @@ def export_trip_report_csv(request, order_id):
 
     return response
 
-def short_over_matrix(request):
+
+# ============================================================
+# Short/Over + MRET % report filtering (shared)
+# ============================================================
+
+def _report_filter_options():
+    """Dropdown choices shared by the short/over and MRET % report filters."""
+    areas = (
+        OrderDetails.objects
+        .exclude(area__isnull=True)
+        .values_list("area_id", "area__area_name")
+        .distinct()
+        .order_by("area__area_name")
+    )
+    employees = (
+        OrderDetails.objects
+        .exclude(agent__isnull=True)
+        .values_list("agent_id", "agent__employee_name")
+        .distinct()
+        .order_by("agent__employee_name")
+    )
+    products = Product.objects.all().order_by("product_name")
+    return areas, employees, products
+
+
+def _short_over_filtered_queryset(request):
     """
-    Product x Date matrix of Short/Over balances.
-    Only includes orders with a completed MRET (mret_date set),
-    filtered to mret_date within the selected range.
+    Shared filtering logic for the short/over and MRET % matrices (screen + CSV):
+    date range, product, area, employee (agent) — selected by ID via dropdowns.
+    Returns (marketing_qs, products, filters_dict).
     """
     start_date = parse_date(request.GET["start_date"]) if request.GET.get("start_date") else None
     end_date = parse_date(request.GET["end_date"]) if request.GET.get("end_date") else None
+    product_id = request.GET.get("product") or None
+    area_id = request.GET.get("area") or None
+    employee_id = request.GET.get("employee") or None
 
     orders = OrderDetails.objects.filter(mret_date__isnull=False)
     if start_date:
         orders = orders.filter(mret_date__gte=start_date)
     if end_date:
         orders = orders.filter(mret_date__lte=end_date)
+    if area_id:
+        orders = orders.filter(area_id=area_id)
+    if employee_id:
+        orders = orders.filter(agent_id=employee_id)
 
     marketing_qs = (
         MarketingDetails.objects
         .filter(order__in=orders)
         .select_related("order", "product")
     )
+    if product_id:
+        marketing_qs = marketing_qs.filter(product_id=product_id)
 
-    # matrix[product_pk][date] -> summed short/over
+    area_choices, employee_choices, product_choices = _report_filter_options()
+
+    products = product_choices
+    if product_id:
+        products = products.filter(pk=product_id)
+
+    selected_product = product_choices.filter(pk=product_id).first() if product_id else None
+    area_lookup = dict(area_choices)
+    employee_lookup = dict(employee_choices)
+
+    filters = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "product_id": product_id,
+        "area_id": area_id,
+        "employee_id": employee_id,
+        "selected_product_name": selected_product.product_name if selected_product else None,
+        "selected_area_name": area_lookup.get(int(area_id)) if area_id else None,
+        "selected_employee_name": employee_lookup.get(int(employee_id)) if employee_id else None,
+        "area_choices": area_choices,
+        "employee_choices": employee_choices,
+        "product_choices": product_choices,
+    }
+
+    return marketing_qs, products, filters
+
+
+def _base_matrix_context(filters):
+    """Context keys shared by both matrix screen views (filter state + dropdown choices)."""
+    return {
+        "start_date": filters["start_date"] or "",
+        "end_date": filters["end_date"] or "",
+        "product_id": filters["product_id"],
+        "area_id": filters["area_id"],
+        "employee_id": filters["employee_id"],
+        "selected_product_name": filters["selected_product_name"],
+        "selected_area_name": filters["selected_area_name"],
+        "selected_employee_name": filters["selected_employee_name"],
+        "area_choices": filters["area_choices"],
+        "employee_choices": filters["employee_choices"],
+        "product_choices": filters["product_choices"],
+    }
+
+
+def _csv_filename_suffix(filters):
+    bits = []
+    if filters["start_date"]:
+        bits.append(str(filters["start_date"]))
+    if filters["end_date"]:
+        bits.append(str(filters["end_date"]))
+    return f"_{'_to_'.join(bits)}" if bits else ""
+
+
+def _write_csv_filter_header(writer, title, filters):
+    writer.writerow([title])
+    if filters["start_date"] or filters["end_date"]:
+        writer.writerow(["From", filters["start_date"] or "", "To", filters["end_date"] or ""])
+    if filters["selected_area_name"]:
+        writer.writerow(["Area", filters["selected_area_name"]])
+    if filters["selected_employee_name"]:
+        writer.writerow(["Employee", filters["selected_employee_name"]])
+    if filters["selected_product_name"]:
+        writer.writerow(["Product", filters["selected_product_name"]])
+    writer.writerow([])
+
+
+# ============================================================
+# Short/Over matrix
+# ============================================================
+
+def short_over_matrix(request):
+    """
+    Product x Date matrix of Short/Over balances.
+    Only includes orders with a completed MRET (mret_date set),
+    filtered to mret_date within the selected range, and optionally
+    by product, area, and employee (agent) — selected via dropdowns.
+    """
+    marketing_qs, products, filters = _short_over_filtered_queryset(request)
+
     matrix = defaultdict(lambda: defaultdict(int))
     date_columns = set()
 
@@ -291,7 +403,6 @@ def short_over_matrix(request):
         matrix[md.product.pk][d] += md.total_short_over_balance
 
     date_columns = sorted(date_columns)
-    products = Product.objects.all().order_by("product_name")
 
     rows = [
         {
@@ -304,29 +415,16 @@ def short_over_matrix(request):
     return render(request, "records/short_over_matrix/short_over_matrix.html", {
         "date_columns": date_columns,
         "rows": rows,
-        "start_date": request.GET.get("start_date", ""),
-        "end_date": request.GET.get("end_date", ""),
+        **_base_matrix_context(filters),
     })
+
 
 def export_short_over_matrix_csv(request):
     """
     CSV export of the Product x Date Short/Over matrix.
     Same filtering logic as short_over_matrix.
     """
-    start_date = parse_date(request.GET["start_date"]) if request.GET.get("start_date") else None
-    end_date = parse_date(request.GET["end_date"]) if request.GET.get("end_date") else None
-
-    orders = OrderDetails.objects.filter(mret_date__isnull=False)
-    if start_date:
-        orders = orders.filter(mret_date__gte=start_date)
-    if end_date:
-        orders = orders.filter(mret_date__lte=end_date)
-
-    marketing_qs = (
-        MarketingDetails.objects
-        .filter(order__in=orders)
-        .select_related("order", "product")
-    )
+    marketing_qs, products, filters = _short_over_filtered_queryset(request)
 
     matrix = defaultdict(lambda: defaultdict(int))
     date_columns = set()
@@ -337,25 +435,15 @@ def export_short_over_matrix_csv(request):
         matrix[md.product.pk][d] += md.total_short_over_balance
 
     date_columns = sorted(date_columns)
-    products = Product.objects.all().order_by("product_name")
 
     response = HttpResponse(content_type="text/csv")
-    filename_bits = []
-    if start_date:
-        filename_bits.append(str(start_date))
-    if end_date:
-        filename_bits.append(str(end_date))
-    suffix = f"_{'_to_'.join(filename_bits)}" if filename_bits else ""
+    suffix = _csv_filename_suffix(filters)
     response["Content-Disposition"] = (
         f'attachment; filename="short_over_matrix{suffix}.csv"'
     )
 
     writer = csv.writer(response)
-
-    writer.writerow(["Short / Over Report — Post-MRET"])
-    if start_date or end_date:
-        writer.writerow(["From", start_date or "", "To", end_date or ""])
-    writer.writerow([])
+    _write_csv_filter_header(writer, "Short / Over Report — Post-MRET", filters)
 
     header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns]
     writer.writerow(header)
@@ -363,6 +451,102 @@ def export_short_over_matrix_csv(request):
     for product in products:
         row = [product.product_name] + [
             matrix[product.pk].get(d, 0) for d in date_columns
+        ]
+        writer.writerow(row)
+
+    return response
+
+
+# ============================================================
+# MRET % matrix
+# ============================================================
+
+def _mret_pct(cell):
+    """
+    MRET % = total_MRET / total_MLOAD * 100.
+    total_MRET is stored as a negative value (see total_MRET_display
+    elsewhere), so it must be negated before use.
+    MRET values can never be negative, so the result is floored at 0.
+    """
+    if not cell["mload"]:
+        return 0
+    mret = -cell["mret"]  # stored negative; flip sign to get the real magnitude
+    return max(0, round((mret / cell["mload"]) * 100, 2))
+
+
+def mret_percentage_matrix(request):
+    """
+    Product x Date matrix of MRET % (total_MRET / total_MLOAD * 100).
+    Same filtering as short_over_matrix: date range, product, area, employee.
+    """
+    marketing_qs, products, filters = _short_over_filtered_queryset(request)
+
+    # matrix[product_pk][date] -> {"mret": total, "mload": total}
+    matrix = defaultdict(lambda: defaultdict(lambda: {"mret": 0, "mload": 0}))
+    date_columns = set()
+
+    for md in marketing_qs:
+        d = md.order.mret_date
+        date_columns.add(d)
+        cell = matrix[md.product.pk][d]
+        cell["mret"] += md.total_MRET
+        cell["mload"] += md.total_MLOAD
+
+    date_columns = sorted(date_columns)
+
+    rows = [
+        {
+            "product": product,
+            "values": [
+                _mret_pct(matrix[product.pk].get(d, {"mret": 0, "mload": 0}))
+                for d in date_columns
+            ],
+        }
+        for product in products
+    ]
+
+    return render(request, "records/mret_percentage_matrix/mret_percentage_matrix.html", {
+        "date_columns": date_columns,
+        "rows": rows,
+        **_base_matrix_context(filters),
+    })
+
+
+def export_mret_percentage_matrix_csv(request):
+    """
+    CSV export of the Product x Date MRET % matrix.
+    Same filtering logic as mret_percentage_matrix.
+    """
+    marketing_qs, products, filters = _short_over_filtered_queryset(request)
+
+    matrix = defaultdict(lambda: defaultdict(lambda: {"mret": 0, "mload": 0}))
+    date_columns = set()
+
+    for md in marketing_qs:
+        d = md.order.mret_date
+        date_columns.add(d)
+        cell = matrix[md.product.pk][d]
+        cell["mret"] += md.total_MRET
+        cell["mload"] += md.total_MLOAD
+
+    date_columns = sorted(date_columns)
+
+    response = HttpResponse(content_type="text/csv")
+    suffix = _csv_filename_suffix(filters)
+    response["Content-Disposition"] = (
+        f'attachment; filename="mret_percentage_matrix{suffix}.csv"'
+    )
+
+    writer = csv.writer(response)
+    _write_csv_filter_header(writer, "MRET % Report — Post-MRET", filters)
+
+    header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns]
+    writer.writerow(header)
+
+    for product in products:
+        row = [product.product_name] + [
+            _mret_pct(matrix[product.pk].get(d, {"mret": 0, "mload": 0}))
+            for d in date_columns
         ]
         writer.writerow(row)
 
