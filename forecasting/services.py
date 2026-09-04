@@ -1,117 +1,148 @@
 import logging
 from datetime import date, timedelta
- 
+
 import pandas as pd
 from statsforecast import StatsForecast
 from statsforecast.models import AutoARIMA
- 
+
 from .models import Forecast
 from .queries import SalesQuery
- 
- 
+
+
 logger = logging.getLogger(__name__)
- 
+
 MODEL_NAME = "AutoARIMA"
- 
- 
+
+
 class InsufficientHistoryError(Exception):
     """Raised when a product doesn't have enough transaction history to forecast."""
- 
- 
+
+
 class ForecastService:
- 
+
     def get_or_create_forecast(self, product_id, horizon=30, force_refresh=False):
         if not force_refresh:
             cached = self._load_cached_forecast(
                 product_id,
                 horizon,
             )
- 
+
             if cached:
                 return cached
- 
+
         return self._generate_forecast(
             product_id,
             horizon,
         )
- 
- 
+
+
     def get_summary(self, product_id, forecast):
         history = list(
             SalesQuery.product_daily_history(product_id)
         )
- 
+
         demands = [
             row["demand"] or 0
             for row in history
         ]
- 
+
         returns = [
             row["customer_return"] or 0
             for row in history
         ]
- 
+
         bad_orders = [
             row["customer_bad_order"] or 0
             for row in history
         ]
- 
+
         predictions = [
             row["predicted_quantity"]
             for row in forecast
         ]
- 
+
+        upper_bounds = [
+            row["upper_bound"]
+            for row in forecast
+        ]
+
+        lower_bounds = [
+            row["lower_bound"]
+            for row in forecast
+        ]
+
         forecast_total = round(
             sum(predictions)
         )
- 
-        safety_stock = round(forecast_total * 0.10)
-        
+
+        upper_total = round(
+            sum(upper_bounds)
+        )
+
+        lower_total = round(
+            sum(lower_bounds)
+        )
+
+        # Safety stock = the extra buffer implied by the model's own 90%
+        # confidence interval (upper bound minus point forecast), NOT an
+        # arbitrary flat percentage. A product with a wide CI (volatile
+        # demand) gets more buffer than one with a narrow CI (stable
+        # demand), which is what safety stock is supposed to represent.
+        safety_stock = max(upper_total - forecast_total, 0)
+
         return {
             "history_days": len(history),
- 
+
             "total_units": sum(demands),
- 
+
             "average_daily": round(
                 sum(demands) / len(demands),
                 2,
             ) if demands else 0,
- 
+
             "highest_demand": max(demands)
             if demands else 0,
- 
+
             "lowest_demand": min(demands)
             if demands else 0,
- 
+
             "customer_returns": sum(returns),
- 
+
             "customer_bad_orders": sum(bad_orders),
- 
+
             "forecast_total": forecast_total,
- 
+
             "forecast_average": round(
                 forecast_total / len(predictions),
                 2,
             ) if predictions else 0,
- 
-            "recommended_stock": forecast_total + safety_stock,
- 
+
+            "forecast_lower_total": lower_total,
+
+            "forecast_upper_total": upper_total,
+
             "safety_stock": safety_stock,
- 
+
+            # recommended_stock now always equals forecast_total +
+            # safety_stock == upper_total (the 90th-percentile demand
+            # scenario the model itself predicted), so the three numbers
+            # are guaranteed to add up.
+            "recommended_stock": forecast_total + safety_stock,
+
             "last_transaction":
                 SalesQuery.latest_transaction_date(
                     product_id
                 ),
         }
- 
- 
+
+
     def _load_cached_forecast(self, product_id, horizon):
         today = date.today()
- 
+
         target_end = today + timedelta(
             days=horizon
         )
- 
+
         queryset = (
             Forecast.objects
             .filter(
@@ -128,17 +159,17 @@ class ForecastService:
             )
             .order_by("forecast_date")
         )
- 
+
         latest = queryset.last()
- 
+
         if not latest:
             return None
- 
+
         if latest.forecast_date < (
             target_end - timedelta(days=1)
         ):
             return None
- 
+
         return list(
             queryset.values(
                 "forecast_date",
@@ -147,43 +178,43 @@ class ForecastService:
                 "upper_bound",
             )
         )
- 
- 
+
+
     def _generate_forecast(self, product_id, horizon):
         history = list(
             SalesQuery.product_daily_history(product_id)
         )
- 
+
         if not history:
             raise InsufficientHistoryError(
                 "No historical data available."
             )
- 
+
         if not any((row["demand"] or 0) for row in history):
             raise InsufficientHistoryError(
                 "No net demand recorded; nothing to forecast."
             )
- 
+
         dataframe = self._prepare_dataframe(
             history,
             product_id,
         )
- 
+
         forecast_dataframe = self._run_model(
             dataframe,
             horizon,
         )
- 
+
         rows = self._to_forecast_rows(
             forecast_dataframe,
             product_id,
         )
- 
+
         self._save_forecast(
             product_id,
             rows,
         )
- 
+
         return [
             {
                 "forecast_date": row.forecast_date,
@@ -193,9 +224,14 @@ class ForecastService:
             }
             for row in rows
         ]
- 
- 
+
+
     def _prepare_dataframe(self, history, product_id):
+        """
+        Zero-fills gaps WITHIN the product's own historical range only
+        (min sale date -> max sale date). Deliberately does NOT extend
+        to today — see module docstring for why that distorted results.
+        """
         dataframe = (
             pd.DataFrame(history)
             .rename(
@@ -205,28 +241,20 @@ class ForecastService:
                 }
             )
         )
- 
+
         dataframe["ds"] = pd.to_datetime(
             dataframe["ds"]
         )
- 
-        dataframe = dataframe.set_index("ds")
- 
-        full_index = pd.date_range(
-            start=dataframe.index.min(),
-            end=pd.Timestamp(date.today()),
-            freq="D",
-        )
- 
+
         dataframe = (
             dataframe
-            .reindex(full_index, fill_value=0)
-            .rename_axis("ds")
+            .set_index("ds")
+            .asfreq("D", fill_value=0)
             .reset_index()
         )
- 
+
         dataframe["unique_id"] = str(product_id)
- 
+
         return dataframe[
             [
                 "unique_id",
@@ -234,8 +262,8 @@ class ForecastService:
                 "y",
             ]
         ]
- 
- 
+
+
     def _run_model(self, dataframe, horizon):
         model = StatsForecast(
             models=[
@@ -243,14 +271,14 @@ class ForecastService:
             ],
             freq="D",
         )
- 
+
         return model.forecast(
             df=dataframe,
             h=horizon,
             level=[90],
         )
- 
- 
+
+
     def _save_forecast(self, product_id, rows):
         (
             Forecast.objects
@@ -260,23 +288,34 @@ class ForecastService:
             )
             .delete()
         )
- 
+
         Forecast.objects.bulk_create(rows)
- 
- 
+
+
     def _to_forecast_rows(self, forecast_dataframe, product_id):
+        """
+        Re-numbers forecast dates to start from TOMORROW (real calendar
+        time), regardless of what internal 'ds' date StatsForecast
+        attached to each row. Row order is preserved by the model
+        (h=1, h=2, ... in sequence), so record N always means "N days
+        from the end of the training series" — we just relabel that as
+        "N days from today" instead of "N days from the last sale."
+        """
         lower_column = "AutoARIMA-lo-90"
         upper_column = "AutoARIMA-hi-90"
- 
+
         rows = []
- 
-        for record in forecast_dataframe.to_dict("records"):
- 
+        today = date.today()
+
+        records = forecast_dataframe.to_dict("records")
+
+        for offset, record in enumerate(records, start=1):
+
             prediction = max(
                 float(record["AutoARIMA"]),
                 0,
             )
- 
+
             lower = max(
                 float(
                     record.get(
@@ -286,7 +325,7 @@ class ForecastService:
                 ),
                 0,
             )
- 
+
             upper = max(
                 float(
                     record.get(
@@ -296,31 +335,36 @@ class ForecastService:
                 ),
                 0,
             )
- 
+
+            # Guard against AutoARIMA occasionally returning an interval
+            # that doesn't bracket the point forecast (can happen with
+            # very short/flat series). Without this, upper_total could
+            # come out below forecast_total and safety_stock would be
+            # silently clamped to 0 even though the CI looked "wide".
+            upper = max(upper, prediction)
+            lower = min(lower, prediction)
+
             rows.append(
                 Forecast(
                     product_id=product_id,
-                    forecast_date=pd.to_datetime(
-                        record["ds"]
-                    ).date(),
+                    forecast_date=today + timedelta(days=offset),
                     predicted_quantity=prediction,
                     lower_bound=lower,
                     upper_bound=upper,
                     model_name=MODEL_NAME,
                 )
             )
- 
+
         return rows
- 
- 
+
+
     def history_for_display(self, product_id, days=90):
         history = list(
             SalesQuery.product_daily_history(product_id)
         )
- 
+
         return (
             history[-days:]
             if days
             else history
         )
- 

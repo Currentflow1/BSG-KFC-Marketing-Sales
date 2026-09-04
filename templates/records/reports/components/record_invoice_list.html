@@ -19,19 +19,19 @@
         {% with latest=customer_detail.latest_so_sam_transaction %}
         {% if latest %}
         <tr>
-          <td class="border border-black p-2">
+          <td class="border border-black p-2 ">
             {{ order.mret_date|date:"Y-m-d" }}
           </td>
-          <td class="border border-black p-2">
+          <td class="border border-black p-2 ">
             {{ customer_detail.customer }}
           </td>
-          <td class="border border-black p-2">
+          <td class="border border-black p-2 ">
             {{ latest.get_invoice_type_display }}
           </td>
-          <td class="border border-black p-2 text-right">
+          <td class="border border-black p-2  text-right">
             P{{ customer_detail.total_so_sam_price|floatformat:2|intcomma }}
           </td>
-          <td class="border border-black p-2 text-right">
+          <td class="border border-black p-2  text-right">
             {% if customer_detail.invoice_balance is not None %}
               P{{ customer_detail.invoice_balance|floatformat:2|intcomma }}
             {% endif %}
@@ -44,7 +44,7 @@
         {% endwith %}
       {% empty %}
         <tr>
-          <td colspan="8" class="border border-black p-2 text-center">
+          <td colspan="8" class="border border-black p-2  text-center">
             No transaction records
           </td>
         </tr>
@@ -53,14 +53,14 @@
       <!-- Blank rows for manual/handwritten entries -->
       {% for i in "0123456789" %}
       <tr>
-        <td class="border border-black p-2">&nbsp;</td>
-        <td class="border border-black p-2">&nbsp;</td>
-        <td class="border border-black p-2">&nbsp;</td>
-        <td class="border border-black p-2 text-right">&nbsp;</td>
-        <td class="border border-black p-2 text-right">&nbsp;</td>
-        <td class="border border-black p-2 text-right">&nbsp;</td>
-        <td class="border border-black p-2 text-right">&nbsp;</td>
-        <td class="border border-black p-2 text-right">&nbsp;</td>
+        <td class="border border-black p-2 ">&nbsp;</td>
+        <td class="border border-black p-2 ">&nbsp;</td>
+        <td class="border border-black p-2 ">&nbsp;</td>
+        <td class="border border-black p-2  text-right">&nbsp;</td>
+        <td class="border border-black p-2  text-right">&nbsp;</td>
+        <td class="border border-black p-2  text-right">&nbsp;</td>
+        <td class="border border-black p-2  text-right">&nbsp;</td>
+        <td class="border border-black p-2  text-right">&nbsp;</td>
       </tr>
       {% endfor %}
     </tbody>

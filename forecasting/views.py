@@ -27,7 +27,7 @@ def forecasting_search(request):
 
     if search:
         products = products.filter(
-            Q(product_code__icontains=search)| 
+            Q(product_code__icontains=search)|
             Q(product_name__icontains=search)
         )
 
@@ -67,13 +67,24 @@ def product_forecast(request, product_id):
     except InsufficientHistoryError as exc:
         error = str(exc)
 
-    # HTMX request: return ONLY the forecast table
+    # HTMX request: return the forecast table AND the summary/recommendation
+    # cards together, all computed from THIS request's horizon. Previously
+    # only forecast_result.html was returned and only #forecast-result was
+    # swapped, so summary.html / recommendation.html kept showing whatever
+    # horizon the page last fully loaded with (forecast_total, safety_stock,
+    # recommended_stock, history_days, etc.) while the forecast table showed
+    # the newly selected horizon's rows — the two would visibly disagree
+    # after every Refresh with a changed horizon. forecast_result.html now
+    # includes the summary/recommendation partials so everything updates
+    # together; the hx-target/hx-swap in settings.html must wrap all three
+    # cards (see forecast_result.html) for this to take effect.
     if request.headers.get("HX-Request"):
         return render(
             request,
             "forecasting/components/forecast_result.html",
             {
                 "forecast": forecast,
+                "summary": summary,
                 "error": error,
             },
         )

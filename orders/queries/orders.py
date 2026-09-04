@@ -20,6 +20,7 @@ def _clean_sort(sort):
         return DEFAULT_SORT
     return sort
 
+
 def search_orders(search="", sort="-control_no"):
     sort = _clean_sort(sort)
     orders = (
@@ -43,7 +44,24 @@ def search_orders(search="", sort="-control_no"):
             | Q(customers__customer__customer_business_name__icontains=search)
         ).distinct()
 
-    return orders.order_by(sort)
+    # control_no is a CharField, so a plain order_by("control_no") sorts
+    # lexicographically ("100000" < "99999" as strings) instead of
+    # numerically. Once control numbers cross a digit-count boundary
+    # (they start at CONTROL_NO_START = 30000 and only increment, see
+    # OrderDetails._generate_control_no), a string sort silently puts
+    # some older/smaller numbers above newer/bigger ones. Cast to
+    # integer for the actual ordering, same approach already used in
+    # OrderDetails._generate_control_no.
+    sort_field = sort.lstrip("-")
+    if sort_field == "control_no":
+        descending = sort.startswith("-")
+        orders = orders.extra(
+            select={"control_no_int": "CAST(control_no AS INTEGER)"}
+        ).order_by("-control_no_int" if descending else "control_no_int")
+    else:
+        orders = orders.order_by(sort)
+
+    return orders
 
 
 def order_detail_queryset():

@@ -316,8 +316,10 @@ class MarketingDetails(models.Model):
 
     @property
     def net_qty(self):
-        return self.total_SO - self.total_CBO_display
+
+        return self.total_SO + self.total_CBO_display
 
     @property
     def net_price(self):
-        return self.total_SO_price - self.total_CBO_price
+
+        return self.total_SO_price + self.total_CBO_price

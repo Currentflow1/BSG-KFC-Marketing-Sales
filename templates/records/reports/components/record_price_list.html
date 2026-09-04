@@ -98,7 +98,7 @@
         </td>
 
         <td class="p-2 text-right text-xs">
-          P{{ totals.net_price|floatformat:2|intcomma }}
+          P{{ totals.total_SO_price|floatformat:2|intcomma }}
         </td>
 
         <td class="p-2 text-right text-xs">
@@ -163,7 +163,7 @@
       <tr class="border-t">
         <td class="px-4 py-2">Net Value</td>
         <td class="px-4 py-2 text-center">
-          {{ totals.net_value|floatformat:2|intcomma }}
+          {{ totals.net_price|floatformat:2|intcomma }}
         </td>
       </tr>
 

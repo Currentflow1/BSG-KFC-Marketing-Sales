@@ -185,8 +185,8 @@
   table.print-grid th,
   table.print-grid td {
     border: 1px solid #000 !important;
-    padding-top: 2pt !important;
-    padding-bottom: 2pt !important;
+    padding-top: 5pt !important;
+    padding-bottom: 5pt !important;
     font-size: inherit !important;
   }
   table.print-grid th {

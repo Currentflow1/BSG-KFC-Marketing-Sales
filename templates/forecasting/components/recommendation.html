@@ -1,17 +1,12 @@
 <div class="rounded-lg border border-gray-200 bg-white">
-
     <div class="border-b border-gray-200 px-4 py-3">
-
         <h2 class="font-semibold">
             Inventory Recommendation
         </h2>
-
     </div>
 
     <div class="grid grid-cols-4 gap-6 p-5">
-
         <div>
-
             <p class="text-sm text-gray-500">
                 Forecast Demand
             </p>
@@ -27,7 +22,6 @@
         </div>
 
         <div>
-
             <p class="text-sm text-gray-500">
                 Safety Stock
             </p>
@@ -37,13 +31,11 @@
             </p>
 
             <p class="text-xs text-gray-400">
-                10% buffer
+                90% CI buffer
             </p>
-
         </div>
 
         <div>
-
             <p class="text-sm text-gray-500">
                 Recommended Stock
             </p>
@@ -55,7 +47,6 @@
             <p class="text-xs text-gray-400">
                 Forecast + buffer
             </p>
-
         </div>
 
         <div>
@@ -71,9 +62,7 @@
             <p class="text-xs text-gray-400">
                 StatsForecast
             </p>
-
         </div>
-
     </div>
 
     <div class="border-t border-gray-200 bg-gray-50 px-5 py-4">
@@ -97,10 +86,9 @@
             <span class="font-semibold text-yellow-600">
                 {{ summary.safety_stock }}-unit
             </span>
-            safety stock, can help reduce the risk of stock shortages while
-            accommodating normal demand fluctuations.
+            safety stock based on the model's 90% confidence interval, can help
+            reduce the risk of stock shortages while accommodating normal
+            demand fluctuations.
         </p>
-
     </div>
-
 </div>
