@@ -212,11 +212,6 @@ class ForecastService:
  
         dataframe = dataframe.set_index("ds")
  
-        # Extend the series through TODAY (not just the last actual
-        # sale date) so the forecast's h-day horizon starts counting
-        # from now, the same reference point for every product —
-        # instead of silently continuing from whenever each product
-        # last happened to sell.
         full_index = pd.date_range(
             start=dataframe.index.min(),
             end=pd.Timestamp(date.today()),
