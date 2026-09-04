@@ -69,47 +69,47 @@
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.net_qty == 0 %}-{% else %}{{ marketing.net_qty|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.net_qty == 0 %}{% else %}{{ marketing.total_SO|floatformat:0|intcomma }}{% endif %}
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.total_SAM == 0 %}-{% else %}{{ marketing.total_SAM|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.total_SAM == 0 %}{% else %}{{ marketing.total_SAM|floatformat:0|intcomma }}{% endif %}
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.total_out == 0 %}-{% else %}{{ marketing.total_out|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.total_out == 0 %}{% else %}{{ marketing.total_out|floatformat:0|intcomma }}{% endif %}
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.total_MRET_display == 0 %}-{% else %}{{ marketing.total_MRET_display|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.total_MRET_display == 0 %}{% else %}{{ marketing.total_MRET_display|floatformat:0|intcomma }}{% endif %}
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.total_total == 0 %}-{% else %}{{ marketing.total_total|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.total_total == 0 %}{% else %}{{ marketing.total_total|floatformat:0|intcomma }}{% endif %}
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.total_MLOAD == 0 %}-{% else %}{{ marketing.total_MLOAD|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.total_MLOAD == 0 %}{% else %}{{ marketing.total_MLOAD|floatformat:0|intcomma }}{% endif %}
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.total_short_over_balance == 0 %}-{% else %}{{ marketing.total_short_over_balance|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.total_CRET_display == 0 %}{% else %}{{ marketing.total_CRET_display|floatformat:0|intcomma }}{% endif %}
+        </td>
+        
+        <td class="p-2 text-right">
+            {% if marketing.total_short_over_balance == 0 %}{% else %}{{ marketing.total_short_over_balance|floatformat:0|intcomma }}{% endif %}
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.total_CRET_display == 0 %}-{% else %}{{ marketing.total_CRET_display|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.total_VBO_display == 0 %}{% else %}{{ marketing.total_VBO_display|floatformat:0|intcomma }}{% endif %}
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.total_VBO_display == 0 %}-{% else %}{{ marketing.total_VBO_display|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.total_CBO_display == 0 %}{% else %}{{ marketing.total_CBO_display|floatformat:0|intcomma }}{% endif %}
         </td>
 
         <td class="p-2 text-right">
-            {% if marketing.total_CBO_display == 0 %}-{% else %}{{ marketing.total_CBO_display|floatformat:0|intcomma }}{% endif %}
-        </td>
-
-        <td class="p-2 text-right">
-            {% if marketing.total_bo == 0 %}-{% else %}{{ marketing.total_bo|floatformat:0|intcomma }}{% endif %}
+            {% if marketing.total_bo == 0 %}{% else %}{{ marketing.total_bo|floatformat:0|intcomma }}{% endif %}
         </td>
 
       </tr>

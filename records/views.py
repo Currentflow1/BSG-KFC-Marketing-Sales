@@ -9,6 +9,20 @@ from products.models import Product
 from django.db.models import Sum, Q
 
 
+def _collection_totals(order):
+    cash_total = 0
+    charge_total = 0
+
+    for customer_detail in order.customers.all():
+        for transaction in customer_detail.transactions.all():
+            if transaction.invoice_type == "CASH":
+                cash_total += transaction.net_price
+            elif transaction.invoice_type == "CHARGE":
+                charge_total += transaction.net_price
+
+    return {"cash_total": cash_total, "charge_total": charge_total}
+
+
 def record_list(request):
     orders = services.search_orders(
         search=request.GET.get("search"),
@@ -104,19 +118,9 @@ def record_view(request, order_id):
         totals["mld_mrt"]
     )
 
-    collection_totals = order.customers.aggregate(
-        cash_total=Sum(
-            "transactions__line_price",
-            filter=Q(transactions__invoice_type="CASH"),
-        ),
-        charge_total=Sum(
-            "transactions__line_price",
-            filter=Q(transactions__invoice_type="CHARGE"),
-        ),
-    )
-
-    totals["cash_total"] = collection_totals["cash_total"] or 0
-    totals["charge_total"] = collection_totals["charge_total"] or 0
+    collection_totals = _collection_totals(order)
+    totals["cash_total"] = collection_totals["cash_total"]
+    totals["charge_total"] = collection_totals["charge_total"]
     totals["collectible_a"] = totals["charge_total"]
 
     return render(request, "records/reports/view.html", {
@@ -162,18 +166,9 @@ def export_trip_report_csv(request, order_id):
     totals["mld_mrt"] = totals["total_MLOAD_price"] - totals["total_MRET_price"]
     totals["so"] = totals["net_value"] - totals["mld_mrt"]
 
-    collection_totals = order.customers.aggregate(
-        cash_total=Sum(
-            "transactions__line_price",
-            filter=Q(transactions__invoice_type="CASH"),
-        ),
-        charge_total=Sum(
-            "transactions__line_price",
-            filter=Q(transactions__invoice_type="CHARGE"),
-        ),
-    )
-    totals["cash_total"] = collection_totals["cash_total"] or 0
-    totals["charge_total"] = collection_totals["charge_total"] or 0
+    collection_totals = _collection_totals(order)
+    totals["cash_total"] = collection_totals["cash_total"]
+    totals["charge_total"] = collection_totals["charge_total"]
     totals["collectible_a"] = totals["charge_total"]
 
     response = HttpResponse(content_type="text/csv")

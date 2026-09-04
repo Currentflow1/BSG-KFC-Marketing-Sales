@@ -188,6 +188,18 @@ class TransactionDetail(models.Model):
     line_price = models.DecimalField(max_digits=20, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def net_price(self):
+        """
+        SO adds to collections, CBO subtracts from it.
+        SAM and CRET contribute 0 — they don't affect cash/charge totals.
+        """
+        if self.order_type == "SO":
+            return self.line_price
+        if self.order_type == "CBO":
+            return -self.line_price
+        return 0
+
     def __str__(self):
         return f"{self.customer_detail} - {self.product} ({self.order_type})"
 
@@ -305,7 +317,7 @@ class MarketingDetails(models.Model):
     @property
     def net_qty(self):
         return self.total_SO - self.total_CBO_display
- 
+
     @property
     def net_price(self):
         return self.total_SO_price - self.total_CBO_price

@@ -22,34 +22,41 @@
           {{ order.area }}
         </td>
       </tr>
-      <tr class="border-b">
-        <td class="py-3 text-lg font-medium">
-          MLOAD
-        </td>
-        <td class="py-3 text-right text-lg">
-          <input type="date" name="mload_date"
-            value="{{ order.mload_date|date:'Y-m-d' }}"
-            class="rounded-lg border border-gray-300 px-3 py-1 text-right"
-            hx-post="{% url 'save_order_dates' order.id %}"
-            hx-trigger="change"
-            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            hx-swap="none">
-        </td>
-      </tr>
-      <tr class="border-b">
-        <td class="py-3 text-lg font-medium">
-          MRET
-        </td>
-        <td class="py-3 text-right text-lg">
-          <input type="date" name="mret_date"
-            value="{{ order.mret_date|date:'Y-m-d' }}"
-            class="rounded-lg border border-gray-300 px-3 py-1 text-right"
-            hx-post="{% url 'save_order_dates' order.id %}"
-            hx-trigger="change"
-            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-            hx-swap="none">
-        </td>
-      </tr>
+ 
+      <!-- both date fields now live inside this form -->
+      <form id="order-dates-form">
+        <tr class="border-b">
+          <td class="py-3 text-lg font-medium">
+            MLOAD
+          </td>
+          <td class="py-3 text-right text-lg">
+            <input type="date" name="mload_date"
+              value="{{ order.mload_date|date:'Y-m-d' }}"
+              class="rounded-lg border border-gray-300 px-3 py-1 text-right"
+              hx-post="{% url 'save_order_dates' order.id %}"
+              hx-trigger="change"
+              hx-include="#order-dates-form"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              hx-swap="none">
+          </td>
+        </tr>
+        <tr class="border-b">
+          <td class="py-3 text-lg font-medium">
+            MRET
+          </td>
+          <td class="py-3 text-right text-lg">
+            <input type="date" name="mret_date"
+              value="{{ order.mret_date|date:'Y-m-d' }}"
+              class="rounded-lg border border-gray-300 px-3 py-1 text-right"
+              hx-post="{% url 'save_order_dates' order.id %}"
+              hx-trigger="change"
+              hx-include="#order-dates-form"
+              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+              hx-swap="none">
+          </td>
+        </tr>
+      </form>
+ 
       <tr class="border-b">
         <td class="py-3 text-lg font-medium">
           SO
@@ -66,7 +73,7 @@
       Edit Order
     </a>
   </div>
-
+ 
   <div class="mt-3 grid grid-cols-3 gap-3">
     <form method="post" action="{% url 'manage_delivery_mload' order.id %}" id="delivery-mload-form">
       {% csrf_token %}
