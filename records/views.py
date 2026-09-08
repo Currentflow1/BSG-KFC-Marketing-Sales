@@ -14,11 +14,17 @@ def _collection_totals(order):
     charge_total = 0
 
     for customer_detail in order.customers.all():
+        if customer_detail.invoice_balance is not None:
+            # Use the recorded invoice balance instead of summing SO/CBO
+            charge_total += customer_detail.invoice_balance
+        else:
+            for transaction in customer_detail.transactions.all():
+                if transaction.invoice_type == "CHARGE":
+                    charge_total += transaction.net_price
+
         for transaction in customer_detail.transactions.all():
             if transaction.invoice_type == "CASH":
                 cash_total += transaction.net_price
-            elif transaction.invoice_type == "CHARGE":
-                charge_total += transaction.net_price
 
     return {"cash_total": cash_total, "charge_total": charge_total}
 
