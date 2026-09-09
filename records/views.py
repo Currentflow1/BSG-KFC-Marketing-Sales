@@ -15,7 +15,6 @@ def _collection_totals(order):
 
     for customer_detail in order.customers.all():
         if customer_detail.invoice_balance is not None:
-            # Use the recorded invoice balance instead of summing SO/CBO
             charge_total += customer_detail.invoice_balance
         else:
             for transaction in customer_detail.transactions.all():
