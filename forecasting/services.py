@@ -41,20 +41,21 @@ class ForecastService:
             SalesQuery.product_daily_history(product_id)
         )
 
-        demands = [
-            row["demand"] or 0
-            for row in history
-        ]
-
-        returns = [
-            row["customer_return"] or 0
-            for row in history
-        ]
-
-        bad_orders = [
-            row["customer_bad_order"] or 0
-            for row in history
-        ]
+        # SalesQuery.product_daily_history is grouped by sales_date, so it
+        # only contains rows for days that had at least one transaction —
+        # days with zero net demand simply don't appear. The forecast,
+        # however, is generated from a calendar zero-filled series (see
+        # _prepare_dataframe's .asfreq("D", fill_value=0)). Computing
+        # average_daily / highest_demand / lowest_demand off the sparse
+        # `history` list mixed those two notions of "day": for a sporadic
+        # seller, average_daily would come out much higher than the true
+        # per-day rate implied by forecast_average, and highest/lowest
+        # would be maxima/minima over transaction-days only. Zero-filling
+        # here the same way _prepare_dataframe does keeps every summary
+        # stat on the same daily calendar basis as the forecast.
+        demands, returns, bad_orders = self._zero_filled_daily_series(
+            history
+        )
 
         predictions = [
             row["predicted_quantity"]
@@ -91,7 +92,7 @@ class ForecastService:
         safety_stock = max(upper_total - forecast_total, 0)
 
         return {
-            "history_days": len(history),
+            "history_days": len(demands),
 
             "total_units": sum(demands),
 
@@ -134,6 +135,62 @@ class ForecastService:
                     product_id
                 ),
         }
+
+
+    def _zero_filled_daily_series(self, history):
+        """
+        Expands the sparse (transaction-days-only) history rows into a
+        full calendar series between the first and last sale, filling
+        non-transaction days with zeros. Mirrors the zero-fill done in
+        _prepare_dataframe so summary stats and the forecast are computed
+        over the same set of days.
+        """
+        if not history:
+            return [], [], []
+
+        dataframe = (
+            pd.DataFrame(history)
+            .assign(
+                sales_date=lambda df: pd.to_datetime(
+                    df["sales_date"]
+                )
+            )
+            .set_index("sales_date")
+        )
+
+        full_index = pd.date_range(
+            dataframe.index.min(),
+            dataframe.index.max(),
+            freq="D",
+        )
+
+        dataframe = dataframe.reindex(
+            full_index,
+            fill_value=0,
+        )
+
+        demands = (
+            dataframe["demand"]
+            .fillna(0)
+            .astype(int)
+            .tolist()
+        )
+
+        returns = (
+            dataframe["customer_return"]
+            .fillna(0)
+            .astype(int)
+            .tolist()
+        )
+
+        bad_orders = (
+            dataframe["customer_bad_order"]
+            .fillna(0)
+            .astype(int)
+            .tolist()
+        )
+
+        return demands, returns, bad_orders
 
 
     def _load_cached_forecast(self, product_id, horizon):

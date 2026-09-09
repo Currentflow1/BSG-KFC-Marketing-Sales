@@ -43,7 +43,17 @@ def forecasting_search(request):
 def product_forecast(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
 
-    horizon = int(request.GET.get("days", 30))
+    # Clamped to at least 1: with horizon=0 the cache lookup window
+    # collapses to [today, today] while generated forecast rows always
+    # start at today+1 (see ForecastService._to_forecast_rows), so a
+    # cache could never match, and StatsForecast.forecast(h=0) is
+    # rejected outright. ?days=0 (or a negative value) used to reach
+    # that call and blow up with an unhandled exception instead of a
+    # clean "no data" response.
+    horizon = max(
+        int(request.GET.get("days", 30)),
+        1,
+    )
     force_refresh = request.GET.get("refresh") == "1"
 
     service = ForecastService()
