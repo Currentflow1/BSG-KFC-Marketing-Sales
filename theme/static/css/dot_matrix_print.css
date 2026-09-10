@@ -10,6 +10,7 @@
      ============================================================ */
 
   * {
+    font-family: 'Courier New', Courier, monospace !important;
     color: #000 !important;
     background: #fff !important;
     box-shadow: none !important;
@@ -25,17 +26,25 @@
     margin: 0;
     padding: 0;
 
-    font-family:
-      'Courier New',
-      'Consolas',
-      Courier,
-      monospace !important;
+    font-family: 'Courier New', Courier, monospace !important;
 
+    /* KEEP THE SAME FONT SIZE */
     font-size: 12pt;
     line-height: 1.5;
 
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  /* ============================================================
+     SLIGHTLY MOVE PRINT CONTENT DOWN
+     ------------------------------------------------------------
+     Does NOT change page size or font size.
+     Adjust 0.10in -> 0.15in if you want it lower.
+     ============================================================ */
+
+  body {
+    padding-top: 0.10in !important;
   }
 
   /* ============================================================
@@ -92,11 +101,7 @@
   h2,
   h3,
   h4 {
-    font-family:
-      'Courier New',
-      'Consolas',
-      Courier,
-      monospace !important;
+    font-family: 'Courier New', Courier, monospace !important;
 
     font-weight: bold;
     text-transform: uppercase;
@@ -146,11 +151,7 @@
     border-collapse: separate !important;
     border-spacing: 0 !important;
 
-    font-family:
-      'Courier New',
-      'Consolas',
-      Courier,
-      monospace !important;
+    font-family: 'Courier New', Courier, monospace !important;
 
     font-size: 12pt !important;
     line-height: 1.2;
@@ -235,18 +236,11 @@
 
   /* ============================================================
      PRINT-ROWS / PRINT-MONEY
-     ------------------------------------------------------------
-     IMPORTANT:
-     - Normal spacing is restored.
-     - No forced row height.
-     - No extra gaps.
-     - No vertical borders.
-     - Every cell gets a reliable horizontal separator.
      ============================================================ */
 
   table.print-rows,
   table.print-money {
-    border-collapse: separate !important;
+    border-collapse: collapse !important;
     border-spacing: 0 !important;
   }
 
@@ -255,57 +249,11 @@
   table.print-money th,
   table.print-money td {
     box-sizing: border-box !important;
-
-    position: relative;
-
     font-size: inherit !important;
-
     vertical-align: middle !important;
-
-    /*
-     * Restore the original normal row spacing.
-     * Do NOT increase this.
-     */
-    padding: 2.5pt 0 !important;
-
-    /*
-     * No top/left/right borders.
-     * The horizontal line is drawn below each cell.
-     */
-    border: none !important;
-  }
-
-  /* ============================================================
-     CONSISTENT HORIZONTAL ROW LINES
-     ------------------------------------------------------------
-     Instead of relying on table border negotiation, draw the
-     separator as a pseudo-element attached to every cell.
-
-     This avoids:
-       - missing lines
-       - doubled lines
-       - disappearing thin borders
-       - vertical column lines
-       - border-collapse negotiation
-     ============================================================ */
-
-  table.print-rows th::after,
-  table.print-rows td::after,
-  table.print-money th::after,
-  table.print-money td::after {
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    height: 1pt;
-
-    background: #000 !important;
-
-    pointer-events: none;
+    padding: 4pt 0 !important;
+    border: 0 !important;
+    border-bottom: 0.75pt solid #000 !important;
   }
 
   /* ============================================================
@@ -321,9 +269,8 @@
     line-height: 1.2 !important;
   }
 
-  /* Header separator */
-  table.print-rows thead th::after {
-    height: 2pt;
+  table.print-rows thead th {
+    border-bottom: 1pt solid #000 !important;
   }
 
   /* ============================================================
@@ -338,48 +285,26 @@
   table.print-money td {
     letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
-
     line-height: 1.2 !important;
   }
 
-  /* Header separator */
-  table.print-money thead th::after {
-    height: 2pt;
+  table.print-money thead th {
+    border-bottom: 1pt solid #000 !important;
   }
 
   /* ============================================================
      TOTALS ROW
-     ------------------------------------------------------------
-     The totals row receives a controlled top rule.
-
-     The previous row's bottom rule remains, so we intentionally
-     make the totals top rule sit at the row boundary without
-     changing padding or adding extra vertical space.
      ============================================================ */
 
   table.print-rows tr.border-t-2 th,
   table.print-rows tr.border-t-2 td,
   table.print-money tr.border-t-2 th,
   table.print-money tr.border-t-2 td {
-    border-top: 2pt solid #000 !important;
-  }
-
-  /*
-   * Remove the pseudo bottom rule from the totals cell when
-   * its normal bottom border is already supplied by the row.
-   */
-  table.print-rows tr.border-t-2 th::after,
-  table.print-rows tr.border-t-2 td::after,
-  table.print-money tr.border-t-2 th::after,
-  table.print-money tr.border-t-2 td::after {
-    height: 1pt;
+    border-top: 1pt solid #000 !important;
   }
 
   /* ============================================================
      COLUMN SPACING
-     ------------------------------------------------------------
-     This is the original spacing.
-     No additional gap has been introduced.
      ============================================================ */
 
   table.print-rows th:not(:last-child),
@@ -409,10 +334,6 @@
 
   /* ============================================================
      FULL GRID
-     ------------------------------------------------------------
-     DO NOT TOUCH.
-
-     This is preserved exactly from the original CSS.
      ============================================================ */
 
   table.print-grid {
@@ -479,5 +400,4 @@
   .print-header-block .grid {
     gap: 2px !important;
   }
-
 }
