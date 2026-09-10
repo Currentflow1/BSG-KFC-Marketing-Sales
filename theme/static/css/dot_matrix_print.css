@@ -119,6 +119,14 @@
   tfoot {
     display: table-footer-group;
   }
+
+  /* Sticky headers only make sense on-screen; on paper they can cause
+     redraw/overlap across page breaks, so force static positioning */
+  .sticky {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+  }
   tr {
     page-break-inside: avoid;
     break-inside: avoid;
@@ -185,8 +193,12 @@
   table.print-grid th,
   table.print-grid td {
     border: 1px solid #000 !important;
-    padding-top: 5pt !important;
-    padding-bottom: 5pt !important;
+    /* Padding tightened for Epson LX310 — original 5pt top/bottom was
+       pushing row height past a clean LPI multiple, causing line-skip drift */
+    padding-top: 2pt !important;
+    padding-bottom: 2pt !important;
+    padding-left: 3pt !important;
+    padding-right: 2pt !important;
     font-size: inherit !important;
   }
   table.print-grid th {

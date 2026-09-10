@@ -31,7 +31,7 @@ def _collection_totals(order):
 def record_list(request):
     orders = services.search_orders(
         search=request.GET.get("search"),
-        sort=request.GET.get("sort", "-beg_date"),
+        sort=request.GET.get("sort", "-control_no"),
     )
 
     context = {"orders": orders}
