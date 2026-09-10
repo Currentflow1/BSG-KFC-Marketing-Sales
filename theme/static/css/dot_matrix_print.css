@@ -19,7 +19,7 @@
     width: 100%;
     margin: 0;
     padding: 0;
-    font-family: 'Courier New', 'Consolas', 'Lucida Console', Courier, monospace !important;
+    font-family: 'Courier New', 'Consolas', Courier, monospace !important;
     font-size: 12pt;
     line-height: 1.5;
     -webkit-print-color-adjust: exact;
@@ -58,7 +58,7 @@
   }
 
   h1, h2, h3, h4 {
-    font-family: 'Courier New', 'Consolas', 'Lucida Console', Courier, monospace !important;
+    font-family: 'Courier New', 'Consolas', Courier, monospace !important;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -84,7 +84,7 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-family: 'Courier New', 'Consolas', 'Lucida Console', Courier, monospace !important;
+    font-family: 'Courier New', 'Consolas', Courier, monospace !important;
     font-size: 12pt !important;
     line-height: 1.2;
     table-layout: fixed;
@@ -149,7 +149,7 @@
   table.print-money th,
   table.print-money td {
     border: none !important;
-    border-bottom: 1px solid #000 !important;
+    border-bottom: 2px solid #000 !important;
     padding: 0 !important;
     font-size: inherit !important;
     position: relative;
@@ -164,7 +164,24 @@
   }
   table.print-rows th,
   table.print-money th {
-    border-bottom: 2px solid #000 !important;
+    border-bottom: 3px solid #000 !important;
+  }
+
+  /* Fixed row heights (worst case: 3 wrapped lines), same reasoning as
+     print-grid above. Set separately per table since print-rows (11.5pt)
+     and print-money (8.5pt) need different totals. */
+  table.print-rows th,
+  table.print-rows td {
+    box-sizing: border-box !important;
+    min-height: 47pt !important;
+    vertical-align: middle !important;
+  }
+
+  table.print-money th,
+  table.print-money td {
+    box-sizing: border-box !important;
+    min-height: 36pt !important;
+    vertical-align: middle !important;
   }
 
   table.print-rows th:not(:last-child),
@@ -192,7 +209,7 @@
   }
   table.print-grid th,
   table.print-grid td {
-    border: 1px solid #000 !important;
+    border: 2px solid #000 !important;
     /* Padding tightened for Epson LX310 — original 5pt top/bottom was
        pushing row height past a clean LPI multiple, causing line-skip drift */
     padding-top: 2pt !important;
@@ -200,9 +217,16 @@
     padding-left: 3pt !important;
     padding-right: 2pt !important;
     font-size: inherit !important;
+    /* Fixed row height (worst case: 3 wrapped lines at 11.5pt/1.2 line-height)
+       so every row — even 1-line ones — is a uniform height. Uneven row
+       heights are what desync the printer's fixed line-pitch and cause
+       lines to skip partway down the page. */
+    box-sizing: border-box !important;
+    min-height: 46pt !important;
+    vertical-align: middle !important;
   }
   table.print-grid th {
-    border-bottom: 2px solid #000 !important;
+    border-bottom: 3px solid #000 !important;
   }
 
   /* ============================================
