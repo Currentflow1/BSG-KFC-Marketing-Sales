@@ -1,10 +1,10 @@
-<div class="rounded-lg border border-gray-200 bg-white p-5">
+<div class="rounded-lg border gap-y-10 border-gray-200 bg-white p-5">
 
   <h2 class="mb-4 text-lg font-semibold">
     Customers &amp; Invoices
   </h2>
 
-  <div class="mb-4 h-48 overflow-y-auto rounded-lg border border-gray-200">
+  <div class="mb-4 h-64 overflow-y-auto rounded-lg border border-gray-200">
 
     <table class="w-full">
       <tbody>
@@ -23,16 +23,19 @@
 
           <td class="px-4 py-3 text-right">
             <div class="flex justify-end gap-2">
-              <form method="post" action="{% url 'manage_transactions_for_customer' order.id cd.id %}" id="manage-transactions-form-{{ cd.id }}">
+              <form method="post" action="{% url 'manage_transactions_for_customer' order.id cd.id %}"
+                id="manage-transactions-form-{{ cd.id }}">
                 {% csrf_token %}
                 <button type="submit" id="manage-transactions-btn-{{ cd.id }}"
                   class="rounded cursor-pointer bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700">
                   Manage
                 </button>
               </form>
-              <form method="post" action="{% url 'customer_delete' order.id cd.id %}" id="customer-delete-form-{{ cd.id }}">
+              <form method="post" action="{% url 'customer_delete' order.id cd.id %}"
+                id="customer-delete-form-{{ cd.id }}">
                 {% csrf_token %}
-                <button type="submit" id="customer-delete-btn-{{ cd.id }}" onclick="return confirm('Delete this invoice?')"
+                <button type="submit" id="customer-delete-btn-{{ cd.id }}"
+                  onclick="return confirm('Delete this invoice?')"
                   class="rounded cursor-pointer bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600">
                   Delete
                 </button>
@@ -58,22 +61,14 @@
     {% csrf_token %}
 
     <div>
-        <div id="customer-select" class="w-full m-1">
-          {{ customer_form.customer }}
-          {{ customer_form.customer.errors }}
+      <div id="customer-select" class="w-full m-1">
+        {{ customer_form.customer }}
+        {{ customer_form.customer.errors }}
       </div>
 
-      <input
-          type="text"
-          name="search"
-          placeholder="Search customer..."
-          class="m-1 w-full rounded-lg border border-gray-300 px-4 py-2"
-
-          hx-get="{% url 'customer_search' order.id %}"
-          hx-trigger="keyup changed delay:300ms"
-          hx-target="#customer-select"
-          hx-swap="innerHTML"
-      >
+      <input type="text" name="search" placeholder="Search customer..."
+        class="m-1 w-full rounded-lg border border-gray-300 px-4 py-2" hx-get="{% url 'customer_search' order.id %}"
+        hx-trigger="keyup changed delay:300ms" hx-target="#customer-select" hx-swap="innerHTML">
     </div>
 
     <div class="w-full m-1">

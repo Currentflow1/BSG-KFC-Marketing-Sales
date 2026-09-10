@@ -1,6 +1,6 @@
 @page {
-  size: 9.5in 11in;      
-  margin: 0.2in 0.3in;
+  size: 9.5in 11in;
+  margin: 0.15in 0.2in;
 }
 
 @media print {
@@ -15,25 +15,33 @@
     font-weight: bold !important;
   }
 
-  html, body {
+  html,
+  body {
     width: 100%;
     margin: 0;
     padding: 0;
     font-family: 'Courier New', 'Consolas', Courier, monospace !important;
-    font-size: 12pt;
-    line-height: 1.5;
+    font-size: 8.5pt;
+    line-height: 1.2;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  nav, header:not(.print-header), footer:not(.print-footer),
-  .no-print, button, .btn, .sidebar, .navbar {
+  nav,
+  header:not(.print-header),
+  footer:not(.print-footer),
+  .no-print,
+  button,
+  .btn,
+  .sidebar,
+  .navbar {
     display: none !important;
   }
 
-  .p-2, .space-y-6 > * + * {
+  .p-2,
+  .space-y-6>*+* {
     padding: 0 !important;
-    margin-top: 0.25em !important;
+    margin-top: 0.15em !important;
   }
 
   .p-2.space-y-6 {
@@ -42,12 +50,12 @@
     padding: 0 !important;
   }
 
-  .p-2.space-y-6 > * {
-    margin-bottom: 0.5em;
+  .p-2.space-y-6>* {
+    margin-bottom: 0.2em;
   }
 
-  .p-2.space-y-6 > table,
-  .p-2.space-y-6 > .overflow-x-auto {
+  .p-2.space-y-6>table,
+  .p-2.space-y-6>.overflow-x-auto {
     page-break-inside: auto;
     break-inside: auto;
   }
@@ -57,23 +65,35 @@
     break-before: page;
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: 'Courier New', 'Consolas', Courier, monospace !important;
     font-weight: bold;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    line-height: 1.3;
-    margin: 0.3em 0;
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    margin: 0.15em 0;
   }
 
-  h1 { font-size: 15pt; }
-  h2 { font-size: 14pt; }
-  h3, h4 { font-size: 13pt; }
+  h1 {
+    font-size: 11pt;
+  }
+
+  h2 {
+    font-size: 10pt;
+  }
+
+  h3,
+  h4 {
+    font-size: 9pt;
+  }
 
   hr {
     border: none;
     border-top: 1px dashed #000;
-    margin: 0.4em 0;
+    margin: 0.2em 0;
   }
 
   .overflow-x-auto {
@@ -85,15 +105,16 @@
     width: 100%;
     border-collapse: collapse;
     font-family: 'Courier New', 'Consolas', Courier, monospace !important;
-    font-size: 12pt !important;
-    line-height: 1.2;
+    font-size: 8.5pt !important;
+    line-height: 1.05;
     table-layout: fixed;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
 
-  th, td {
-    padding: 4px 3px 4px 4px;
+  th,
+  td {
+    padding: 2px 1px 2px 2px;
     text-align: left;
     white-space: normal;
     word-wrap: break-word;
@@ -108,14 +129,19 @@
     text-transform: uppercase;
   }
 
-  td.text-right, th.text-right,
-  td[class*="amount"], td[class*="qty"], td[class*="price"], td[class*="total"] {
+  td.text-right,
+  th.text-right,
+  td[class*="amount"],
+  td[class*="qty"],
+  td[class*="price"],
+  td[class*="total"] {
     text-align: right;
   }
 
   thead {
     display: table-header-group;
   }
+
   tfoot {
     display: table-footer-group;
   }
@@ -127,19 +153,20 @@
     top: auto !important;
     z-index: auto !important;
   }
+
   tr {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
   table.print-rows {
-    font-size: 11.5pt !important;
+    font-size: 8pt !important;
     border-collapse: separate !important;
     border-spacing: 0 !important;
   }
 
   table.print-money {
-    font-size: 13pt !important;
+    font-size: 8.5pt !important;
     border-collapse: separate !important;
     border-spacing: 0 !important;
   }
@@ -149,7 +176,7 @@
   table.print-money th,
   table.print-money td {
     border: none !important;
-    border-bottom: 2px solid #000 !important;
+    border-bottom: 1.5px solid #000 !important;
     padding: 0 !important;
     font-size: inherit !important;
     position: relative;
@@ -159,28 +186,26 @@
   table.print-rows td,
   table.print-money th,
   table.print-money td {
-    padding-top: 2.5pt !important;
-    padding-bottom: 2.5pt !important;
-  }
-  table.print-rows th,
-  table.print-money th {
-    border-bottom: 3px solid #000 !important;
+    padding-top: 1pt !important;
+    padding-bottom: 1pt !important;
   }
 
-  /* Fixed row heights (worst case: 3 wrapped lines), same reasoning as
-     print-grid above. Set separately per table since print-rows (11.5pt)
-     and print-money (8.5pt) need different totals. */
+  table.print-rows th,
+  table.print-money th {
+    border-bottom: 2.5px solid #000 !important;
+  }
+
   table.print-rows th,
   table.print-rows td {
     box-sizing: border-box !important;
-    min-height: 47pt !important;
+    min-height: 24pt !important;
     vertical-align: middle !important;
   }
 
   table.print-money th,
   table.print-money td {
     box-sizing: border-box !important;
-    min-height: 36pt !important;
+    min-height: 24pt !important;
     vertical-align: middle !important;
   }
 
@@ -188,7 +213,7 @@
   table.print-rows td:not(:last-child),
   table.print-money th:not(:last-child),
   table.print-money td:not(:last-child) {
-    padding-right: 10px !important;
+    padding-right: 6px !important;
   }
 
   /* Colon column dividers — print-money only (removed for print-rows) */
@@ -202,31 +227,41 @@
     transform: translateY(-50%);
   }
 
-  /* Full grid: row lines AND column lines */
+  /* Full grid: row lines AND column lines.
+     This is now at the practical print floor, not just another
+     incremental cut. Font: 6.5pt -> 5.5pt -> 4.5pt (below ~4.5pt,
+     monospace glyphs on most dot matrix ribbons blur into illegible
+     smudges — this is the accepted lower bound for readable impact-
+     printer text, not an arbitrary stop). Padding scaled by the same
+     ~0.82x factor as the font drop, keeping the original top:left:right
+     ratio (≈1 : 1.8 : 1) from every prior pass: 0.45pt/0.25pt ->
+     0.35pt/0.2pt. Border held at 1px (sub-1px borders round
+     inconsistently and can vanish on print). Row height held at 9pt
+     (1 line @ 8 LPI) rather than cut further — going below one line's
+     worth of height defeats the point of a row entirely, so 9pt is the
+     floor there regardless of font size. If you need MORE than this on
+     a page, the remaining lever isn't smaller text, it's fewer/narrower
+     columns or splitting the table across more pages. */
   table.print-grid {
-    font-size: 11.5pt !important;
+    font-size: 4.5pt !important;
     border-collapse: collapse !important;
   }
+
   table.print-grid th,
   table.print-grid td {
-    border: 2px solid #000 !important;
-    /* Padding tightened for Epson LX310 — original 5pt top/bottom was
-       pushing row height past a clean LPI multiple, causing line-skip drift */
-    padding-top: 2pt !important;
-    padding-bottom: 2pt !important;
-    padding-left: 3pt !important;
-    padding-right: 2pt !important;
+    border: 1px solid #000 !important;
+    padding-top: 0.2pt !important;
+    padding-bottom: 0.2pt !important;
+    padding-left: 0.35pt !important;
+    padding-right: 0.2pt !important;
     font-size: inherit !important;
-    /* Fixed row height (worst case: 3 wrapped lines at 11.5pt/1.2 line-height)
-       so every row — even 1-line ones — is a uniform height. Uneven row
-       heights are what desync the printer's fixed line-pitch and cause
-       lines to skip partway down the page. */
     box-sizing: border-box !important;
-    min-height: 46pt !important;
+    min-height: 9pt !important;
     vertical-align: middle !important;
   }
+
   table.print-grid th {
-    border-bottom: 3px solid #000 !important;
+    border-bottom: 1.25px solid #000 !important;
   }
 
   /* ============================================
@@ -235,7 +270,7 @@
      ============================================ */
 
   table.print-money {
-    font-size: 8.5pt !important;
+    font-size: 6pt !important;
   }
 
   table.print-money th,
@@ -247,8 +282,9 @@
   a {
     text-decoration: none !important;
   }
+
   a[href]:after {
-    content: none !important; 
+    content: none !important;
   }
 
 
@@ -257,22 +293,26 @@
     max-width: 100%;
   }
 
+  /* print-header-block scaled by the same ~18% ratio as print-grid:
+     h2 9pt -> 7.5pt, p 7pt -> 6pt. Padding and grid-gap were already at
+     a 1px practical floor and are left as-is — going to 0 risks the
+     header fields visually touching each other. */
   .print-header-block h2 {
-    font-size: 15pt !important;
+    font-size: 7.5pt !important;
   }
 
   .print-header-block p {
-    font-size: 13pt !important;
+    font-size: 6pt !important;
     margin: 0 !important;
-    line-height: 1.15 !important;
+    line-height: 1.05 !important;
   }
 
   .print-header-block .p-4 {
-    padding: 3px 5px !important;
+    padding: 1px 1px !important;
   }
 
   .print-header-block .grid {
-    gap: 3px !important;
+    gap: 1px !important;
   }
 
 }

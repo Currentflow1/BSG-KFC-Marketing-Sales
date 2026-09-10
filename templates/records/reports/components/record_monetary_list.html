@@ -1,19 +1,18 @@
 <h1 class="font-bold">Agent Collection Report</h1>
-
 <div class="mb-4">
   <div class="border-2 divide-y-2 print-header-block">
-    <div class="p-4">
-      <h2 class="font-bold text-2xl">
+    <div class="p-2">
+      <h2 class="font-bold text-xl">
         Report No. {{ order.control_no }}
       </h2>
     </div>
 
-    <div class="grid grid-cols-2 gap-6 p-4">
+    <div class="grid grid-cols-2 gap-6 p-2">
       <div class="min-w-0 wrap-break-words">
         <p>Area: {{ order.area.area_name }}</p>
         <p>Agent: {{ order.agent.employee_name }}</p>
       </div>
-    
+  
     
       <div class="min-w-0 wrap-break-word text-right">
         <p>MLOAD Date: {{ order.mload_date }}</p>

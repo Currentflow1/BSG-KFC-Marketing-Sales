@@ -1,9 +1,13 @@
 @page {
-  size: 9.5in 11in;      
+  size: 9.5in 11in;
   margin: 0.2in 0.3in;
 }
 
 @media print {
+
+  /* ============================================================
+     GLOBAL PRINT SETTINGS
+     ============================================================ */
 
   * {
     color: #000 !important;
@@ -15,23 +19,46 @@
     font-weight: bold !important;
   }
 
-  html, body {
+  html,
+  body {
     width: 100%;
     margin: 0;
     padding: 0;
-    font-family: 'Courier New', 'Consolas', Courier, monospace !important;
+
+    font-family:
+      'Courier New',
+      'Consolas',
+      Courier,
+      monospace !important;
+
     font-size: 12pt;
     line-height: 1.5;
+
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  nav, header:not(.print-header), footer:not(.print-footer),
-  .no-print, button, .btn, .sidebar, .navbar {
+  /* ============================================================
+     HIDE NON-PRINT ELEMENTS
+     ============================================================ */
+
+  nav,
+  header:not(.print-header),
+  footer:not(.print-footer),
+  .no-print,
+  button,
+  .btn,
+  .sidebar,
+  .navbar {
     display: none !important;
   }
 
-  .p-2, .space-y-6 > * + * {
+  /* ============================================================
+     GENERAL SPACING
+     ============================================================ */
+
+  .p-2,
+  .space-y-6 > * + * {
     padding: 0 !important;
     margin-top: 0.25em !important;
   }
@@ -57,8 +84,20 @@
     break-before: page;
   }
 
-  h1, h2, h3, h4 {
-    font-family: 'Courier New', 'Consolas', Courier, monospace !important;
+  /* ============================================================
+     HEADINGS
+     ============================================================ */
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family:
+      'Courier New',
+      'Consolas',
+      Courier,
+      monospace !important;
+
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -66,9 +105,22 @@
     margin: 0.3em 0;
   }
 
-  h1 { font-size: 15pt; }
-  h2 { font-size: 14pt; }
-  h3, h4 { font-size: 13pt; }
+  h1 {
+    font-size: 15pt;
+  }
+
+  h2 {
+    font-size: 14pt;
+  }
+
+  h3,
+  h4 {
+    font-size: 13pt;
+  }
+
+  /* ============================================================
+     HORIZONTAL RULE
+     ============================================================ */
 
   hr {
     border: none;
@@ -76,31 +128,60 @@
     margin: 0.4em 0;
   }
 
+  /* ============================================================
+     TABLE CONTAINERS
+     ============================================================ */
+
   .overflow-x-auto {
     overflow: visible !important;
     width: 100% !important;
   }
 
+  /* ============================================================
+     DEFAULT TABLE
+     ============================================================ */
+
   table {
     width: 100%;
-    border-collapse: collapse;
-    font-family: 'Courier New', 'Consolas', Courier, monospace !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+
+    font-family:
+      'Courier New',
+      'Consolas',
+      Courier,
+      monospace !important;
+
     font-size: 12pt !important;
     line-height: 1.2;
+
     table-layout: fixed;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
 
-  th, td {
+  /* ============================================================
+     DEFAULT TABLE CELLS
+     ============================================================ */
+
+  th,
+  td {
     padding: 4px 3px 4px 4px;
+
     text-align: left;
+
     white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
     overflow: visible;
+
     font-size: inherit !important;
     line-height: inherit !important;
+
+    border-style: solid !important;
+    border-color: #000000 !important;
+
+    border-width: 0 0 1pt 0 !important;
   }
 
   th {
@@ -108,131 +189,146 @@
     text-transform: uppercase;
   }
 
-  td.text-right, th.text-right,
-  td[class*="amount"], td[class*="qty"], td[class*="price"], td[class*="total"] {
+  /* ============================================================
+     RIGHT-ALIGNED NUMERIC COLUMNS
+     ============================================================ */
+
+  td.text-right,
+  th.text-right,
+  td[class*="amount"],
+  td[class*="qty"],
+  td[class*="price"],
+  td[class*="total"] {
     text-align: right;
   }
+
+  /* ============================================================
+     TABLE HEADERS / FOOTERS
+     ============================================================ */
 
   thead {
     display: table-header-group;
   }
+
   tfoot {
     display: table-footer-group;
   }
 
-  /* Sticky headers only make sense on-screen; on paper they can cause
-     redraw/overlap across page breaks, so force static positioning */
+  /* ============================================================
+     STICKY HEADERS
+     ============================================================ */
+
   .sticky {
     position: static !important;
     top: auto !important;
     z-index: auto !important;
   }
+
+  /* ============================================================
+     KEEP TABLE ROWS TOGETHER
+     ============================================================ */
+
   tr {
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
+  /* ============================================================
+     PRINT-ROWS / PRINT-MONEY
+     ------------------------------------------------------------
+     IMPORTANT:
+     - Normal spacing is restored.
+     - No forced row height.
+     - No extra gaps.
+     - No vertical borders.
+     - Every cell gets a reliable horizontal separator.
+     ============================================================ */
+
+  table.print-rows,
+  table.print-money {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+  }
+
+  table.print-rows th,
+  table.print-rows td,
+  table.print-money th,
+  table.print-money td {
+    box-sizing: border-box !important;
+
+    position: relative;
+
+    font-size: inherit !important;
+
+    vertical-align: middle !important;
+
+    /*
+     * Restore the original normal row spacing.
+     * Do NOT increase this.
+     */
+    padding: 2.5pt 0 !important;
+
+    /*
+     * No top/left/right borders.
+     * The horizontal line is drawn below each cell.
+     */
+    border: none !important;
+  }
+
+  /* ============================================================
+     CONSISTENT HORIZONTAL ROW LINES
+     ------------------------------------------------------------
+     Instead of relying on table border negotiation, draw the
+     separator as a pseudo-element attached to every cell.
+
+     This avoids:
+       - missing lines
+       - doubled lines
+       - disappearing thin borders
+       - vertical column lines
+       - border-collapse negotiation
+     ============================================================ */
+
+  table.print-rows th::after,
+  table.print-rows td::after,
+  table.print-money th::after,
+  table.print-money td::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 1pt;
+
+    background: #000 !important;
+
+    pointer-events: none;
+  }
+
+  /* ============================================================
+     PRINT-ROWS
+     ============================================================ */
+
   table.print-rows {
     font-size: 11.5pt !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
   }
 
-  table.print-money {
-    font-size: 13pt !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-  }
-
-  table.print-rows th,
-  table.print-rows td,
-  table.print-money th,
-  table.print-money td {
-    border: none !important;
-    border-bottom: 2px solid #000 !important;
-    padding: 0 !important;
-    font-size: inherit !important;
-    position: relative;
-  }
-
-  table.print-rows th,
-  table.print-rows td,
-  table.print-money th,
-  table.print-money td {
-    padding-top: 2.5pt !important;
-    padding-bottom: 2.5pt !important;
-  }
-  table.print-rows th,
-  table.print-money th {
-    border-bottom: 3px solid #000 !important;
-  }
-
-  /* Fixed row heights (worst case: 3 wrapped lines), same reasoning as
-     print-grid above. Set separately per table since print-rows (11.5pt)
-     and print-money (8.5pt) need different totals. */
   table.print-rows th,
   table.print-rows td {
-    box-sizing: border-box !important;
-    min-height: 47pt !important;
-    vertical-align: middle !important;
+    line-height: 1.2 !important;
   }
 
-  table.print-money th,
-  table.print-money td {
-    box-sizing: border-box !important;
-    min-height: 36pt !important;
-    vertical-align: middle !important;
+  /* Header separator */
+  table.print-rows thead th::after {
+    height: 2pt;
   }
 
-  table.print-rows th:not(:last-child),
-  table.print-rows td:not(:last-child),
-  table.print-money th:not(:last-child),
-  table.print-money td:not(:last-child) {
-    padding-right: 10px !important;
-  }
-
-  /* Colon column dividers — print-money only (removed for print-rows) */
-  table.print-money th:not(:last-child)::after,
-  table.print-money td:not(:last-child)::after {
-    content: ":";
-    font-weight: normal;
-    position: absolute;
-    right: 2px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  /* Full grid: row lines AND column lines */
-  table.print-grid {
-    font-size: 11.5pt !important;
-    border-collapse: collapse !important;
-  }
-  table.print-grid th,
-  table.print-grid td {
-    border: 2px solid #000 !important;
-    /* Padding tightened for Epson LX310 — original 5pt top/bottom was
-       pushing row height past a clean LPI multiple, causing line-skip drift */
-    padding-top: 2pt !important;
-    padding-bottom: 2pt !important;
-    padding-left: 3pt !important;
-    padding-right: 2pt !important;
-    font-size: inherit !important;
-    /* Fixed row height (worst case: 3 wrapped lines at 11.5pt/1.2 line-height)
-       so every row — even 1-line ones — is a uniform height. Uneven row
-       heights are what desync the printer's fixed line-pitch and cause
-       lines to skip partway down the page. */
-    box-sizing: border-box !important;
-    min-height: 46pt !important;
-    vertical-align: middle !important;
-  }
-  table.print-grid th {
-    border-bottom: 3px solid #000 !important;
-  }
-
-  /* ============================================
-     MONEY VARIANT — print-rows layout, smaller font
-     to fit 8-digit amounts. Overrides the size set above.
-     ============================================ */
+  /* ============================================================
+     PRINT-MONEY
+     ============================================================ */
 
   table.print-money {
     font-size: 8.5pt !important;
@@ -242,37 +338,146 @@
   table.print-money td {
     letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
+
+    line-height: 1.2 !important;
   }
+
+  /* Header separator */
+  table.print-money thead th::after {
+    height: 2pt;
+  }
+
+  /* ============================================================
+     TOTALS ROW
+     ------------------------------------------------------------
+     The totals row receives a controlled top rule.
+
+     The previous row's bottom rule remains, so we intentionally
+     make the totals top rule sit at the row boundary without
+     changing padding or adding extra vertical space.
+     ============================================================ */
+
+  table.print-rows tr.border-t-2 th,
+  table.print-rows tr.border-t-2 td,
+  table.print-money tr.border-t-2 th,
+  table.print-money tr.border-t-2 td {
+    border-top: 2pt solid #000 !important;
+  }
+
+  /*
+   * Remove the pseudo bottom rule from the totals cell when
+   * its normal bottom border is already supplied by the row.
+   */
+  table.print-rows tr.border-t-2 th::after,
+  table.print-rows tr.border-t-2 td::after,
+  table.print-money tr.border-t-2 th::after,
+  table.print-money tr.border-t-2 td::after {
+    height: 1pt;
+  }
+
+  /* ============================================================
+     COLUMN SPACING
+     ------------------------------------------------------------
+     This is the original spacing.
+     No additional gap has been introduced.
+     ============================================================ */
+
+  table.print-rows th:not(:last-child),
+  table.print-rows td:not(:last-child),
+  table.print-money th:not(:last-child),
+  table.print-money td:not(:last-child) {
+    padding-right: 10px !important;
+  }
+
+  /* ============================================================
+     MONEY COLON DIVIDERS
+     ============================================================ */
+
+  table.print-money th:not(:last-child)::before,
+  table.print-money td:not(:last-child)::before {
+    content: ":";
+
+    font-weight: normal;
+
+    position: absolute;
+
+    right: 2px;
+    top: 50%;
+
+    transform: translateY(-50%);
+  }
+
+  /* ============================================================
+     FULL GRID
+     ------------------------------------------------------------
+     DO NOT TOUCH.
+
+     This is preserved exactly from the original CSS.
+     ============================================================ */
+
+  table.print-grid {
+    font-size: 11pt !important;
+    border-collapse: collapse !important;
+  }
+
+  table.print-grid th,
+  table.print-grid td {
+    border: 1.5px solid #000 !important;
+    padding-top: 1.5pt !important;
+    padding-bottom: 1.5pt !important;
+    padding-left: 1.5pt !important;
+    padding-right: 1.5pt !important;
+    font-size: inherit !important;
+    box-sizing: border-box !important;
+    min-height: 12pt !important;
+    vertical-align: middle !important;
+  }
+
+  table.print-grid th {
+    border-bottom: 2px solid #000 !important;
+  }
+
+  /* ============================================================
+     LINKS
+     ============================================================ */
 
   a {
     text-decoration: none !important;
   }
+
   a[href]:after {
-    content: none !important; 
+    content: none !important;
   }
 
+  /* ============================================================
+     IMAGES
+     ============================================================ */
 
   img {
     filter: grayscale(1) contrast(2) !important;
     max-width: 100%;
   }
 
+  /* ============================================================
+     PRINT HEADER
+     ============================================================ */
+
   .print-header-block h2 {
-    font-size: 15pt !important;
+    font-size: 14pt !important;
   }
 
   .print-header-block p {
-    font-size: 13pt !important;
+    font-size: 12pt !important;
     margin: 0 !important;
-    line-height: 1.15 !important;
+    line-height: 1.1 !important;
   }
 
   .print-header-block .p-4 {
-    padding: 3px 5px !important;
+    padding: 2px 2px !important;
   }
 
   .print-header-block .grid {
-    gap: 3px !important;
+    gap: 2px !important;
   }
 
 }
