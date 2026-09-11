@@ -474,12 +474,41 @@ def _mret_pct(cell):
     return max(0, round((mret / cell["mload"]) * 100, 2))
 
 
+def _mret_raw(cell):
+    """
+    Raw MRET total (magnitude).
+    total_MRET is stored as a negative value, so it must be negated before use.
+    MRET values can never be negative, so the result is floored at 0.
+    """
+    mret = -cell["mret"]  # stored negative; flip sign to get the real magnitude
+    return max(0, round(mret, 2))
+
+
+# Which view mode is valid, and which function computes the cell value for it.
+_MRET_MODE_FUNCS = {
+    "percentage": _mret_pct,
+    "raw": _mret_raw,
+}
+
+
+def _get_mret_mode(request):
+    """Read and validate the ?mode= query param, defaulting to percentage."""
+    mode = request.GET.get("mode", "percentage")
+    return mode if mode in _MRET_MODE_FUNCS else "percentage"
+
+
 def mret_percentage_matrix(request):
     """
-    Product x Date matrix of MRET % (total_MRET / total_MLOAD * 100).
+    Product x Date matrix of MRET values.
     Same filtering as short_over_matrix: date range, product, area, employee.
+    Supports two display modes via ?mode=percentage|raw:
+      - percentage (default): total_MRET / total_MLOAD * 100
+      - raw: total_MRET magnitude
     """
     marketing_qs, products, filters = _short_over_filtered_queryset(request)
+
+    mode = _get_mret_mode(request)
+    value_fn = _MRET_MODE_FUNCS[mode]
 
     # matrix[product_pk][date] -> {"mret": total, "mload": total}
     matrix = defaultdict(lambda: defaultdict(lambda: {"mret": 0, "mload": 0}))
@@ -498,7 +527,7 @@ def mret_percentage_matrix(request):
         {
             "product": product,
             "values": [
-                _mret_pct(matrix[product.pk].get(d, {"mret": 0, "mload": 0}))
+                value_fn(matrix[product.pk].get(d, {"mret": 0, "mload": 0}))
                 for d in date_columns
             ],
         }
@@ -508,16 +537,20 @@ def mret_percentage_matrix(request):
     return render(request, "records/mret_percentage_matrix/mret_percentage_matrix.html", {
         "date_columns": date_columns,
         "rows": rows,
+        "mode": mode,
         **_base_matrix_context(filters),
     })
 
 
 def export_mret_percentage_matrix_csv(request):
     """
-    CSV export of the Product x Date MRET % matrix.
-    Same filtering logic as mret_percentage_matrix.
+    CSV export of the Product x Date MRET matrix.
+    Same filtering logic and mode support as mret_percentage_matrix.
     """
     marketing_qs, products, filters = _short_over_filtered_queryset(request)
+
+    mode = _get_mret_mode(request)
+    value_fn = _MRET_MODE_FUNCS[mode]
 
     matrix = defaultdict(lambda: defaultdict(lambda: {"mret": 0, "mload": 0}))
     date_columns = set()
@@ -533,19 +566,21 @@ def export_mret_percentage_matrix_csv(request):
 
     response = HttpResponse(content_type="text/csv")
     suffix = _csv_filename_suffix(filters)
+    filename_part = "mret_percentage_matrix" if mode == "percentage" else "mret_raw_matrix"
     response["Content-Disposition"] = (
-        f'attachment; filename="mret_percentage_matrix{suffix}.csv"'
+        f'attachment; filename="{filename_part}{suffix}.csv"'
     )
 
     writer = csv.writer(response)
-    _write_csv_filter_header(writer, "MRET % Report — Post-MRET", filters)
+    title = "MRET % Report — Post-MRET" if mode == "percentage" else "MRET Report — Post-MRET"
+    _write_csv_filter_header(writer, title, filters)
 
     header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns]
     writer.writerow(header)
 
     for product in products:
         row = [product.product_name] + [
-            _mret_pct(matrix[product.pk].get(d, {"mret": 0, "mload": 0}))
+            value_fn(matrix[product.pk].get(d, {"mret": 0, "mload": 0}))
             for d in date_columns
         ]
         writer.writerow(row)

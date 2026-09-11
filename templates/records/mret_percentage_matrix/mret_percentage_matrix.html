@@ -3,11 +3,11 @@
 {% block content %}
 
 <h1 class="font-bold text-2xl">
-  MRET % Report
+  {% if mode == "raw" %}MRET Report{% else %}MRET % Report{% endif %}
 </h1>
 
 <p class="mb-6 text-gray-400">
-  Post-MRET Summary — MRET / MLOAD
+  {% if mode == "raw" %}Post-MRET Summary — Raw MRET{% else %}Post-MRET Summary — MRET / MLOAD{% endif %}
 </p>
 
 <form method="get" class="mb-6 flex flex-wrap items-end gap-6">
@@ -78,6 +78,9 @@
     </select>
   </div>
 
+  <!-- Keep the current display mode when the filter form is submitted -->
+  <input type="hidden" name="mode" value="{{ mode }}">
+
   <button
     type="submit"
     class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -86,10 +89,17 @@
   </button>
 
   <a
-    href="{% url 'export_mret_percentage_matrix_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}&amp;product={{ product_id|default:'' }}&amp;area={{ area_id|default:'' }}&amp;employee={{ employee_id|default:'' }}"
+    href="{% url 'export_mret_percentage_matrix_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}&amp;product={{ product_id|default:'' }}&amp;area={{ area_id|default:'' }}&amp;employee={{ employee_id|default:'' }}&amp;mode={{ mode }}"
     class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
   >
     Export CSV
+  </a>
+
+  <a
+    href="?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}&amp;product={{ product_id|default:'' }}&amp;area={{ area_id|default:'' }}&amp;employee={{ employee_id|default:'' }}&amp;mode={% if mode == 'raw' %}percentage{% else %}raw{% endif %}"
+    class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
+  >
+    {% if mode == "raw" %}Show %{% else %}Show Raw Numbers{% endif %}
   </a>
 
 </form>
@@ -130,7 +140,7 @@
 
         {% for v in row.values %}
         <td class="p-2 text-right">
-          {{ v }}%
+          {{ v }}{% if mode != "raw" %}%{% endif %}
         </td>
         {% endfor %}
 
