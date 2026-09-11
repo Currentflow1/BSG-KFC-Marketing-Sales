@@ -12,14 +12,36 @@
       </p>
     </div>
 
-    <div class="flex items-center space-x-6">
+    <form method="get" id="order-filter-form" class="flex items-center space-x-3">
 
       <input type="text" name="search" value="{{ request.GET.search }}" placeholder="Search Orders..."
         autocomplete="off" class="w-lg rounded-lg border border-gray-300 px-4 py-2 text-sm
-              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" hx-get="{% url 'order_search' %}"
-        hx-trigger="keyup changed delay:300ms" hx-target="#orders-results" hx-swap="innerHTML">
+              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+        hx-get="{% url 'order_search' %}"
+        hx-trigger="keyup changed delay:300ms"
+        hx-include="#order-filter-form"
+        hx-target="#orders-results" hx-swap="innerHTML">
 
-    </div>
+      <input type="date" name="date_from" value="{{ request.GET.date_from }}"
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+
+      <span class="text-gray-400">to</span>
+
+      <input type="date" name="date_to" value="{{ request.GET.date_to }}"
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+
+      <button type="button"
+        hx-get="{% url 'order_search' %}"
+        hx-include="#order-filter-form"
+        hx-target="#orders-results" hx-swap="innerHTML"
+        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium
+               text-white transition-colors hover:bg-blue-700">
+        Filter
+      </button>
+
+    </form>
 
   </div>
 

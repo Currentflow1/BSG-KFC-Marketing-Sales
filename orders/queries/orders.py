@@ -21,7 +21,7 @@ def _clean_sort(sort):
     return sort
 
 
-def search_orders(search="", sort="-control_no"):
+def search_orders(search="", sort="-control_no", date_from=None, date_to=None):
     sort = _clean_sort(sort)
     orders = (
         OrderDetails.objects
@@ -43,6 +43,12 @@ def search_orders(search="", sort="-control_no"):
             | Q(customers__invoice_no__icontains=search)
             | Q(customers__customer__customer_business_name__icontains=search)
         ).distinct()
+
+    # Date range filter, applied against mret_date.
+    if date_from:
+        orders = orders.filter(mret_date__gte=date_from)
+    if date_to:
+        orders = orders.filter(mret_date__lte=date_to)
 
     # control_no is a CharField, so a plain order_by("control_no") sorts
     # lexicographically ("100000" < "99999" as strings) instead of

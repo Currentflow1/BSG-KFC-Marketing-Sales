@@ -32,7 +32,12 @@ def record_list(request):
     orders = services.search_orders(
         search=request.GET.get("search"),
         sort=request.GET.get("sort", "-control_no"),
-    )
+        date_from=request.GET.get("date_from") or None,
+        date_to=request.GET.get("date_to") or None,
+    ).prefetch_related("marketing__product")
+
+    for order in orders:
+        order.revenue_total = sum(item.net_price for item in order.marketing.all())
 
     context = {"orders": orders}
 
@@ -386,12 +391,6 @@ def _write_csv_filter_header(writer, title, filters):
 # ============================================================
 
 def short_over_matrix(request):
-    """
-    Product x Date matrix of Short/Over balances.
-    Only includes orders with a completed MRET (mret_date set),
-    filtered to mret_date within the selected range, and optionally
-    by product, area, and employee (agent) — selected via dropdowns.
-    """
     marketing_qs, products, filters = _short_over_filtered_queryset(request)
 
     matrix = defaultdict(lambda: defaultdict(int))
@@ -412,18 +411,22 @@ def short_over_matrix(request):
         for product in products
     ]
 
+    column_totals = [
+        sum(matrix[product.pk].get(d, 0) for product in products)
+        for d in date_columns
+    ]
+    grand_total = sum(column_totals)
+
     return render(request, "records/short_over_matrix/short_over_matrix.html", {
         "date_columns": date_columns,
         "rows": rows,
+        "column_totals": column_totals,
+        "grand_total": grand_total,
         **_base_matrix_context(filters),
     })
 
 
 def export_short_over_matrix_csv(request):
-    """
-    CSV export of the Product x Date Short/Over matrix.
-    Same filtering logic as short_over_matrix.
-    """
     marketing_qs, products, filters = _short_over_filtered_queryset(request)
 
     matrix = defaultdict(lambda: defaultdict(int))
@@ -454,8 +457,13 @@ def export_short_over_matrix_csv(request):
         ]
         writer.writerow(row)
 
-    return response
+    column_totals = [
+        sum(matrix[product.pk].get(d, 0) for product in products)
+        for d in date_columns
+    ]
+    writer.writerow(["TOTAL"] + column_totals)
 
+    return response
 
 # ============================================================
 # MRET % matrix
@@ -498,19 +506,11 @@ def _get_mret_mode(request):
 
 
 def mret_percentage_matrix(request):
-    """
-    Product x Date matrix of MRET values.
-    Same filtering as short_over_matrix: date range, product, area, employee.
-    Supports two display modes via ?mode=percentage|raw:
-      - percentage (default): total_MRET / total_MLOAD * 100
-      - raw: total_MRET magnitude
-    """
     marketing_qs, products, filters = _short_over_filtered_queryset(request)
 
     mode = _get_mret_mode(request)
     value_fn = _MRET_MODE_FUNCS[mode]
 
-    # matrix[product_pk][date] -> {"mret": total, "mload": total}
     matrix = defaultdict(lambda: defaultdict(lambda: {"mret": 0, "mload": 0}))
     date_columns = set()
 
@@ -534,19 +534,34 @@ def mret_percentage_matrix(request):
         for product in products
     ]
 
+    # Totals computed from aggregated mret/mload per column (and overall),
+    # not by summing per-row percentages, so the % total stays accurate.
+    column_agg = [
+        {
+            "mret": sum(matrix[product.pk].get(d, {"mret": 0, "mload": 0})["mret"] for product in products),
+            "mload": sum(matrix[product.pk].get(d, {"mret": 0, "mload": 0})["mload"] for product in products),
+        }
+        for d in date_columns
+    ]
+    column_totals = [value_fn(agg) for agg in column_agg]
+
+    grand_agg = {
+        "mret": sum(agg["mret"] for agg in column_agg),
+        "mload": sum(agg["mload"] for agg in column_agg),
+    }
+    grand_total = value_fn(grand_agg)
+
     return render(request, "records/mret_percentage_matrix/mret_percentage_matrix.html", {
         "date_columns": date_columns,
         "rows": rows,
         "mode": mode,
+        "column_totals": column_totals,
+        "grand_total": grand_total,
         **_base_matrix_context(filters),
     })
 
 
 def export_mret_percentage_matrix_csv(request):
-    """
-    CSV export of the Product x Date MRET matrix.
-    Same filtering logic and mode support as mret_percentage_matrix.
-    """
     marketing_qs, products, filters = _short_over_filtered_queryset(request)
 
     mode = _get_mret_mode(request)
@@ -584,5 +599,143 @@ def export_mret_percentage_matrix_csv(request):
             for d in date_columns
         ]
         writer.writerow(row)
+
+    column_agg = [
+        {
+            "mret": sum(matrix[product.pk].get(d, {"mret": 0, "mload": 0})["mret"] for product in products),
+            "mload": sum(matrix[product.pk].get(d, {"mret": 0, "mload": 0})["mload"] for product in products),
+        }
+        for d in date_columns
+    ]
+    column_totals = [value_fn(agg) for agg in column_agg]
+    writer.writerow(["TOTAL"] + column_totals)
+
+    return response
+
+# ============================================================
+# Revenue / SO Amount matrix
+# ============================================================
+
+def _revenue_value(cell):
+    """Total Revenue = sum of net_price across marketing lines in the cell."""
+    return round(cell["net_price"], 2)
+
+
+def _so_amount_value(cell):
+    """Total SO Amount = sum of total_SO quantity across marketing lines in the cell."""
+    return cell["total_SO"]
+
+
+# Which view mode is valid, and which function computes the cell value for it.
+_REVENUE_MODE_FUNCS = {
+    "revenue": _revenue_value,
+    "so_amount": _so_amount_value,
+}
+
+
+def _get_revenue_mode(request):
+    """Read and validate the ?mode= query param, defaulting to revenue."""
+    mode = request.GET.get("mode", "revenue")
+    return mode if mode in _REVENUE_MODE_FUNCS else "revenue"
+
+
+def revenue_so_matrix(request):
+    marketing_qs, products, filters = _short_over_filtered_queryset(request)
+
+    mode = _get_revenue_mode(request)
+    value_fn = _REVENUE_MODE_FUNCS[mode]
+
+    matrix = defaultdict(lambda: defaultdict(lambda: {"net_price": 0, "total_SO": 0}))
+    date_columns = set()
+
+    for md in marketing_qs:
+        d = md.order.mret_date
+        date_columns.add(d)
+        cell = matrix[md.product.pk][d]
+        cell["net_price"] += md.net_price
+        cell["total_SO"] += md.total_SO
+
+    date_columns = sorted(date_columns)
+
+    rows = [
+        {
+            "product": product,
+            "values": [
+                value_fn(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0}))
+                for d in date_columns
+            ],
+        }
+        for product in products
+    ]
+
+    column_totals = [
+        value_fn({
+            "net_price": sum(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0})["net_price"] for product in products),
+            "total_SO": sum(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0})["total_SO"] for product in products),
+        })
+        for d in date_columns
+    ]
+    grand_total = value_fn({
+        "net_price": sum(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0})["net_price"] for product in products for d in date_columns),
+        "total_SO": sum(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0})["total_SO"] for product in products for d in date_columns),
+    })
+
+    return render(request, "records/revenue_so_matrix/revenue_so_matrix.html", {
+        "date_columns": date_columns,
+        "rows": rows,
+        "mode": mode,
+        "column_totals": column_totals,
+        "grand_total": grand_total,
+        **_base_matrix_context(filters),
+    })
+
+
+def export_revenue_so_matrix_csv(request):
+    marketing_qs, products, filters = _short_over_filtered_queryset(request)
+
+    mode = _get_revenue_mode(request)
+    value_fn = _REVENUE_MODE_FUNCS[mode]
+
+    matrix = defaultdict(lambda: defaultdict(lambda: {"net_price": 0, "total_SO": 0}))
+    date_columns = set()
+
+    for md in marketing_qs:
+        d = md.order.mret_date
+        date_columns.add(d)
+        cell = matrix[md.product.pk][d]
+        cell["net_price"] += md.net_price
+        cell["total_SO"] += md.total_SO
+
+    date_columns = sorted(date_columns)
+
+    response = HttpResponse(content_type="text/csv")
+    suffix = _csv_filename_suffix(filters)
+    filename_part = "revenue_matrix" if mode == "revenue" else "so_amount_matrix"
+    response["Content-Disposition"] = (
+        f'attachment; filename="{filename_part}{suffix}.csv"'
+    )
+
+    writer = csv.writer(response)
+    title = "Total Revenue Report — Post-MRET" if mode == "revenue" else "Total SO Amount Report — Post-MRET"
+    _write_csv_filter_header(writer, title, filters)
+
+    header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns]
+    writer.writerow(header)
+
+    for product in products:
+        row = [product.product_name] + [
+            value_fn(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0}))
+            for d in date_columns
+        ]
+        writer.writerow(row)
+
+    column_totals = [
+        value_fn({
+            "net_price": sum(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0})["net_price"] for product in products),
+            "total_SO": sum(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0})["total_SO"] for product in products),
+        })
+        for d in date_columns
+    ]
+    writer.writerow(["TOTAL"] + column_totals)
 
     return response

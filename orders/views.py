@@ -28,8 +28,15 @@ from .models import (
 def order_list(request):
     search = request.GET.get("search", "").strip()
     sort = request.GET.get("sort", "-control_no")
+    date_from = request.GET.get("date_from") or None
+    date_to = request.GET.get("date_to") or None
 
-    orders = queries.search_orders(search=search, sort=sort)
+    orders = queries.search_orders(
+        search=search,
+        sort=sort,
+        date_from=date_from,
+        date_to=date_to,
+    )
 
     return render(request, "orders/home.html", {
         "orders": orders,
@@ -39,8 +46,15 @@ def order_list(request):
 def order_search(request):
     search = request.GET.get("search", "").strip()
     sort = request.GET.get("sort", "-control_no")
+    date_from = request.GET.get("date_from") or None
+    date_to = request.GET.get("date_to") or None
 
-    orders = queries.search_orders(search=search, sort=sort)
+    orders = queries.search_orders(
+        search=search,
+        sort=sort,
+        date_from=date_from,
+        date_to=date_to,
+    )
 
     return render(request, "orders/components/main_order/main_order_list.html", {
         "orders": orders,

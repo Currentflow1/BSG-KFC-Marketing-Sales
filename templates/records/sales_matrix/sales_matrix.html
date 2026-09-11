@@ -3,11 +3,11 @@
 {% block content %}
 
 <h1 class="font-bold text-2xl">
-  Short Over Reports
+  {% if mode == "revenue" %}Total Revenue Report{% else %}Total SO Amount Report{% endif %}
 </h1>
 
 <p class="mb-6 text-gray-400">
-  Post-MRET Summary — Short / Over
+  Post-MRET Summary — {% if mode == "revenue" %}Total Revenue{% else %}Total SO Amount{% endif %}
 </p>
 
 <form method="get" class="mb-6 flex flex-wrap items-end gap-6">
@@ -78,6 +78,18 @@
     </select>
   </div>
 
+  <div>
+    <label for="mode" class="mb-1 block font-medium">View</label>
+    <select
+      id="mode" name="mode"
+      class="rounded-lg border border-gray-300 px-4 py-2 text-sm
+             focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+    >
+      <option value="revenue" {% if mode == "revenue" %}selected{% endif %}>Total Revenue</option>
+      <option value="so_amount" {% if mode == "so_amount" %}selected{% endif %}>Total SO Amount</option>
+    </select>
+  </div>
+
   <button
     type="submit"
     class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -86,7 +98,7 @@
   </button>
 
   <a
-    href="{% url 'export_short_over_matrix_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}&amp;product={{ product_id|default:'' }}&amp;area={{ area_id|default:'' }}&amp;employee={{ employee_id|default:'' }}"
+    href="{% url 'export_revenue_so_matrix_csv' %}?start_date={{ start_date|urlencode }}&amp;end_date={{ end_date|urlencode }}&amp;product={{ product_id|default:'' }}&amp;area={{ area_id|default:'' }}&amp;employee={{ employee_id|default:'' }}&amp;mode={{ mode }}"
     class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
   >
     Export CSV
@@ -148,7 +160,9 @@
       <tr>
         <td class="p-2">TOTAL</td>
         {% for v in column_totals %}
-        <td class="p-2 text-right">{{ v }}</td>
+        <td class="p-2 text-right">
+          {{ v }}{% if mode != "raw" and mode != "so_amount" and column_totals and grand_total is not None and "percentage" in mode|default:"" %}%{% endif %}
+        </td>
         {% endfor %}
       </tr>
     </tfoot>

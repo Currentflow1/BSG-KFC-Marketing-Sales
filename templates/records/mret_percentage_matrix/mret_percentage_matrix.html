@@ -153,7 +153,18 @@
       </tr>
       {% endfor %}
     </tbody>
-
+        {% if rows %}
+    <tfoot class="sticky bottom-0 bg-gray-200 font-semibold border-t-2 border-gray-400">
+      <tr>
+        <td class="p-2">TOTAL</td>
+        {% for v in column_totals %}
+        <td class="p-2 text-right">
+          {{ v }}{% if mode != "raw" %}%{% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+    </tfoot>
+    {% endif %}
   </table>
 </div>
 

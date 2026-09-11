@@ -12,7 +12,7 @@
       </p>
     </div>
 
-    <form method="get" class="flex items-center space-x-6">
+    <form method="get" id="record-filter-form" class="flex items-center space-x-3">
 
       <input
         type="text"
@@ -24,10 +24,32 @@
 
         hx-get="{% url 'record_list' %}"
         hx-trigger="keyup changed delay:300ms"
+        hx-include="#record-filter-form"
         hx-target="#records-results"
         hx-swap="innerHTML"
         hx-push-url="true"
       >
+
+      <input type="date" name="date_from" value="{{ request.GET.date_from }}"
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+
+      <span class="text-gray-400">to</span>
+
+      <input type="date" name="date_to" value="{{ request.GET.date_to }}"
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none">
+
+      <button type="button"
+        hx-get="{% url 'record_list' %}"
+        hx-include="#record-filter-form"
+        hx-target="#records-results"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium
+               text-white transition-colors hover:bg-blue-700">
+        Filter
+      </button>
 
     </form>
 
