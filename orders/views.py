@@ -319,9 +319,27 @@ def manage_transactions(request, order_id):
         customer_id=selected_customer_id,
     )
 
+    # Prev/next invoice navigation
+    order_customers = list(order.customers.all().order_by("invoice_no"))
+    prev_customer = None
+    next_customer = None
+
+    if selected_customer_id:
+        ids = [c.id for c in order_customers]
+        try:
+            idx = ids.index(int(selected_customer_id))
+            if idx > 0:
+                prev_customer = order_customers[idx - 1]
+            if idx < len(order_customers) - 1:
+                next_customer = order_customers[idx + 1]
+        except (ValueError, IndexError):
+            pass
+
     return render(request, "orders/manage_transactions.html", {
         "order": order,
         "form": form,
+        "prev_customer": prev_customer,
+        "next_customer": next_customer,
 
         **page_data,
 

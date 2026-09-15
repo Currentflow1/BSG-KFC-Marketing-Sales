@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils.dateparse import parse_date
 from . import services
-from orders.models import OrderDetails, MarketingDetails
+from orders.models import OrderDetails, MarketingDetails, CustomerDetails
 from products.models import Product
 from django.db.models import Sum, Q
 
@@ -739,3 +739,106 @@ def export_revenue_so_matrix_csv(request):
     writer.writerow(["TOTAL"] + column_totals)
 
     return response
+
+# ============================================================
+# Invoice report (filter by date / agent / area, one invoice at a time)
+# ============================================================
+
+def _invoice_report_filtered_customers(request):
+    start_date = parse_date(request.GET["start_date"]) if request.GET.get("start_date") else None
+    end_date = parse_date(request.GET["end_date"]) if request.GET.get("end_date") else None
+    area_id = request.GET.get("area") or None
+    employee_id = request.GET.get("employee") or None
+
+    orders = OrderDetails.objects.all()
+    if start_date:
+        orders = orders.filter(mret_date__gte=start_date)
+    if end_date:
+        orders = orders.filter(mret_date__lte=end_date)
+    if area_id:
+        orders = orders.filter(area_id=area_id)
+    if employee_id:
+        orders = orders.filter(agent_id=employee_id)
+
+    customers = (
+        CustomerDetails.objects
+        .filter(order__in=orders)
+        .select_related("order", "order__area", "order__agent", "customer")
+        .order_by("order__mret_date", "invoice_no")
+    )
+
+    area_choices, employee_choices, _ = _report_filter_options()
+
+    filters = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "area_id": area_id,
+        "employee_id": employee_id,
+        "selected_area_name": dict(area_choices).get(int(area_id)) if area_id else None,
+        "selected_employee_name": dict(employee_choices).get(int(employee_id)) if employee_id else None,
+        "area_choices": area_choices,
+        "employee_choices": employee_choices,
+    }
+
+    return customers, filters
+
+
+def invoice_report(request):
+    customers, filters = _invoice_report_filtered_customers(request)
+    customer_ids = list(customers.values_list("id", flat=True))
+
+    selected_id = request.GET.get("customer_detail_id")
+    try:
+        selected_id = int(selected_id) if selected_id else None
+    except ValueError:
+        selected_id = None
+
+    if selected_id not in customer_ids:
+        selected_id = customer_ids[0] if customer_ids else None
+
+    selected_customer_detail = None
+    lines = []
+    prev_url = next_url = None
+    current_position = 0
+
+    # querystring with filters only, used as the base for prev/next/nav links
+    base_params = request.GET.copy()
+    base_params.pop("customer_detail_id", None)
+
+    def _nav_url(cd_id):
+        if cd_id is None:
+            return None
+        params = base_params.copy()
+        params["customer_detail_id"] = cd_id
+        return f"?{params.urlencode()}"
+
+    if selected_id:
+        selected_customer_detail = get_object_or_404(
+            CustomerDetails.objects.select_related(
+                "order", "order__area", "order__agent", "customer"
+            ),
+            pk=selected_id,
+        )
+        idx = customer_ids.index(selected_id)
+        current_position = idx + 1
+
+        if idx > 0:
+            prev_url = _nav_url(customer_ids[idx - 1])
+        if idx < len(customer_ids) - 1:
+            next_url = _nav_url(customer_ids[idx + 1])
+
+        lines = (
+            selected_customer_detail.transactions
+            .select_related("product")
+            .order_by("-created_at")
+        )
+
+    return render(request, "records/invoice_report/invoice_report.html", {
+        "selected_customer_detail": selected_customer_detail,
+        "lines": lines,
+        "prev_url": prev_url,
+        "next_url": next_url,
+        "current_position": current_position,
+        "total_count": len(customer_ids),
+        **filters,
+    })

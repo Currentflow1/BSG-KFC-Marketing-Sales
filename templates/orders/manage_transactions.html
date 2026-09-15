@@ -19,12 +19,49 @@
 </div>
 {% include "orders/components/transactional/transaction_form_static.html" %}
 <div class="flex flex-col lg:flex-row gap-4">
-  <div class="lg:w-64 lg:flex-shrink-0">
+  <div class="lg:w-64 lg:shrink-0">
     {% include "orders/components/transactional/transaction_form.html" %}
   </div>
-  <div class="flex-1 min-w-0">
+  <div class="flex-1 min-w-0 min-h-max">
     {% include "orders/components/transactional/transaction_list.html" %}
   </div>
 </div>
+
+<div class="flex items-center justify-between mb-4">
+  {% if prev_customer %}
+    <form method="post" action="{% url 'manage_transactions_for_customer' order.id prev_customer.id %}">
+      {% csrf_token %}
+      <button type="submit"
+        class="font-bold text-white rounded p-2 bg-blue-600 hover:bg-blue-700 flex items-center gap-1">
+        &larr; Invoice #{{ prev_customer.invoice_no }}
+      </button>
+    </form>
+  {% else %}
+    <span class="font-bold text-gray-400 rounded p-2 bg-gray-100 flex items-center gap-1 cursor-not-allowed">
+      &larr; Invoice
+    </span>
+  {% endif %}
+
+  {% if selected_customer_detail %}
+    <span class="text-sm font-bold text-gray-500">
+      Invoice #{{ selected_customer_detail.invoice_no }} &middot; {{ selected_customer_detail.customer }}
+    </span>
+  {% endif %}
+
+  {% if next_customer %}
+    <form method="post" action="{% url 'manage_transactions_for_customer' order.id next_customer.id %}">
+      {% csrf_token %}
+      <button type="submit"
+        class="font-bold text-white rounded p-2 bg-blue-600 hover:bg-blue-700 flex items-center gap-1">
+        Invoice #{{ next_customer.invoice_no }} &rarr;
+      </button>
+    </form>
+  {% else %}
+    <span class="font-bold text-gray-400 rounded p-2 bg-gray-100 flex items-center gap-1 cursor-not-allowed">
+      Invoice &rarr;
+    </span>
+  {% endif %}
+</div>
+
 {% include "orders/components/transactional/transaction_total.html" %}
 {% endblock %}
