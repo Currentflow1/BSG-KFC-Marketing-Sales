@@ -1,3 +1,6 @@
+{% load humanize %}
+
+
 <div class="overflow-x-auto">
   <table class="min-w-full border border-gray-200 rounded-lg">
     <thead class="sticky top-0 z-10 bg-gray-100">
@@ -37,7 +40,7 @@
         </td>
 
         <td class="px-4 py-2 text-right">
-          {{ order.revenue_total|floatformat:2 }}
+          {{ order.revenue_total|intcomma|floatformat:2 }}
         </td>
 
         <td class="px-4 py-2">

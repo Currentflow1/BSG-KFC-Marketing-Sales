@@ -60,7 +60,7 @@
         </span>
       {% endif %}
 
-      <span class="text-sm font-bold text-gray-500">
+      <span class="text-sm font-bold text-black">
         Invoice #{{ selected_customer_detail.invoice_no }}
         &middot; {{ selected_customer_detail.customer }}
         &middot; ({{ current_position }} of {{ total_count }})
@@ -79,7 +79,7 @@
     </div>
 
     <div class="rounded-lg border border-gray-200 bg-white p-4">
-      <h2 class="mb-2 text-sm text-gray-500">
+      <h2 class="mb-2 text-sm text-black">
         Order #{{ selected_customer_detail.order.control_no }}
         &middot; Area: {{ selected_customer_detail.order.area }}
         &middot; Agent: {{ selected_customer_detail.order.agent }}
