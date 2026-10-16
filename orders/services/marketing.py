@@ -1,93 +1,86 @@
 from django.db import transaction
+from django.db.models import Q, Sum
 
-from django.db.models import Sum
-from ..models import (
-  DeliveryDetail,
-  TransactionDetail,
-  MarketingDetails,
-)
+from ..models import DeliveryDetail, MarketingDetails, TransactionDetail
+
+MARKETING_FIELDS = [
+    "total_SO",
+    "total_SAM",
+    "total_CRET",
+    "total_CBO",
+    "total_MLOAD",
+    "total_MRET",
+    "total_VBO",
+]
 
 
 @transaction.atomic
 def sync_marketing_details(order):
-    product_ids = set(
-        DeliveryDetail.objects
-        .filter(order=order)
-        .values_list("product_id", flat=True)
-    ) | set(
-        TransactionDetail.objects
-        .filter(customer_detail__order=order)
-        .values_list("product_id", flat=True)
-    )
+    delivery = {
+        row["product_id"]: row
+        for row in (
+            DeliveryDetail.objects.filter(order=order)
+            .order_by()
+            .values("product_id")
+            .annotate(
+                MLOAD=Sum("quantity", filter=Q(order_type="MLOAD")),
+                MRET=Sum("quantity", filter=Q(order_type="MRET")),
+                VBO=Sum("quantity", filter=Q(order_type="VBO")),
+            )
+        )
+    }
+
+    transactions = {
+        row["product_id"]: row
+        for row in (
+            TransactionDetail.objects.filter(customer_detail__order=order)
+            .order_by()
+            .values("product_id")
+            .annotate(
+                SO=Sum("quantity", filter=Q(order_type="SO")),
+                SAM=Sum("quantity", filter=Q(order_type="SAM")),
+                CRET=Sum("quantity", filter=Q(order_type="CRET")),
+                CBO=Sum("quantity", filter=Q(order_type="CBO")),
+            )
+        )
+    }
+
+    existing = {
+        md.product_id: md
+        for md in MarketingDetails.objects.select_for_update().filter(order=order)
+    }
+
+    # Include products that already have a marketing row. This is the actual fix:
+    # when a product's last line is deleted, it still gets recomputed (to 0).
+    product_ids = set(delivery) | set(transactions) | set(existing)
+
+    to_create, to_update = [], []
 
     for product_id in product_ids:
-        MarketingDetails.objects.update_or_create(
-            order=order,
-            product_id=product_id,
-            defaults={
+        d = delivery.get(product_id, {})
+        t = transactions.get(product_id, {})
 
-                "total_SO":
-                    TransactionDetail.objects.filter(
-                        customer_detail__order=order,
-                        product_id=product_id,
-                        order_type="SO",
-                    )
-                    .aggregate(total=Sum("quantity"))["total"] or 0,
+        values = {
+            "total_SO": t.get("SO") or 0,
+            "total_SAM": t.get("SAM") or 0,
+            "total_CRET": -(t.get("CRET") or 0),
+            "total_CBO": -(t.get("CBO") or 0),
+            "total_MLOAD": d.get("MLOAD") or 0,
+            "total_MRET": -(d.get("MRET") or 0),
+            "total_VBO": -(d.get("VBO") or 0),
+        }
 
-                "total_SAM":
-                    TransactionDetail.objects.filter(
-                        customer_detail__order=order,
-                        product_id=product_id,
-                        order_type="SAM",
-                    )
-                    .aggregate(total=Sum("quantity"))["total"] or 0,
+        md = existing.get(product_id)
+        if md is None:
+            to_create.append(
+                MarketingDetails(order=order, product_id=product_id, **values)
+            )
+        else:
+            for field, value in values.items():
+                setattr(md, field, value)
+            to_update.append(md)
 
-                "total_CRET":
-                    -(
-                        TransactionDetail.objects.filter(
-                            customer_detail__order=order,
-                            product_id=product_id,
-                            order_type="CRET",
-                        )
-                        .aggregate(total=Sum("quantity"))["total"] or 0
-                    ),
-
-                "total_CBO":
-                    -(
-                        TransactionDetail.objects.filter(
-                            customer_detail__order=order,
-                            product_id=product_id,
-                            order_type="CBO",
-                        )
-                        .aggregate(total=Sum("quantity"))["total"] or 0
-                    ),
-
-                "total_MLOAD":
-                    DeliveryDetail.objects.filter(
-                        order=order,
-                        product_id=product_id,
-                        order_type="MLOAD",
-                    )
-                    .aggregate(total=Sum("quantity"))["total"] or 0,
-
-                "total_MRET":
-                    -(
-                        DeliveryDetail.objects.filter(
-                            order=order,
-                            product_id=product_id,
-                            order_type="MRET",
-                        )
-                        .aggregate(total=Sum("quantity"))["total"] or 0
-                    ),
-
-                "total_VBO":
-                    -(
-                        DeliveryDetail.objects.filter(
-                            order=order,
-                            product_id=product_id,
-                            order_type="VBO",
-                        )
-                        .aggregate(total=Sum("quantity"))["total"] or 0
-                    ),
-            }
-        )
+    if to_create:
+        MarketingDetails.objects.bulk_create(to_create)
+    if to_update:
+        MarketingDetails.objects.bulk_update(to_update, MARKETING_FIELDS)

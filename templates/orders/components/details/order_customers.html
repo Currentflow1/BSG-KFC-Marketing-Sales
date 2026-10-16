@@ -9,7 +9,7 @@
     <table class="w-full">
       <tbody>
 
-        {% for cd in order.customers.all %}
+        {% for cd in order.customers.all|dictsort:"invoice_no" %}
         <tr class="border-b last:border-b-0">
           <td class="px-4 py-3 font-medium">
             {{ cd.customer }}

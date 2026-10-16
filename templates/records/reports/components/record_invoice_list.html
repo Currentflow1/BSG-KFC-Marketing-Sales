@@ -16,7 +16,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for customer_detail in order.customers.all %}
+      {% for customer_detail in order.customers.all|dictsort:"invoice_no" %}
         {% with latest=customer_detail.latest_so_sam_transaction %}
         {% if latest %}
         <tr>

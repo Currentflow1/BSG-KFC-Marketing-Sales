@@ -226,6 +226,16 @@ class MarketingDetails(models.Model):
     total_MRET = models.IntegerField(default=0)
     total_VBO = models.IntegerField(default=0)
 
+    class Meta:
+        # One marketing row per (order, product). sync_marketing_details()
+        # relies on this; it also prevents duplicate rows from concurrent syncs.
+        constraints = [
+            models.UniqueConstraint(
+                fields=["order", "product"],
+                name="uniq_marketing_order_product",
+            ),
+        ]
+
     @property
     def area_price(self):
         try:
