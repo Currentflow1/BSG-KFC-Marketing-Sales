@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load humanize %}
 {% block content %}
 
 <h1 class="font-bold text-2xl">
@@ -120,48 +120,58 @@
 
     <thead class="bg-gray-100">
       <tr>
-        <th class="px-4 py-2 text-left">Product</th>
+        <th class="sticky left-0 z-10 bg-gray-100 px-4 py-2 text-left">Product</th>
 
         {% for d in date_columns %}
           <th class="px-4 py-2 text-right">
             {{ d|date:"M d, Y" }}
           </th>
         {% endfor %}
+
+        <th class="px-4 py-2 text-right font-semibold">Product Total</th>
       </tr>
     </thead>
 
     <tbody>
       {% for row in rows %}
-      <tr class="border-t">
+      <tr class="group border-t">
 
-        <td class="p-2">
+        <td class="sticky left-0 z-10 bg-white p-2 group-hover:bg-gray-50">
           {{ row.product.product_name }}
         </td>
 
         {% for v in row.values %}
         <td class="p-2 text-right">
-          {{ v }}{% if mode != "raw" %}%{% endif %}
+          {% if mode == "raw" %}{{ v|intcomma }}{% else %}{{ v|floatformat:2 }}%{% endif %}
         </td>
         {% endfor %}
+
+        <td class="p-2 text-right font-semibold bg-gray-50">
+          {% if mode == "raw" %}{{ row.total|intcomma }}{% else %}{{ row.total|floatformat:2 }}%{% endif %}
+        </td>
 
       </tr>
       {% empty %}
       <tr>
-        <td colspan="{{ date_columns|length|add:1 }}" class="p-6 text-center text-gray-500">
+        <td colspan="{{ date_columns|length|add:2 }}" class="p-6 text-center text-gray-500">
           No records found.
         </td>
       </tr>
       {% endfor %}
     </tbody>
-        {% if rows %}
+
+    {% if rows %}
     <tfoot class="sticky bottom-0 bg-gray-200 font-semibold border-t-2 border-gray-400">
       <tr>
-        <td class="p-2">TOTAL</td>
+        <td class="sticky left-0 z-10 bg-gray-200 p-2">TOTAL</td>
         {% for v in column_totals %}
         <td class="p-2 text-right">
-          {{ v }}{% if mode != "raw" %}%{% endif %}
+          {% if mode == "raw" %}{{ v|intcomma }}{% else %}{{ v|floatformat:2 }}%{% endif %}
         </td>
         {% endfor %}
+        <td class="p-2 text-right bg-gray-300">
+          {% if mode == "raw" %}{{ grand_total|intcomma }}{% else %}{{ grand_total|floatformat:2 }}%{% endif %}
+        </td>
       </tr>
     </tfoot>
     {% endif %}

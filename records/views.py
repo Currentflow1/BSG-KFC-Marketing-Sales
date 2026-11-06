@@ -403,13 +403,14 @@ def short_over_matrix(request):
 
     date_columns = sorted(date_columns)
 
-    rows = [
-        {
+    rows = []
+    for product in products:
+        values = [matrix[product.pk].get(d, 0) for d in date_columns]
+        rows.append({
             "product": product,
-            "values": [matrix[product.pk].get(d, 0) for d in date_columns],
-        }
-        for product in products
-    ]
+            "values": values,
+            "total": sum(values),
+        })
 
     column_totals = [
         sum(matrix[product.pk].get(d, 0) for product in products)
@@ -448,20 +449,18 @@ def export_short_over_matrix_csv(request):
     writer = csv.writer(response)
     _write_csv_filter_header(writer, "Short / Over Report — Post-MRET", filters)
 
-    header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns]
+    header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns] + ["Product Total"]
     writer.writerow(header)
 
     for product in products:
-        row = [product.product_name] + [
-            matrix[product.pk].get(d, 0) for d in date_columns
-        ]
-        writer.writerow(row)
+        values = [matrix[product.pk].get(d, 0) for d in date_columns]
+        writer.writerow([product.product_name] + values + [sum(values)])
 
     column_totals = [
         sum(matrix[product.pk].get(d, 0) for product in products)
         for d in date_columns
     ]
-    writer.writerow(["TOTAL"] + column_totals)
+    writer.writerow(["TOTAL"] + column_totals + [sum(column_totals)])
 
     return response
 
@@ -523,16 +522,21 @@ def mret_percentage_matrix(request):
 
     date_columns = sorted(date_columns)
 
-    rows = [
-        {
+    rows = []
+    for product in products:
+        cells = [
+            matrix[product.pk].get(d, {"mret": 0, "mload": 0})
+            for d in date_columns
+        ]
+        rows.append({
             "product": product,
-            "values": [
-                value_fn(matrix[product.pk].get(d, {"mret": 0, "mload": 0}))
-                for d in date_columns
-            ],
-        }
-        for product in products
-    ]
+            "values": [value_fn(c) for c in cells],
+            # aggregate first, then apply value_fn, so % mode stays a true ratio
+            "total": value_fn({
+                "mret": sum(c["mret"] for c in cells),
+                "mload": sum(c["mload"] for c in cells),
+            }),
+        })
 
     # Totals computed from aggregated mret/mload per column (and overall),
     # not by summing per-row percentages, so the % total stays accurate.
@@ -590,15 +594,21 @@ def export_mret_percentage_matrix_csv(request):
     title = "MRET % Report — Post-MRET" if mode == "percentage" else "MRET Report — Post-MRET"
     _write_csv_filter_header(writer, title, filters)
 
-    header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns]
+        header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns] + ["Product Total"]
     writer.writerow(header)
 
     for product in products:
-        row = [product.product_name] + [
-            value_fn(matrix[product.pk].get(d, {"mret": 0, "mload": 0}))
+        cells = [
+            matrix[product.pk].get(d, {"mret": 0, "mload": 0})
             for d in date_columns
         ]
-        writer.writerow(row)
+        total = value_fn({
+            "mret": sum(c["mret"] for c in cells),
+            "mload": sum(c["mload"] for c in cells),
+        })
+        writer.writerow(
+            [product.product_name] + [value_fn(c) for c in cells] + [total]
+        )
 
     column_agg = [
         {
@@ -608,7 +618,11 @@ def export_mret_percentage_matrix_csv(request):
         for d in date_columns
     ]
     column_totals = [value_fn(agg) for agg in column_agg]
-    writer.writerow(["TOTAL"] + column_totals)
+    grand_total = value_fn({
+        "mret": sum(a["mret"] for a in column_agg),
+        "mload": sum(a["mload"] for a in column_agg),
+    })
+    writer.writerow(["TOTAL"] + column_totals + [grand_total])
 
     return response
 
@@ -657,16 +671,17 @@ def revenue_so_matrix(request):
 
     date_columns = sorted(date_columns)
 
-    rows = [
-        {
+    rows = []
+    for product in products:
+        values = [
+            value_fn(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0}))
+            for d in date_columns
+        ]
+        rows.append({
             "product": product,
-            "values": [
-                value_fn(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0}))
-                for d in date_columns
-            ],
-        }
-        for product in products
-    ]
+            "values": values,
+            "total": sum(values),
+        })
 
     column_totals = [
         value_fn({
@@ -719,15 +734,15 @@ def export_revenue_so_matrix_csv(request):
     title = "Total Revenue Report — Post-MRET" if mode == "revenue" else "Total SO Amount Report — Post-MRET"
     _write_csv_filter_header(writer, title, filters)
 
-    header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns]
+    header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns] + ["Product Total"]
     writer.writerow(header)
 
     for product in products:
-        row = [product.product_name] + [
+        values = [
             value_fn(matrix[product.pk].get(d, {"net_price": 0, "total_SO": 0}))
             for d in date_columns
         ]
-        writer.writerow(row)
+        writer.writerow([product.product_name] + values + [sum(values)])
 
     column_totals = [
         value_fn({
@@ -736,7 +751,7 @@ def export_revenue_so_matrix_csv(request):
         })
         for d in date_columns
     ]
-    writer.writerow(["TOTAL"] + column_totals)
+    writer.writerow(["TOTAL"] + column_totals + [sum(column_totals)])
 
     return response
 

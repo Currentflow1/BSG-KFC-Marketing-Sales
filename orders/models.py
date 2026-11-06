@@ -235,7 +235,7 @@ class MarketingDetails(models.Model):
                 name="uniq_marketing_order_product",
             ),
         ]
-
+ 
     @property
     def area_price(self):
         try:
