@@ -594,7 +594,7 @@ def export_mret_percentage_matrix_csv(request):
     title = "MRET % Report — Post-MRET" if mode == "percentage" else "MRET Report — Post-MRET"
     _write_csv_filter_header(writer, title, filters)
 
-        header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns] + ["Product Total"]
+    header = ["Product Name"] + [d.strftime("%Y-%m-%d") for d in date_columns] + ["Product Total"]
     writer.writerow(header)
 
     for product in products:
