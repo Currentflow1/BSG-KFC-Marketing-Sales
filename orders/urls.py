@@ -16,8 +16,13 @@ urlpatterns = [
     path("order/<int:order_id>/customer-search/", views.customer_search, name="customer_search"),
 
     path("<int:order_id>/customers/<int:customer_detail_id>/invoice/edit/", views.invoice_edit, name="invoice_edit"),
-path("<int:order_id>/customers/<int:customer_detail_id>/invoice/", views.invoice_display, name="invoice_display"),
-path("<int:order_id>/customers/<int:customer_detail_id>/invoice/update/", views.invoice_update,  name="invoice_update"),
+    path("<int:order_id>/customers/<int:customer_detail_id>/invoice/", views.invoice_display, name="invoice_display"),
+    path("<int:order_id>/customers/<int:customer_detail_id>/invoice/update/", views.invoice_update,  name="invoice_update"),
+
+    path("<int:order_id>/delivery/<int:line_id>/row/", views.delivery_line_row, name="delivery_line_row"),
+    path("<int:order_id>/delivery/<int:line_id>/quantity/", views.delivery_quantity_update, name="delivery_quantity_update"),
+    path("<int:order_id>/transactions/<int:line_id>/row/", views.transaction_line_row, name="transaction_line_row"),
+path("<int:order_id>/transactions/<int:line_id>/quantity/", views.transaction_quantity_update, name="transaction_quantity_update"),
 
     path("<int:order_id>/delivery/", views.manage_delivery, name="manage_delivery"),
     path("<int:order_id>/delivery/mload/", views.manage_delivery_mload, name="manage_delivery_mload"),

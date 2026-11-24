@@ -38,3 +38,17 @@ def set_delivery_order_type(session, order, order_type):
     session[f"delivery_order_type_{order.id}"] = order_type
 
     return True
+
+@transaction.atomic
+def update_delivery_line_quantity(line, order, quantity):
+    # Same pricing as add_delivery_line. Price first, so a pricing error
+    # raises before the line object is modified.
+    area_price = get_area_price(order.area, line.product)
+
+    line.quantity = quantity
+    line.line_price = quantity * area_price
+    line.save(update_fields=["quantity", "line_price"])
+
+    sync_marketing_details(order)
+
+    return line

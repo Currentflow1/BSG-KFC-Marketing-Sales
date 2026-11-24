@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from login.decorators import permission_required_redirect
+from django.db import IntegrityError
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from . import queries, services
 from .forms import (
@@ -570,3 +572,100 @@ def invoice_update(request, order_id, customer_detail_id):
             return reject("Invoice number already in use")
 
     return _invoice_badge(request, cd)
+
+DELIVERY_ROW_TEMPLATE = "orders/components/delivery/partials/delivery_line_row.html"
+MAX_QUANTITY = 2_147_483_647  # PositiveIntegerField upper bound
+
+
+def _delivery_row(request, order, line, **extra):
+    return render(request, DELIVERY_ROW_TEMPLATE, {"order": order, "line": line, **extra})
+
+
+@login_required
+@require_GET
+def delivery_line_row(request, order_id, line_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+    line = get_object_or_404(DeliveryDetail, pk=line_id, order=order)
+    return _delivery_row(request, order, line, editing=bool(request.GET.get("edit")))
+
+
+@login_required
+@require_POST
+def delivery_quantity_update(request, order_id, line_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+    line = get_object_or_404(DeliveryDetail, pk=line_id, order=order)
+    raw = request.POST.get("quantity", "").strip()
+
+    def reject(message):
+        # Status stays 200: HTMX does not swap 4xx/5xx by default.
+        return _delivery_row(request, order, line, editing=True, value=raw, error=message)
+
+    try:
+        quantity = int(raw)
+    except ValueError:
+        return reject("Enter a whole number")
+
+    if not 0 < quantity <= MAX_QUANTITY:
+        return reject("Invalid quantity")
+
+    if quantity != line.quantity:
+        try:
+            services.update_delivery_line_quantity(line, order, quantity)
+        except ValueError as e:  # e.g. missing area price, same as add_delivery_line
+            return reject(str(e))
+
+    response = _delivery_row(request, order, line, editing=False)
+    response["HX-Refresh"] = "true"  # see note below
+    return response
+
+TRANSACTION_ROW_TEMPLATE = "orders/components/transactional/partials/transaction_line_row.html"
+
+
+def _get_transaction_line(order, line_id):
+    return get_object_or_404(
+        TransactionDetail.objects.select_related("customer_detail__customer", "product"),
+        pk=line_id,
+        customer_detail__order=order,
+    )
+
+
+def _transaction_row(request, order, line, **extra):
+    return render(request, TRANSACTION_ROW_TEMPLATE, {"order": order, "line": line, **extra})
+
+
+@login_required
+@require_GET
+def transaction_line_row(request, order_id, line_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+    line = _get_transaction_line(order, line_id)
+    return _transaction_row(request, order, line, editing=bool(request.GET.get("edit")))
+
+
+@login_required
+@require_POST
+def transaction_quantity_update(request, order_id, line_id):
+    order = get_object_or_404(OrderDetails, pk=order_id)
+    line = _get_transaction_line(order, line_id)
+    raw = request.POST.get("quantity", "").strip()
+
+    def reject(message):
+        # Status stays 200: HTMX does not swap 4xx/5xx by default.
+        return _transaction_row(request, order, line, editing=True, value=raw, error=message)
+
+    try:
+        quantity = int(raw)
+    except ValueError:
+        return reject("Enter a whole number")
+
+    if not 0 < quantity <= MAX_QUANTITY:
+        return reject("Invalid quantity")
+
+    if quantity != line.quantity:
+        try:
+            services.update_transaction_line_quantity(line, order, quantity)
+        except ValueError as e:
+            return reject(str(e))
+
+    response = _transaction_row(request, order, line, editing=False)
+    response["HX-Refresh"] = "true"  # totals and balances depend on this line
+    return response

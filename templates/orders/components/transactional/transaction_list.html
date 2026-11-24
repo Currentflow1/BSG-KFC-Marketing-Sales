@@ -19,33 +19,11 @@
 
       <tbody>
         {% for line in lines %}
-        <tr class="border-t hover:bg-gray-50">
-          <td class="px-4 py-2">
-            {{ line.customer_detail.customer }}
-            (INV {{ line.customer_detail.invoice_no }})
-          </td>
-          <td class="px-4 py-2">{{ line.order_type }}</td>
-          <td class="px-4 py-2">{{ line.product }}</td>
-          <td class="px-4 py-2">{{ line.quantity|intcomma }}</td>
-          <td class="px-4 py-2">
-            ₱{{ line.line_price|floatformat:2|intcomma }}
-          </td>
-          <td class="px-4 py-2 text-center">
-            <form method="post" action="{% url 'transaction_delete' order.id line.id %}">
-              {% csrf_token %}
-              <button type="submit" onclick="return confirm('Remove this line?')"
-                class="cursor-pointer rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600">
-                Remove
-              </button>
-            </form>
-          </td>
-        </tr>
+          {% include "orders/components/transactional/partials/transaction_line_row.html" %}
         {% empty %}
-        <tr>
-          <td colspan="6" class="px-4 py-6 text-center text-gray-500">
-            No transaction lines yet.
-          </td>
-        </tr>
+          <tr>
+            <td colspan="6" class="px-4 py-6 text-center text-gray-500">No transaction lines yet.</td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>

@@ -108,3 +108,17 @@ def update_transaction_context(
                 session[customer_key] = int(
                     customer_detail_id
                 )
+
+@transaction.atomic
+def update_transaction_line_quantity(line, order, quantity):
+    # Same pricing as add_transaction_line. Price first, so a pricing error
+    # raises before the line is modified.
+    area_price = get_area_price(order.area, line.product)
+
+    line.quantity = quantity
+    line.line_price = quantity * area_price
+    line.save(update_fields=["quantity", "line_price"])
+
+    sync_marketing_details(order)
+
+    return line
