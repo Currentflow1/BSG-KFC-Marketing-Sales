@@ -1,0 +1,8 @@
+<span id="invoice-{{ cd.id }}"
+      class="cursor-pointer rounded bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-200"
+      title="Click to edit"
+      hx-get="{% url 'invoice_edit' order.id cd.id %}"
+      hx-target="this"
+      hx-swap="outerHTML">
+  INV {{ cd.invoice_no }}
+</span>

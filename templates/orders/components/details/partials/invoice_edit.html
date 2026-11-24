@@ -1,0 +1,22 @@
+<form id="invoice-{{ cd.id }}"
+      class="inline-flex flex-col items-end"
+      hx-post="{% url 'invoice_update' order.id cd.id %}"
+      hx-target="this"
+      hx-swap="outerHTML">
+  {% csrf_token %}
+  <input type="text"
+         name="invoice_no"
+         value="{{ value|default:cd.invoice_no }}"
+         inputmode="numeric"
+         autocomplete="off"
+         autofocus
+         onfocus="this.select()"
+         class="w-28 rounded border border-blue-400 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+         hx-get="{% url 'invoice_display' order.id cd.id %}"
+         hx-trigger="keyup[key=='Escape']"
+         hx-target="#invoice-{{ cd.id }}"
+         hx-swap="outerHTML">
+  {% if error %}
+    <span class="mt-1 text-xs text-red-600">{{ error }}</span>
+  {% endif %}
+</form>

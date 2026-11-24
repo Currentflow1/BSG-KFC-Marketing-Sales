@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-
 from login.decorators import permission_required_redirect
 
 from . import queries, services
@@ -499,3 +498,75 @@ def customer_search(request, order_id):
     return render(request, "orders/components/details/partials/customer_select.html", {
         "customers": customers,
     })
+
+# ============================================================
+# Invoice number inline edit
+# ============================================================
+
+INVOICE_BADGE_TEMPLATE = "orders/components/details/partials/invoice_badge.html"
+INVOICE_EDIT_TEMPLATE = "orders/components/details/partials/invoice_edit.html"
+MAX_INVOICE_NO = 2_147_483_647  # IntegerField upper bound
+
+
+def _get_customer_detail(order_id, customer_detail_id):
+    # Scoped to the order, same as your other customer views.
+    return get_object_or_404(
+        CustomerDetails.objects.select_related("order"),
+        pk=customer_detail_id,
+        order_id=order_id,
+    )
+
+
+def _invoice_badge(request, cd):
+    return render(request, INVOICE_BADGE_TEMPLATE, {"cd": cd, "order": cd.order})
+
+
+@login_required
+@require_http_methods(["GET"])
+def invoice_edit(request, order_id, customer_detail_id):
+    cd = _get_customer_detail(order_id, customer_detail_id)
+    return render(request, INVOICE_EDIT_TEMPLATE, {"cd": cd, "order": cd.order})
+
+
+@login_required
+@require_http_methods(["GET"])
+def invoice_display(request, order_id, customer_detail_id):
+    cd = _get_customer_detail(order_id, customer_detail_id)
+    return _invoice_badge(request, cd)
+
+
+@login_required
+@require_http_methods(["POST"])
+def invoice_update(request, order_id, customer_detail_id):
+    cd = _get_customer_detail(order_id, customer_detail_id)
+    raw = request.POST.get("invoice_no", "").strip()
+
+    def reject(message):
+        # Keep status 200: HTMX does not swap 4xx/5xx responses by default.
+        return render(request, INVOICE_EDIT_TEMPLATE, {
+            "cd": cd,
+            "order": cd.order,
+            "value": raw,
+            "error": message,
+        })
+
+    try:
+        invoice_no = int(raw)
+    except ValueError:
+        return reject("Enter a whole number")
+
+    if not 0 < invoice_no <= MAX_INVOICE_NO:
+        return reject("Invalid invoice number")
+
+    # invoice_no is unique across ALL orders, so no order filter here.
+    if CustomerDetails.objects.filter(invoice_no=invoice_no).exclude(pk=cd.pk).exists():
+        return reject("Invoice number already in use")
+
+    if invoice_no != cd.invoice_no:
+        cd.invoice_no = invoice_no
+        try:
+            cd.save(update_fields=["invoice_no"])
+        except IntegrityError:  # two people saving the same number at once
+            return reject("Invoice number already in use")
+
+    return _invoice_badge(request, cd)
